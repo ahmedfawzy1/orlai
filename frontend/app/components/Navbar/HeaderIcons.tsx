@@ -1,0 +1,67 @@
+'use client';
+
+import Link from 'next/link';
+import { useState } from 'react';
+import { Heart, Search, ShoppingBag, X } from 'lucide-react';
+import { Input } from '../ui/input';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../ui/sheet';
+
+const HeaderIcons = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Searching for:', searchQuery);
+  };
+
+  return (
+    <div className='flex items-center gap-3'>
+      <Sheet>
+        <SheetTrigger asChild>
+          <button className='h-fit cursor-pointer'>
+            <Search size={22} strokeWidth={1.5} />
+          </button>
+        </SheetTrigger>
+        <SheetContent side='top' className='w-full'>
+          <SheetHeader className='px-4 py-2'>
+            <SheetTitle>Search</SheetTitle>
+            <form onSubmit={handleSearch} className='mt-2'>
+              <div className='relative'>
+                <Input
+                  type='text'
+                  placeholder='Search for products...'
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className='w-full !ring-0'
+                />
+                {searchQuery && (
+                  <button
+                    type='button'
+                    onClick={() => setSearchQuery('')}
+                    className='absolute right-2 top-1/2 -translate-y-1/2'
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </form>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
+      <Link href={'/wishlist'}>
+        <Heart size={22} strokeWidth={1.5} />
+      </Link>
+      <Link href={'/cart'}>
+        <ShoppingBag size={22} strokeWidth={1.5} />
+      </Link>
+    </div>
+  );
+};
+
+export default HeaderIcons;
