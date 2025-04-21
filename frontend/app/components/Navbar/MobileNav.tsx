@@ -97,7 +97,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
           <Sheet>
             <SheetTrigger asChild>
               <Button className='w-6' variant='ghost' size='icon'>
-                <Menu className='size-4' />
+                <Menu className='size-5' />
               </Button>
             </SheetTrigger>
             <SheetContent className='overflow-y-auto'>

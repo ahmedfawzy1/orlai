@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className='w-full relative bg-[#f3f3f3] flex flex-col md:flex-row justify-between items-center'>
+    <section className='w-full max-w-[1280px] mx-auto relative bg-[#f3f3f3] flex flex-col md:flex-row justify-between items-center'>
       <div className='px-6 max-w-[577px] min-h-[500px] flex flex-col justify-center items-center'>
         <div className='text-center md:text-left'>
           <h1 className='text-3xl md:text-4xl mb-5'>Classic Exclusive</h1>
