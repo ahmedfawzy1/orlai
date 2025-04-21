@@ -38,5 +38,5 @@ export const defaultLogoConfig = {
   alt: 'logo',
   title: 'lustria',
   width: 80,
-  height: 23,
+  height: 22,
 };

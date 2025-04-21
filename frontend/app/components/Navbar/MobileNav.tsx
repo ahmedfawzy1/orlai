@@ -52,6 +52,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
             src={logo.src}
             className='max-h-8'
             alt={logo.alt}
+            priority
           />
         </Link>
         <div className='flex items-center gap-2'>
@@ -109,6 +110,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                       src={logo.src}
                       className='max-h-8'
                       alt={logo.alt}
+                      priority
                     />
                   </Link>
                 </SheetTitle>

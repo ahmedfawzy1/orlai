@@ -31,7 +31,7 @@ const Navbar = ({
   auth = defaultAuthConfig,
 }: NavbarProps) => {
   return (
-    <section className='py-4'>
+    <header className='py-4'>
       <div className='container mx-auto'>
         {/* Desktop Menu */}
         <div className='hidden lg:flex justify-between items-center'>
@@ -48,7 +48,7 @@ const Navbar = ({
         {/* Mobile Menu */}
         <MobileNav menuItems={menu} logo={logo} auth={auth} />
       </div>
-    </section>
+    </header>
   );
 };
 

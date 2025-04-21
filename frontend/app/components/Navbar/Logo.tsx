@@ -18,6 +18,7 @@ const Logo = ({ url, src, alt, width, height }: LogoProps) => {
         src={src}
         className='max-h-8'
         alt={alt}
+        priority
       />
     </Link>
   );
