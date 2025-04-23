@@ -1,0 +1,94 @@
+{
+  "reviews": [
+    {
+      "id": 13,
+      "userId": 7,
+      "productId": 20,
+      "rating": 5,
+      "comment": "I bought these sneakers on a whim, and I'm so glad I did! They're super comfortable and stylish at the same time. Whether I'm running errands or going out, they always make my outfit stand out. This dress fits like a dream! The cut is so flattering, and the material is high quality. I wore it to a party and received so many compliments. I feel so confident in it!",
+      "createdAt": "2025-03-03T23:27:50.835Z",
+      "updatedAt": "2025-03-03T23:27:50.835Z",
+      "User": {
+        "id": 7,
+        "username": "George Harris",
+        "email": "george@gmail.com"
+      },
+      "Product": {
+        "id": 20,
+        "description": "<p>A sleek and comfortable midweight terry zip hoodie with a slim fit, perfect for layering in any season.</p>"
+      }
+    },
+    {
+      "id": 12,
+      "userId": 6,
+      "productId": 8,
+      "rating": 5,
+      "comment": "These boots are fantastic! They’re durable, stylish, and comfortable for all-day wear. I’ve worn them in different weather conditions, and they’ve held up perfectly.",
+      "createdAt": "2025-03-03T13:18:10.952Z",
+      "updatedAt": "2025-03-03T13:18:10.952Z",
+      "User": {
+        "id": 6,
+        "username": "Grace Lewis",
+        "email": "grace61@gmail.com"
+      },
+      "Product": {
+        "id": 8,
+        "description": "<p>Elevate your performance and comfort with the Jetsetter Tech Pant. Engineered with innovative fabric technology, these pants offer superior mobility and durability, making them perfect for both active lifestyles and casual outings. Experience a sleek design that adapts to your dynamic routine.</p>"
+      }
+    },
+    {
+      "id": 8,
+      "userId": 5,
+      "productId": 12,
+      "rating": 5,
+      "comment": "I’m beyond impressed with this jacket! It’s stylish, warm, and incredibly well-made. I’ve received so many compliments on it. Definitely worth every penny.",
+      "createdAt": "2025-03-03T13:16:19.060Z",
+      "updatedAt": "2025-03-03T13:16:19.060Z",
+      "User": {
+        "id": 5,
+        "username": "Emily Clark",
+        "email": "emily75@gmail.com"
+      },
+      "Product": {
+        "id": 12,
+        "description": "<p>Stay warm and stylish with our Long Hooded Puffer Vest. Designed for layering in transitional weather, this vest features a contemporary long silhouette and an attached hood for added coverage. Experience lightweight insulation combined with modern style for a versatile look.</p>"
+      }
+    },
+    {
+      "id": 6,
+      "userId": 4,
+      "productId": 5,
+      "rating": 5,
+      "comment": "I was hesitant to buy this coat online, but it exceeded my expectations! It’s warm, stylish, and fits perfectly. The material feels premium and the craftsmanship is excellent.",
+      "createdAt": "2025-03-03T13:14:20.124Z",
+      "updatedAt": "2025-03-03T13:14:20.124Z",
+      "User": {
+        "id": 4,
+        "username": "Charlie Davis",
+        "email": "charlie90@gmail.com"
+      },
+      "Product": {
+        "id": 5,
+        "description": "<p>Make a bold statement with the Flocker Oversize Graphic T-Shirt. Crafted for those who love a blend of street style and comfort, its oversized fit and eye-catching graphic design elevate your everyday look.</p>"
+      }
+    },
+    {
+      "id": 2,
+      "userId": 3,
+      "productId": 5,
+      "rating": 5,
+      "comment": "This dress is stunning! The fit is absolutely perfect, and the material feels luxurious. I wore it to a party and got so many compliments. Definitely one of my best purchases!",
+      "createdAt": "2025-03-03T12:58:28.510Z",
+      "updatedAt": "2025-03-03T12:58:28.510Z",
+      "User": {
+        "id": 3,
+        "username": "Alice Johnson",
+        "email": "alice12@gmail.com"
+      },
+      "Product": {
+        "id": 5,
+        "description": "<p>Make a bold statement with the Flocker Oversize Graphic T-Shirt. Crafted for those who love a blend of street style and comfort, its oversized fit and eye-catching graphic design elevate your everyday look.</p>"
+      }
+    }
+  ]
+}
