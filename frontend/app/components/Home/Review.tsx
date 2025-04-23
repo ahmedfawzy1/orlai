@@ -83,7 +83,7 @@ export default function Review() {
   return (
     <section className='px-5 py-10 bg-[#fafafa]'>
       <div className='flex justify-between items-center'>
-        <h5 className='text-3xl font-semibold'>
+        <h5 className='text-2xl md:text-3xl font-semibold'>
           What Our Happy Customer Say's
         </h5>
 
@@ -133,7 +133,7 @@ export default function Review() {
                   '#FFC633',
                 ]}
               />
-              <span className='w-80 max-h-24 block text-black/60 font-normal overflow-hidden'>
+              <span className='w-80 max-h-24 block mt-3 text-black/60 font-normal overflow-hidden'>
                 "{review.comment}"
               </span>
               <div className='flex gap-1 pt-3 pb-1.5'>
