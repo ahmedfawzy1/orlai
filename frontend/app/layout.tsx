@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './styles/globals.css';
 import { Navbar } from './components/Navbar/Navbar';
+import Footer from './components/Footer/Footer';
 import { Toaster } from 'react-hot-toast';
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+        <Footer />
         <Toaster />
       </body>
     </html>
