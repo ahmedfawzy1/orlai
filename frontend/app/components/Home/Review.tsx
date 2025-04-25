@@ -141,7 +141,7 @@ export default function Review() {
                   src={'/images/icons/badgecheck.svg'}
                   alt='badgecheck'
                   width={24}
-                  height={28}
+                  height={30}
                 />
                 <p className='text-xl font-bold mb-0.5'>
                   {review.User.username}.
