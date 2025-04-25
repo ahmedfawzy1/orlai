@@ -44,6 +44,7 @@ export default function Footer() {
               <Link
                 href='tel:+17045550127'
                 className='flex items-center gap-2 text-white/60 hover:text-white transition'
+                aria-label='Phone'
               >
                 <Phone size={20} />
                 <span>(704) 555-0127</span>
@@ -51,6 +52,7 @@ export default function Footer() {
               <Link
                 href='mailto:contact@lustria.shop'
                 className='flex items-center gap-2 text-white/60 hover:text-white transition'
+                aria-label='Email'
               >
                 <Mail size={20} />
                 <span>contact@lustria.shop</span>
@@ -59,6 +61,7 @@ export default function Footer() {
                 href='https://maps.app.goo.gl/K2rkuRuV2GHSwQfPA'
                 target='_blank'
                 className='flex items-start gap-2 text-white/60 hover:text-white transition'
+                aria-label='Location'
               >
                 <MapPin size={20} className='mt-1 flex-shrink-0' />
                 <span>580 Grand St. Manhattan, New York 10002</span>
@@ -96,8 +99,12 @@ export default function Footer() {
               className='py-5 text-white placeholder:text-white border !border-white rounded-md !ring-0 shadow-none'
               placeholder='Your Email'
               type='email'
+              aria-label='Email'
             />
-            <button className='absolute right-4 top-1/2 -translate-y-1/2'>
+            <button
+              className='p-2 absolute right-4 top-1/2 -translate-y-1/2'
+              aria-label='Subscribe'
+            >
               <ArrowRight size={18} className='text-white' />
             </button>
           </div>
@@ -120,6 +127,7 @@ export default function Footer() {
               key={index}
               target='_blank'
               className='transition-transform duration-300 hover:scale-110'
+              aria-label={`${Icon} icon`}
             >
               <Icon
                 size={20}

@@ -74,9 +74,9 @@ export default function Category() {
   return (
     <section className='px-5 py-10 max-w-[1280px] mx-auto'>
       <div className='flex justify-between items-center gap-4'>
-        <h5 className='text-2xl md:text-3xl lg:text-[40px] font-semibold'>
+        <h3 className='text-2xl md:text-3xl lg:text-[40px] font-semibold'>
           Shop by Categories
-        </h5>
+        </h3>
 
         <div className='flex flex-nowrap flex-row gap-4 pt-1'>
           <button

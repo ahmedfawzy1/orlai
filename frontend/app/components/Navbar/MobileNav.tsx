@@ -58,7 +58,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
         <div className='flex items-center gap-2'>
           <Sheet>
             <SheetTrigger asChild>
-              <button className='h-fit cursor-pointer'>
+              <button aria-label='Search' className='h-fit cursor-pointer'>
                 <Search size={22} strokeWidth={1.5} />
               </button>
             </SheetTrigger>
@@ -79,6 +79,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                         type='button'
                         onClick={() => setSearchQuery('')}
                         className='absolute right-2 top-1/2 -translate-y-1/2'
+                        aria-label='Clear search'
                       >
                         <X size={16} />
                       </button>
@@ -88,15 +89,20 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
               </SheetHeader>
             </SheetContent>
           </Sheet>
-          <Link href={'/wishlist'}>
+          <Link href={'/wishlist'} aria-label='Wishlist'>
             <Heart size={22} strokeWidth={1.5} />
           </Link>
-          <Link href={'/cart'}>
+          <Link href={'/cart'} aria-label='Cart'>
             <ShoppingBag size={22} strokeWidth={1.5} />
           </Link>
           <Sheet>
             <SheetTrigger asChild>
-              <Button className='w-6' variant='ghost' size='icon'>
+              <Button
+                className='w-6'
+                variant='ghost'
+                size='icon'
+                aria-label='Menu'
+              >
                 <Menu className='size-5' />
               </Button>
             </SheetTrigger>

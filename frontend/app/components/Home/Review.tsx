@@ -83,9 +83,9 @@ export default function Review() {
   return (
     <section className='px-5 py-10 bg-[#fafafa]'>
       <div className='flex justify-between items-center'>
-        <h5 className='text-2xl md:text-3xl font-semibold'>
+        <h4 className='text-2xl md:text-3xl font-semibold'>
           What Our Happy Customer Say's
-        </h5>
+        </h4>
 
         <div className='flex flex-nowrap flex-row gap-4 pt-1'>
           <button

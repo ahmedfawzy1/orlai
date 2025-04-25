@@ -8,9 +8,9 @@ export default async function BestSelling() {
 
   return (
     <section className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'>
-      <h3 className='text-3xl md:text-[42px] font-semibold text-center'>
+      <h4 className='text-3xl md:text-[42px] font-semibold text-center'>
         Our BestSeller
-      </h3>
+      </h4>
 
       <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-10 pb-8'>
         {bestSellingProducts?.map((product: Product) => (

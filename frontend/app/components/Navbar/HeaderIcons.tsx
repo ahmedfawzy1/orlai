@@ -24,7 +24,7 @@ const HeaderIcons = () => {
     <div className='flex items-center gap-3'>
       <Sheet>
         <SheetTrigger asChild>
-          <button className='h-fit cursor-pointer'>
+          <button aria-label='Search' className='h-fit cursor-pointer'>
             <Search size={22} strokeWidth={1.5} />
           </button>
         </SheetTrigger>
@@ -45,6 +45,7 @@ const HeaderIcons = () => {
                     type='button'
                     onClick={() => setSearchQuery('')}
                     className='absolute right-2 top-1/2 -translate-y-1/2'
+                    aria-label='Clear search'
                   >
                     <X size={16} />
                   </button>
@@ -54,10 +55,10 @@ const HeaderIcons = () => {
           </SheetHeader>
         </SheetContent>
       </Sheet>
-      <Link href={'/wishlist'}>
+      <Link href={'/wishlist'} aria-label='Wishlist'>
         <Heart size={22} strokeWidth={1.5} />
       </Link>
-      <Link href={'/cart'}>
+      <Link href={'/cart'} aria-label='Cart'>
         <ShoppingBag size={22} strokeWidth={1.5} />
       </Link>
     </div>
