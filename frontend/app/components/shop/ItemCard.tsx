@@ -43,14 +43,15 @@ export default function ItemCard({ product }: { product: Product }) {
           <Image
             src={product.image[0]}
             alt={product.title}
-            className='object-center transition-transform duration-500 group-hover:scale-110'
-            fill
+            className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+            width={780}
+            height={1196}
             priority={false}
             draggable={false}
           />
         </Link>
 
-        <div className='w-full h-full relative z-50'>
+        <div className='w-full h-full absolute z-30'>
           <div className='flex flex-col gap-3 absolute top-4 right-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300'>
             <button
               onClick={e => {
