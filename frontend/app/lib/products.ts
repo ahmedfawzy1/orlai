@@ -12,6 +12,28 @@ export async function getProducts(page: number = 1, limit: number = 8) {
   }
 }
 
+export async function getAllBestSellingProducts() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/bestsellers`,
+      {
+        next: {
+          revalidate: 3600,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch bestsellers');
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error('Error fetching bestSelling products:', error);
+    return [];
+  }
+}
+
 export async function getBestSellingProducts() {
   try {
     const res = await fetch(

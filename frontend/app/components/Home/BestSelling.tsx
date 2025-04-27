@@ -21,7 +21,7 @@ export default async function BestSelling() {
       <div className='text-center'>
         <Link
           className='inline-block px-6 md:px-10 py-3 rounded-full text-gray-800 bg-white border-2 border-gray-800 shadow-sm hover:bg-gray-800 hover:text-white transform hover:-translate-y-0.5 transition-all duration-300 font-medium'
-          href='/shop'
+          href='/bestseller'
           prefetch={false}
         >
           View All
