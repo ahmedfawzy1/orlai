@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import { generateToken } from "../config/utils.js";
+import nodemailer from "nodemailer";
 
 export const signup = async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
@@ -100,6 +101,89 @@ export const refreshToken = async (req, res) => {
     res.status(200).json({ accessToken });
   } catch (error) {
     console.error("Error in refreshToken controller", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Generate and send OTP to the user's email
+export const requestOtpForResetPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    // Generate OTP (6 digits)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP in the user model with an expiration time
+    user.otp = otp;
+    user.otpExpiration = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await user.save();
+
+    // Send OTP to the user's email
+    const transporter = nodemailer.createTransport({
+      host: "in-v3.mailjet.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_API_KEY,
+        pass: process.env.EMAIL_SECRET_KEY,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_ADDRESS,
+      to: email,
+      subject: "OTP for Reset Password",
+      text: `Your OTP for reset password is ${otp}. It will expire in 10 minutes.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "OTP sent to the user's email" });
+  } catch (error) {
+    console.error("Error in generateOTPForResetPassword controller", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Verify OTP
+export const verifyOtpForResetPassword = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    const user = await User.findOne({ email, otp, otpExpiration: { $gt: Date.now() } });
+    if (!user) return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    if (user.otp !== otp || user.otpExpiration < Date.now()) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    res.status(200).json({ message: "OTP verified successfully. You can now reset your password." });
+  } catch (error) {
+    console.error("Error in verifyOtpForResetPassword controller", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Reset password
+export const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  try {
+    const user = await User.findOne({ email, otp, otpExpiration: { $gt: Date.now() } });
+    if (!user) return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.otp = undefined; // Clear the OTP
+    user.otpExpiration = undefined; // Clear the OTP expiration
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Error in resetPassword controller", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 };
