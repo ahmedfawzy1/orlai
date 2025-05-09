@@ -1,5 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useAuthStore } from '@/app/store/useAuthStore';
 import { MenuItem } from './menuConfig';
 import { Menu, Heart, ShoppingBag, X, Search } from 'lucide-react';
 import { icons } from './icons';
@@ -17,10 +21,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/app/components/ui/sheet';
-import Link from 'next/link';
-import Image from 'next/image';
 import { Input } from '../ui/input';
-import { useState } from 'react';
+import toast from 'react-hot-toast';
+
 interface MobileNavProps {
   menuItems: MenuItem[];
   logo: {
@@ -37,11 +40,21 @@ interface MobileNavProps {
 
 const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { authUser, logout } = useAuthStore();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(searchQuery);
   };
+
+  const handleNavigation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!authUser) {
+      toast.error('Please login to access this page');
+      return;
+    }
+  };
+
   return (
     <div className='block px-4 lg:hidden'>
       <div className='flex items-center justify-between'>
@@ -89,10 +102,14 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
               </SheetHeader>
             </SheetContent>
           </Sheet>
-          <Link href={'/wishlist'} aria-label='Wishlist'>
+          <Link
+            onClick={handleNavigation}
+            href={'/wishlist'}
+            aria-label='Wishlist'
+          >
             <Heart size={22} strokeWidth={1.5} />
           </Link>
-          <Link href={'/cart'} aria-label='Cart'>
+          <Link onClick={handleNavigation} href={'/cart'} aria-label='Cart'>
             <ShoppingBag size={22} strokeWidth={1.5} />
           </Link>
           <Sheet>
@@ -129,14 +146,26 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                 >
                   {menuItems.map(item => renderMobileMenuItem(item))}
                 </Accordion>
-
                 <div className='flex flex-col gap-3'>
-                  <Button asChild variant='outline'>
-                    <Link href={auth.login.url}>{auth.login.title}</Link>
-                  </Button>
-                  <Button asChild variant='default'>
-                    <Link href={'/signup'}>Sign up</Link>
-                  </Button>
+                  {authUser ? (
+                    <Button
+                      variant='default'
+                      size='sm'
+                      onClick={() => logout()}
+                      className='py-[18px] cursor-pointer'
+                    >
+                      Logout
+                    </Button>
+                  ) : (
+                    <>
+                      <Button asChild variant='outline'>
+                        <Link href={auth.login.url}>{auth.login.title}</Link>
+                      </Button>
+                      <Button asChild variant='default'>
+                        <Link href={'/signup'}>Sign up</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>

@@ -11,13 +11,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../ui/sheet';
+import { toast } from 'react-hot-toast';
+import { useAuthStore } from '@/app/store/useAuthStore';
 
 const HeaderIcons = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { authUser } = useAuthStore();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
+  };
+
+  const handleNavigation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!authUser) {
+      toast.error('Please login to access this page');
+      return;
+    }
   };
 
   return (
@@ -55,10 +66,10 @@ const HeaderIcons = () => {
           </SheetHeader>
         </SheetContent>
       </Sheet>
-      <Link href={'/wishlist'} aria-label='Wishlist'>
+      <Link onClick={handleNavigation} href={'/wishlist'} aria-label='Wishlist'>
         <Heart size={22} strokeWidth={1.5} />
       </Link>
-      <Link href={'/cart'} aria-label='Cart'>
+      <Link onClick={handleNavigation} href={'/cart'} aria-label='Cart'>
         <ShoppingBag size={22} strokeWidth={1.5} />
       </Link>
     </div>
