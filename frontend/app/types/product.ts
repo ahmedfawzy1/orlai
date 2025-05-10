@@ -1,6 +1,6 @@
 export interface Product {
   id: number;
-  title: string;
+  name: string;
   description: string;
   category: string;
   style: string;
@@ -15,4 +15,12 @@ export interface Product {
   slug: string;
   averageRating: number;
   createdAt: string;
+}
+
+export interface SearchQuery {
+  categories?: string[];
+  colors?: string[];
+  sizes?: string[];
+  priceRange?: [number, number];
+  searchQuery?: string;
 }

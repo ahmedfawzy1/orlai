@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useProductStore } from '../store/products';
+import { useProductStore } from '../store/useProductStore';
 import { Product } from '../types/product';
 import ItemCard from '../components/shop/ItemCard';
 import Sidebar from '../components/shop/Sidebar';

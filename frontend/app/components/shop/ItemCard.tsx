@@ -41,8 +41,8 @@ export default function ItemCard({ product }: { product: Product }) {
       <div className='w-full aspect-[3/4] bg-[#fafafa] relative flex justify-center items-center overflow-hidden'>
         <Link href={`/shop/${product.slug}`} className='w-full h-full'>
           <Image
-            src={product.image[0]}
-            alt={product.title}
+            src={product.image}
+            alt={product.name}
             className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
             width={780}
             height={1196}
@@ -88,7 +88,7 @@ export default function ItemCard({ product }: { product: Product }) {
 
       <div className='w-full mt-4 space-y-2'>
         <Link href={`/shop/${product.slug}`} className='block'>
-          <h3 className='text-lg font-bold truncate'>{product.title}</h3>
+          <h3 className='text-lg font-bold truncate'>{product.name}</h3>
         </Link>
         <p className='text-md text-black/70 font-medium'>{product.category}</p>
         <div className='flex gap-2'>

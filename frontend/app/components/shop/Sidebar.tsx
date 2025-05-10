@@ -12,7 +12,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Slider } from '../ui/slider';
 import { Button } from '../ui/button';
 import { SlidersVertical } from 'lucide-react';
-import { useProductStore } from '@/app/store/products';
+import { useProductStore } from '@/app/store/useProductStore';
 
 const productCategories = [
   'Men',
