@@ -6,7 +6,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith('/admin')) {
-    if (!token || token.value !== process.env.ADMIN_TOKEN) {
+    if (!token) {
       return NextResponse.redirect(new URL('/404', req.url));
     }
   }
