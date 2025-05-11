@@ -1,17 +1,14 @@
 'use client';
 
-import PageTitle from './PageTitle';
-import SalesOverview from './SalesOverview';
-import Sidebar from './Sidebar';
-import StatusOverview from './StatusOverview';
-import DashboardCharts from './dashboard-charts';
-import RecentOrders from './orders-table';
+import PageTitle from '../components/Admin/Dashboard/PageTitle';
+import SalesOverview from '../components/Admin/Dashboard/SalesOverview';
+import StatusOverview from '../components/Admin/Dashboard/StatusOverview';
+import DashboardCharts from '../components/Admin/Dashboard/dashboard-charts';
+import RecentOrders from '../components/Admin/Dashboard/orders-table';
 
 export default function Dashboard() {
   return (
     <div className='flex min-h-screen bg-gray-50'>
-      {/* Sidebar */}
-      <Sidebar />
       {/* Main Content */}
       <main className='flex-1 p-8 overflow-y-auto'>
         <section>
