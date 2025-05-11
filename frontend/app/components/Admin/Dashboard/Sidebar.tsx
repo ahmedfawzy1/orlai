@@ -63,7 +63,7 @@ export default function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md'
+        className='lg:hidden fixed top-20 right-4 z-50 p-2 rounded-md bg-white'
       >
         {isOpen ? <X className='w-6 h-6' /> : <Menu className='w-6 h-6' />}
       </button>
@@ -78,7 +78,7 @@ export default function Sidebar() {
       )}
 
       <aside
-        className={`fixed lg:static w-64 h-screen bg-white border-r flex flex-col justify-between z-50 shadow-2xl lg:shadow-[0_8px_32px_0_rgba(60,72,88,0.12)] transition-transform duration-300 ease-in-out rounded-r-2xl
+        className={`fixed lg:static w-64 h-screen bg-white border-r flex flex-col justify-between z-50 shadow-2xl lg:shadow-[0_8px_32px_0_rgba(60,72,88,0.12)] transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
         style={{ top: 0, left: 0 }}
       >
@@ -92,7 +92,7 @@ export default function Sidebar() {
               <X className='w-6 h-6' />
             </button>
           </div>
-          <nav className='flex flex-col gap-1 px-2'>
+          <nav className='flex flex-col gap-1 px-2 pt-4'>
             {sidebarLinks.map(link => {
               const isActive = pathname === link.href;
               return (
@@ -100,10 +100,10 @@ export default function Sidebar() {
                   key={link.label}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 w-full mb-1 px-4 py-3 rounded-lg transition-colors relative font-medium text-base
+                  className={`flex items-center gap-3 w-full mb-1 px-4 py-3 rounded-lg transition-colors relative !font-semibold text-base
                       ${
                         isActive
-                          ? 'bg-gray-50 font-bold text-black'
+                          ? 'bg-gray-50 text-black'
                           : 'text-gray-700 hover:bg-gray-100'
                       }
                     `}

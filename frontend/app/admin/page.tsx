@@ -8,12 +8,12 @@ import RecentOrders from '../components/Admin/Dashboard/orders-table';
 
 export default function Dashboard() {
   return (
-    <div className='flex min-h-screen bg-gray-50'>
+    <div className='flex h-dvh bg-gray-50'>
       {/* Main Content */}
-      <main className='flex-1 p-8 overflow-y-auto'>
+      <main className='flex-1 py-5 overflow-y-auto'>
         <section>
           <PageTitle>Dashboard Overview</PageTitle>
-          <div className='space-y-8 mb-8'>
+          <div className='space-y-8 px-4 mb-8'>
             <SalesOverview />
             <StatusOverview />
             <DashboardCharts />

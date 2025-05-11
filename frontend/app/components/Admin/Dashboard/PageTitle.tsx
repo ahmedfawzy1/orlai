@@ -12,7 +12,7 @@ export default function PageTitle({
   className = '',
 }: PageTitleProps) {
   return (
-    <Component className={`text-xl font-bold mb-6 ${className}`.trim()}>
+    <Component className={`text-xl font-bold px-4 mb-6 ${className}`.trim()}>
       {children}
     </Component>
   );
