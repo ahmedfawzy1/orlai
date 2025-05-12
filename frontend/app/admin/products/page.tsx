@@ -17,29 +17,17 @@ import {
   TableCell,
 } from '@/app/components/ui/table';
 import { Checkbox } from '@/app/components/ui/checkbox';
+import Link from 'next/link';
 
 export default function ProductsPage() {
   return (
     <div className='p-6 space-y-6'>
       <h1 className='text-2xl font-bold'>Products</h1>
-      <Card>
-        <CardContent className='flex flex-wrap gap-2 p-4 items-center justify-between'>
-          <div className='flex gap-2'>
-            <Button variant='outline'>Export</Button>
-            <Button variant='outline'>Import</Button>
-          </div>
-          <div className='flex gap-2'>
-            <Button variant='outline'>Bulk Action</Button>
-            <Button variant='destructive'>Delete</Button>
-            <Button>Add Product</Button>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className='p-4 flex flex-wrap gap-2 items-center'>
-          <Input placeholder='Search product...' className='w-64' />
+      <Card className='py-0'>
+        <CardContent className='p-4 flex flex-nowrap gap-2 items-center'>
+          <Input placeholder='Search product...' className='w-full !ring-0' />
           <Select>
-            <SelectTrigger className='w-40'>
+            <SelectTrigger className='w-44'>
               <SelectValue placeholder='Category' />
             </SelectTrigger>
             <SelectContent>
@@ -49,7 +37,7 @@ export default function ProductsPage() {
             </SelectContent>
           </Select>
           <Select>
-            <SelectTrigger className='w-40'>
+            <SelectTrigger className='w-44'>
               <SelectValue placeholder='Price' />
             </SelectTrigger>
             <SelectContent>
@@ -59,6 +47,12 @@ export default function ProductsPage() {
           </Select>
           <Button>Filter</Button>
           <Button variant='outline'>Reset</Button>
+          <Link
+            href='/admin/products/create'
+            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+          >
+            Add Product
+          </Link>
         </CardContent>
       </Card>
       <Card>

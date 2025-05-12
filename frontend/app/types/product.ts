@@ -1,20 +1,25 @@
 export interface Product {
-  id: number;
+  _id: string;
   name: string;
   description: string;
   category: string;
-  style: string;
-  store: string;
-  size: string;
   inventory: number;
-  color: string;
-  minPrice: number;
-  maxPrice: number;
-  image: string;
-  userId: number;
-  slug: string;
+  availableForSale: boolean;
+  images: string[];
+  variants: {
+    color: string;
+    size: string;
+    stock: number;
+  }[];
+  priceRange: {
+    maxVariantPrice: number;
+    minVariantPrice: number;
+  }[];
   averageRating: number;
+  slug: string;
+  reviews: string[];
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface SearchQuery {

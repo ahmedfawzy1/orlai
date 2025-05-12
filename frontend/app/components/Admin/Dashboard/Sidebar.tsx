@@ -78,7 +78,7 @@ export default function Sidebar() {
       )}
 
       <aside
-        className={`fixed lg:static w-64 h-screen bg-white border-r flex flex-col justify-between z-50 shadow-2xl lg:shadow-[0_8px_32px_0_rgba(60,72,88,0.12)] transition-transform duration-300 ease-in-out
+        className={`fixed lg:static w-64 h-full bg-white border-r flex flex-col justify-between z-50 shadow-md transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
         style={{ top: 0, left: 0 }}
       >

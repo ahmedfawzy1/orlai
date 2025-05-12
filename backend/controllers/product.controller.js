@@ -2,18 +2,19 @@ import Product from "../models/product.model.js";
 
 export const createProduct = async (req, res) => {
   try {
-    const { name, description, priceRange, category, inventory, availableForSale, images, variants, averageRating, slug } = req.body;
+    const { name, description, priceRange, category, images, variants, slug } = req.body;
+
+    // Calculate total inventory from variant stocks
+    const totalInventory = variants.reduce((sum, variant) => sum + variant.stock, 0);
 
     const newProduct = new Product({
       name,
       description,
       priceRange,
       category,
-      inventory,
-      availableForSale,
+      inventory: totalInventory,
       images,
       variants,
-      averageRating,
       slug,
     });
 
@@ -74,6 +75,12 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
     const updatedData = req.body;
 
+    // If variants are being updated, calculate new total inventory
+    if (updatedData.variants) {
+      const totalInventory = updatedData.variants.reduce((sum, variant) => sum + variant.stock, 0);
+      updatedData.inventory = totalInventory;
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, { new: true });
 
     if (!updatedProduct) {
@@ -128,26 +135,6 @@ export const searchProduct = async (req, res) => {
     res.status(200).json({
       products,
       total_count: products.length,
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-export const updateProductInventory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { inventory } = req.body;
-
-    const updatedProduct = await Product.findByIdAndUpdate(id, { inventory }, { new: true });
-
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.status(200).json({
-      message: "Product inventory updated successfully",
-      product: updatedProduct,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });

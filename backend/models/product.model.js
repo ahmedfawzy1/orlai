@@ -33,14 +33,14 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: true,
     },
-    image: [
+    images: [
       {
         type: String,
         required: true,
         match: [/\.(jpg|jpeg|png|webp|avif)$/i, "Invalid image format"],
       },
     ],
-    variant: [
+    variants: [
       {
         color: {
           type: String,
