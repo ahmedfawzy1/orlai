@@ -23,11 +23,6 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    inventory: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
     availableForSale: {
       type: Boolean,
       required: true,
