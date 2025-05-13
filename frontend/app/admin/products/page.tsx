@@ -1,7 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -21,11 +23,12 @@ import {
   TableCell,
 } from '@/app/components/ui/table';
 import { Checkbox } from '@/app/components/ui/checkbox';
-import Link from 'next/link';
 import { useProductStore } from '@/app/store/useProductStore';
+import { toast } from 'react-hot-toast';
 
 export default function ProductsPage() {
-  const { products } = useProductStore();
+  const router = useRouter();
+  const { products, deleteProduct } = useProductStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priceSort, setPriceSort] = useState('');
@@ -70,6 +73,17 @@ export default function ProductsPage() {
     setSearchQuery('');
     setCategoryFilter('all');
     setPriceSort('');
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteProduct(productId);
+      toast.success('Product deleted successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
+    }
   };
 
   return (
@@ -201,6 +215,7 @@ export default function ProductsPage() {
                         variant='ghost'
                         size='sm'
                         className='text-red-600'
+                        onClick={() => handleDeleteProduct(product._id)}
                       >
                         Delete
                       </Button>
