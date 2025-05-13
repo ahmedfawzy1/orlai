@@ -7,6 +7,7 @@ export interface Product {
   availableForSale: boolean;
   images: string[];
   variants: {
+    _id: string;
     color: string;
     size: string;
     stock: number;
@@ -14,7 +15,7 @@ export interface Product {
   priceRange: {
     maxVariantPrice: number;
     minVariantPrice: number;
-  }[];
+  };
   averageRating: number;
   slug: string;
   reviews: string[];
