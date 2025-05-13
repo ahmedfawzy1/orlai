@@ -85,6 +85,11 @@ const productSchema = new mongoose.Schema(
             return variantWithoutId;
           });
         }
+        // Transform priceRange to remove numeric key and duplicate id
+        if (ret.priceRange && ret.priceRange.length > 0) {
+          const { id, ...priceRangeWithoutId } = ret.priceRange[0];
+          ret.priceRange = priceRangeWithoutId;
+        }
         return ret;
       },
     },
@@ -97,6 +102,11 @@ const productSchema = new mongoose.Schema(
             const { id, ...variantWithoutId } = variant;
             return variantWithoutId;
           });
+        }
+        // Transform priceRange to remove numeric key and duplicate id
+        if (ret.priceRange && ret.priceRange.length > 0) {
+          const { id, ...priceRangeWithoutId } = ret.priceRange[0];
+          ret.priceRange = priceRangeWithoutId;
         }
         return ret;
       },
