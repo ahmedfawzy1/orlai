@@ -55,25 +55,20 @@ export const getProducts = async (req, res) => {
   }
 };
 
-export const getProductById = async (req, res) => {
+export const getProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
 
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    // Check if the id is a valid MongoDB ObjectId
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    let product;
+    if (isValidObjectId) {
+      product = await Product.findById(id);
+    } else {
+      // If not a valid ObjectId, treat it as a slug
+      product = await Product.findOne({ slug: id });
     }
-
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-export const getProductBySlug = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    const product = await Product.findOne({ slug });
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
