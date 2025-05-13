@@ -37,6 +37,10 @@ const productSchema = new mongoose.Schema(
     ],
     variants: [
       {
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          auto: true,
+        },
         color: {
           type: String,
           required: true,
@@ -69,14 +73,49 @@ const productSchema = new mongoose.Schema(
     },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: function (doc, ret) {
+        // Transform variants to remove duplicate id
+        if (ret.variants) {
+          ret.variants = ret.variants.map((variant) => {
+            const { id, ...variantWithoutId } = variant;
+            return variantWithoutId;
+          });
+        }
+        return ret;
+      },
+    },
+    toObject: {
+      virtuals: true,
+      transform: function (doc, ret) {
+        // Transform variants to remove duplicate id
+        if (ret.variants) {
+          ret.variants = ret.variants.map((variant) => {
+            const { id, ...variantWithoutId } = variant;
+            return variantWithoutId;
+          });
+        }
+        return ret;
+      },
+    },
+  }
 );
 
-// Middleware to automatically update 'availableForSale' based on 'inventory'
+// Virtual field for inventory
+productSchema.virtual("inventory").get(function () {
+  return this.variants.reduce((sum, variant) => sum + variant.stock, 0);
+});
+
+// Middleware to automatically update 'availableForSale' based on inventory
 productSchema.pre("save", function (next) {
-  if (this.inventory === 0) {
+  const inventory = this.variants.reduce((sum, variant) => sum + variant.stock, 0);
+
+  if (inventory === 0) {
     this.availableForSale = false;
-  } else if (this.inventory > 0 && this.availableForSale === false) {
+  } else if (inventory > 0 && this.availableForSale === false) {
     this.availableForSale = true;
   }
   next();
