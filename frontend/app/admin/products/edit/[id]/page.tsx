@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -12,7 +12,12 @@ import Color from '@/app/components/Admin/Products/Color';
 import ImageGallery from '@/app/components/Admin/Products/ImageGallery';
 import { axiosInstance } from '@/app/lib/axios';
 
-export default function EditProductPage() {
+export default function EditProductPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const router = useRouter();
   const submitButton = useRef<HTMLButtonElement | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -23,7 +28,7 @@ export default function EditProductPage() {
     name: '',
     description: '',
     category: '',
-    priceRange: [{ maxVariantPrice: 0, minVariantPrice: 0 }],
+    priceRange: { maxVariantPrice: 0, minVariantPrice: 0 },
     image: [] as string[],
     variants: [] as { color: string; size: string; stock: number }[],
     slug: '',
@@ -48,20 +53,18 @@ export default function EditProductPage() {
       .string()
       .min(2, 'Category must be at least 2 characters')
       .max(50, 'Category cannot exceed 50 characters'),
-    priceRange: z.array(
-      z.object({
-        maxVariantPrice: z
-          .number()
-          .positive()
-          .min(1, 'Price must be at least 1')
-          .max(10000, 'Price cannot exceed 10,000'),
-        minVariantPrice: z
-          .number()
-          .positive()
-          .min(1, 'Price must be at least 1')
-          .max(10000, 'Price cannot exceed 10,000'),
-      })
-    ),
+    priceRange: z.object({
+      maxVariantPrice: z
+        .number()
+        .positive()
+        .min(1, 'Price must be at least 1')
+        .max(10000, 'Price cannot exceed 10,000'),
+      minVariantPrice: z
+        .number()
+        .positive()
+        .min(1, 'Price must be at least 1')
+        .max(10000, 'Price cannot exceed 10,000'),
+    }),
     variants: z.array(
       z.object({
         color: z.string().min(1, 'Color is required'),
@@ -75,6 +78,55 @@ export default function EditProductPage() {
       .min(3, 'Slug must be at least 3 characters long')
       .max(100, 'Slug cannot exceed 100 characters'),
   });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    setValue,
+    trigger,
+  } = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: formData,
+  });
+
+  // Fetch product data on component mount
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axiosInstance.get(`/products/${id}`);
+        const product = response.data;
+
+        setFormData({
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          priceRange: product.priceRange,
+          image: product.images || [],
+          variants: product.variants || [],
+          slug: product.slug,
+        });
+
+        setImageUrls(product.images || []);
+
+        reset({
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          priceRange: product.priceRange,
+          image: product.images || [],
+          variants: product.variants || [],
+          slug: product.slug,
+        });
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        toast.error('Failed to fetch product data');
+      }
+    };
+
+    fetchProduct();
+  }, [id, reset]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -99,14 +151,11 @@ export default function EditProductPage() {
     const price = e.target.value !== '' ? parseFloat(value) : 0;
     setFormData(prevFormData => ({
       ...prevFormData,
-      priceRange: [
-        {
-          maxVariantPrice: price,
-          minVariantPrice: prevFormData.priceRange[0].minVariantPrice,
-        },
-      ],
+      priceRange: {
+        maxVariantPrice: price,
+        minVariantPrice: prevFormData.priceRange.minVariantPrice,
+      },
     }));
-    register('priceRange.0.maxVariantPrice').onChange(e);
   };
 
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,14 +163,11 @@ export default function EditProductPage() {
     const price = e.target.value !== '' ? parseFloat(value) : 0;
     setFormData(prevFormData => ({
       ...prevFormData,
-      priceRange: [
-        {
-          maxVariantPrice: prevFormData.priceRange[0].maxVariantPrice,
-          minVariantPrice: price,
-        },
-      ],
+      priceRange: {
+        maxVariantPrice: prevFormData.priceRange.maxVariantPrice,
+        minVariantPrice: price,
+      },
     }));
-    register('priceRange.0.minVariantPrice').onChange(e);
   };
 
   const handleImageChange = (imageUrls: string[]) => {
@@ -170,18 +216,6 @@ export default function EditProductPage() {
     });
   };
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-    setValue,
-    trigger,
-  } = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: formData,
-  });
-
   const onSubmit = async () => {
     try {
       if (imageUrls.length === 0) {
@@ -191,8 +225,8 @@ export default function EditProductPage() {
         }));
       }
 
-      await axiosInstance.post(
-        '/products',
+      await axiosInstance.put(
+        `/products/${id}`,
         {
           ...formData,
           images: formData.image,
@@ -200,22 +234,20 @@ export default function EditProductPage() {
         },
         { headers: { 'Content-Type': 'application/json' } }
       );
-      toast.success('Product created successfully');
-      reset();
+      toast.success('Product updated successfully');
       router.push('/admin/products');
     } catch (error) {
-      toast.error(`Failed to create product: ${error}`);
+      toast.error(`Failed to update product: ${error}`);
       console.error(error);
     }
   };
-  console.log(formData);
 
   return (
     <div className='mb-10 pe-6'>
       <div className='flex justify-between items-center'>
         <h1 className='text-sm md:text-2xl font-semibold py-6 flex justify-center items-center gap-2'>
           <PackagePlus />
-          Add New Product
+          Edit Product
         </h1>
         <button
           onClick={() => submitButton.current?.click()}
@@ -224,7 +256,7 @@ export default function EditProductPage() {
           {isSubmitting ? (
             <LoaderCircle className='animate-spin' />
           ) : (
-            <>Create Product</>
+            <>Update Product</>
           )}
         </button>
       </div>
@@ -324,21 +356,21 @@ export default function EditProductPage() {
                   <input
                     id='maxPrice'
                     type='number'
-                    {...register('priceRange.0.maxVariantPrice', {
+                    {...register('priceRange.maxVariantPrice', {
                       valueAsNumber: true,
+                      onChange: handleMaxPriceChange,
                     })}
                     value={
-                      formData.priceRange[0].maxVariantPrice === 0
+                      formData.priceRange.maxVariantPrice === 0
                         ? ''
-                        : formData.priceRange[0].maxVariantPrice.toString()
+                        : formData.priceRange.maxVariantPrice.toString()
                     }
-                    onChange={handleMaxPriceChange}
                     min={1}
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none'
                   />
-                  {errors.priceRange?.[0]?.maxVariantPrice && (
+                  {errors.priceRange?.maxVariantPrice && (
                     <p className='text-red-500 text-sm'>
-                      {errors.priceRange[0].maxVariantPrice.message}
+                      {errors.priceRange.maxVariantPrice.message}
                     </p>
                   )}
                 </div>
@@ -349,21 +381,21 @@ export default function EditProductPage() {
                   <input
                     id='minPrice'
                     type='number'
-                    {...register('priceRange.0.minVariantPrice', {
+                    {...register('priceRange.minVariantPrice', {
                       valueAsNumber: true,
+                      onChange: handleMinPriceChange,
                     })}
                     value={
-                      formData.priceRange[0].minVariantPrice === 0
+                      formData.priceRange.minVariantPrice === 0
                         ? ''
-                        : formData.priceRange[0].minVariantPrice.toString()
+                        : formData.priceRange.minVariantPrice.toString()
                     }
-                    onChange={handleMinPriceChange}
                     min={1}
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none'
                   />
-                  {errors.priceRange?.[0]?.minVariantPrice && (
+                  {errors.priceRange?.minVariantPrice && (
                     <p className='text-red-500 text-sm'>
-                      {errors.priceRange[0].minVariantPrice.message}
+                      {errors.priceRange.minVariantPrice.message}
                     </p>
                   )}
                 </div>

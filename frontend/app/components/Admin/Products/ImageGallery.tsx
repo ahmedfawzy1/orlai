@@ -51,10 +51,11 @@ export default function ImageGallery({
         {imageUrls.length > 0 ? (
           <Image
             src={imageUrls[selectedImage]}
-            alt={'product'}
+            alt={'product image'}
             width={256}
             height={341}
             draggable={false}
+            className='w-full h-full'
           />
         ) : (
           <FileImage />

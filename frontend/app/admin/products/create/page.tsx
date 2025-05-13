@@ -23,7 +23,7 @@ export default function CreateProduct() {
     name: '',
     description: '',
     category: '',
-    priceRange: [{ maxVariantPrice: 0, minVariantPrice: 0 }],
+    priceRange: { maxVariantPrice: 0, minVariantPrice: 0 },
     image: [] as string[],
     variants: [] as { color: string; size: string; stock: number }[],
     slug: '',
@@ -48,20 +48,18 @@ export default function CreateProduct() {
       .string()
       .min(2, 'Category must be at least 2 characters')
       .max(50, 'Category cannot exceed 50 characters'),
-    priceRange: z.array(
-      z.object({
-        maxVariantPrice: z
-          .number()
-          .positive()
-          .min(1, 'Price must be at least 1')
-          .max(10000, 'Price cannot exceed 10,000'),
-        minVariantPrice: z
-          .number()
-          .positive()
-          .min(1, 'Price must be at least 1')
-          .max(10000, 'Price cannot exceed 10,000'),
-      })
-    ),
+    priceRange: z.object({
+      maxVariantPrice: z
+        .number()
+        .positive()
+        .min(1, 'Price must be at least 1')
+        .max(10000, 'Price cannot exceed 10,000'),
+      minVariantPrice: z
+        .number()
+        .positive()
+        .min(1, 'Price must be at least 1')
+        .max(10000, 'Price cannot exceed 10,000'),
+    }),
     variants: z.array(
       z.object({
         color: z.string().min(1, 'Color is required'),
@@ -99,14 +97,12 @@ export default function CreateProduct() {
     const price = e.target.value !== '' ? parseFloat(value) : 0;
     setFormData(prevFormData => ({
       ...prevFormData,
-      priceRange: [
-        {
-          maxVariantPrice: price,
-          minVariantPrice: prevFormData.priceRange[0].minVariantPrice,
-        },
-      ],
+      priceRange: {
+        maxVariantPrice: price,
+        minVariantPrice: prevFormData.priceRange.minVariantPrice,
+      },
     }));
-    register('priceRange.0.maxVariantPrice').onChange(e);
+    register('priceRange.maxVariantPrice').onChange(e);
   };
 
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,14 +110,12 @@ export default function CreateProduct() {
     const price = e.target.value !== '' ? parseFloat(value) : 0;
     setFormData(prevFormData => ({
       ...prevFormData,
-      priceRange: [
-        {
-          maxVariantPrice: prevFormData.priceRange[0].maxVariantPrice,
-          minVariantPrice: price,
-        },
-      ],
+      priceRange: {
+        maxVariantPrice: prevFormData.priceRange.maxVariantPrice,
+        minVariantPrice: price,
+      },
     }));
-    register('priceRange.0.minVariantPrice').onChange(e);
+    register('priceRange.minVariantPrice').onChange(e);
   };
 
   const handleImageChange = (imageUrls: string[]) => {
@@ -208,7 +202,6 @@ export default function CreateProduct() {
       console.error(error);
     }
   };
-  console.log(formData);
 
   return (
     <div className='mb-10 pe-6'>
@@ -324,21 +317,21 @@ export default function CreateProduct() {
                   <input
                     id='maxPrice'
                     type='number'
-                    {...register('priceRange.0.maxVariantPrice', {
+                    {...register('priceRange.maxVariantPrice', {
                       valueAsNumber: true,
                     })}
                     value={
-                      formData.priceRange[0].maxVariantPrice === 0
+                      formData.priceRange.maxVariantPrice === 0
                         ? ''
-                        : formData.priceRange[0].maxVariantPrice.toString()
+                        : formData.priceRange.maxVariantPrice.toString()
                     }
                     onChange={handleMaxPriceChange}
                     min={1}
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none'
                   />
-                  {errors.priceRange?.[0]?.maxVariantPrice && (
+                  {errors.priceRange?.maxVariantPrice && (
                     <p className='text-red-500 text-sm'>
-                      {errors.priceRange[0].maxVariantPrice.message}
+                      {errors.priceRange.maxVariantPrice.message}
                     </p>
                   )}
                 </div>
@@ -349,21 +342,21 @@ export default function CreateProduct() {
                   <input
                     id='minPrice'
                     type='number'
-                    {...register('priceRange.0.minVariantPrice', {
+                    {...register('priceRange.minVariantPrice', {
                       valueAsNumber: true,
                     })}
                     value={
-                      formData.priceRange[0].minVariantPrice === 0
+                      formData.priceRange.minVariantPrice === 0
                         ? ''
-                        : formData.priceRange[0].minVariantPrice.toString()
+                        : formData.priceRange.minVariantPrice.toString()
                     }
                     onChange={handleMinPriceChange}
                     min={1}
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none'
                   />
-                  {errors.priceRange?.[0]?.minVariantPrice && (
+                  {errors.priceRange?.minVariantPrice && (
                     <p className='text-red-500 text-sm'>
-                      {errors.priceRange[0].minVariantPrice.message}
+                      {errors.priceRange.minVariantPrice.message}
                     </p>
                   )}
                 </div>

@@ -146,10 +146,10 @@ export const useProductStore = create<ProductStore>()(set => ({
       const updatedProduct = await updateProduct(id, updateData);
       set(state => ({
         products: state.products.map(product =>
-          product.id.toString() === id ? updatedProduct : product
+          product._id === id ? updatedProduct : product
         ),
         selectedProduct:
-          state.selectedProduct?.id.toString() === id
+          state.selectedProduct?._id === id
             ? updatedProduct
             : state.selectedProduct,
       }));
@@ -166,13 +166,9 @@ export const useProductStore = create<ProductStore>()(set => ({
     try {
       await deleteProduct(id);
       set(state => ({
-        products: state.products.filter(
-          product => product.id.toString() !== id
-        ),
+        products: state.products.filter(product => product._id !== id),
         selectedProduct:
-          state.selectedProduct?.id.toString() === id
-            ? null
-            : state.selectedProduct,
+          state.selectedProduct?._id === id ? null : state.selectedProduct,
       }));
     } catch (error) {
       set({ error: 'Failed to delete product' });
