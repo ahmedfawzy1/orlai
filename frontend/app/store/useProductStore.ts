@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { Product } from '../types/product';
 import {
   getProducts,
+  getProduct,
   createProduct,
   updateProduct,
   deleteProduct,
-  getProductById,
   searchProducts,
 } from '../lib/products';
 
@@ -34,7 +34,7 @@ interface ProductStore {
 
   // CRUD operations
   getProducts: (page: number, limit: number) => Promise<void>;
-  getProductById: (id: string) => Promise<void>;
+  getProduct: (id: string) => Promise<void>;
   createProduct: (productData: Product) => Promise<void>;
   updateProduct: (id: string, updateData: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -112,10 +112,10 @@ export const useProductStore = create<ProductStore>()(set => ({
     }
   },
 
-  getProductById: async (id: string) => {
+  getProduct: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const product = await getProductById(id);
+      const product = await getProduct(id);
       set({ selectedProduct: product });
     } catch (error) {
       set({ error: 'Failed to fetch product details' });

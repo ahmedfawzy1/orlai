@@ -67,7 +67,7 @@ export async function getBestSellingProducts() {
   }
 }
 
-export async function getProductById(id: string) {
+export async function getProduct(id: string) {
   try {
     const res = await axios.get(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${id}`
