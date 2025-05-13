@@ -11,6 +11,7 @@ import corsOptions from "./config/corsOptions.js";
 import rootRoutes from "./routes/root.js";
 import authRoutes from "./routes/auth.route.js";
 import productRoutes from "./routes/product.route.js";
+import categoryRoutes from "./routes/category.route.js";
 import reviewRoutes from "./routes/review.route.js";
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use("/api/", rootRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 // 404 handler
