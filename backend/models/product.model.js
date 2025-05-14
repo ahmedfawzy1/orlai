@@ -42,14 +42,14 @@ const productSchema = new mongoose.Schema(
           auto: true,
         },
         color: {
-          type: String,
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Color",
           required: true,
-          trim: true,
         },
         size: {
-          type: String,
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Size",
           required: true,
-          trim: true,
         },
         stock: {
           type: Number,
