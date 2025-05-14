@@ -31,13 +31,39 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
+    const { category, min_price, max_price, sort, order, search } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
     const skip = (page - 1) * limit;
-    const products = await Product.find().skip(skip).limit(limit);
 
-    const totalCount = await Product.countDocuments();
+    let query = {};
+
+    // Filter by category
+    if (category) query.category = category;
+
+    // Filter by price range
+    if (min_price && max_price) {
+      query.priceRange = {
+        $elemMatch: {
+          minVariantPrice: { $gte: parseFloat(min_price) },
+          maxVariantPrice: { $lte: parseFloat(max_price) },
+        },
+      };
+    }
+
+    // search by product name
+    if (search) query.name = { $regex: search, $options: "i" };
+
+    // sort by price
+    let sortQuery = {};
+    if (sort) {
+      sortQuery[sort] = order === "asc" ? 1 : -1;
+    }
+
+    const products = await Product.find(query).sort(sortQuery).skip(skip).limit(limit);
+
+    const totalCount = await Product.countDocuments(query);
 
     if (!products || products.length === 0) {
       return res.status(404).json({ message: "No products found" });

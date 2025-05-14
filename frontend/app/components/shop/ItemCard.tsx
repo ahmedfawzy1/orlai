@@ -41,7 +41,7 @@ export default function ItemCard({ product }: { product: Product }) {
       <div className='w-full aspect-[3/4] bg-[#fafafa] relative flex justify-center items-center overflow-hidden'>
         <Link href={`/shop/${product.slug}`} className='w-full h-full'>
           <Image
-            src={product.image}
+            src={product.images[0]}
             alt={product.name}
             className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
             width={780}
@@ -92,10 +92,12 @@ export default function ItemCard({ product }: { product: Product }) {
         </Link>
         <p className='text-md text-black/70 font-medium'>{product.category}</p>
         <div className='flex gap-2'>
-          <p className='text-lg font-bold'>${product.maxPrice}</p>
-          {product.minPrice > 0 && (
+          <p className='text-lg font-bold'>
+            ${product.priceRange.maxVariantPrice}
+          </p>
+          {product.priceRange.minVariantPrice > 0 && (
             <p className='text-[#000000a6] text-lg font-bold line-through'>
-              ${product.minPrice}
+              ${product.priceRange.minVariantPrice}
             </p>
           )}
         </div>

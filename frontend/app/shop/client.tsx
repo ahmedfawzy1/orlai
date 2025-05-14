@@ -9,13 +9,17 @@ import { ArrowLeft, ArrowRight, SlidersVertical } from 'lucide-react';
 import { PaginationContent, PaginationItem } from '../components/ui/pagination';
 import { Pagination } from '../components/ui/pagination';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Shop() {
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
-  const { products, totalPages, isLoading } = useProductStore();
+  const { products, totalPages, isLoading, getProducts } = useProductStore();
 
-  console.log('products', products);
+  // Update products when filters or page changes
+  useEffect(() => {
+    getProducts(currentPage, 12);
+  }, [currentPage, getProducts]);
 
   return (
     <section className='px-5 py-2 md:py-10 container mx-auto min-h-screen'>
@@ -48,7 +52,7 @@ export default function Shop() {
           ) : (
             <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pb-8'>
               {products?.map((product: Product) => (
-                <ItemCard key={product.id} product={product} />
+                <ItemCard key={product._id} product={product} />
               ))}
             </div>
           )}
