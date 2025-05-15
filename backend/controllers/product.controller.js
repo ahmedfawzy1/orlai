@@ -61,7 +61,13 @@ export const getProducts = async (req, res) => {
       sortQuery[sort] = order === "asc" ? 1 : -1;
     }
 
-    const products = await Product.find(query).sort(sortQuery).skip(skip).limit(limit);
+    const products = await Product.find(query)
+      .populate("category", "name -_id")
+      .populate("variants.color", "name hexCode -_id")
+      .populate("variants.size", "name -_id")
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit);
 
     const totalCount = await Product.countDocuments(query);
 
@@ -90,10 +96,16 @@ export const getProduct = async (req, res) => {
 
     let product;
     if (isValidObjectId) {
-      product = await Product.findById(id);
+      product = await Product.findById(id)
+        .populate("category", "name -_id")
+        .populate("variants.color", "name hexCode -_id")
+        .populate("variants.size", "name -_id");
     } else {
       // If not a valid ObjectId, treat it as a slug
-      product = await Product.findOne({ slug: id });
+      product = await Product.findOne({ slug: id })
+        .populate("category", "name -_id")
+        .populate("variants.color", "name hexCode -_id")
+        .populate("variants.size", "name -_id");
     }
 
     if (!product) {

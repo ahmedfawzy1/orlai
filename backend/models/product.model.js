@@ -78,13 +78,36 @@ const productSchema = new mongoose.Schema(
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {
-        // Transform variants to remove duplicate id
+        // Transform category to just the name
+        if (ret.category) {
+          ret.category = ret.category.name || ret.category;
+        }
+
+        // Transform variants to handle color/size objects and remove duplicate ids
         if (ret.variants) {
           ret.variants = ret.variants.map((variant) => {
+            // Remove id from variant level
             const { id, ...variantWithoutId } = variant;
+
+            // Handle color object
+            if (variant.color && typeof variant.color === "object") {
+              const { id, ...colorWithoutId } = variant.color;
+              variantWithoutId.color = colorWithoutId;
+            }
+
+            // Handle size - return name directly
+            if (variant.size) {
+              if (typeof variant.size === "object") {
+                variantWithoutId.size = variant.size.name;
+              } else {
+                variantWithoutId.size = variant.size;
+              }
+            }
+
             return variantWithoutId;
           });
         }
+
         // Transform priceRange to remove numeric key and duplicate id
         if (ret.priceRange && ret.priceRange.length > 0) {
           const { id, ...priceRangeWithoutId } = ret.priceRange[0];
@@ -96,13 +119,36 @@ const productSchema = new mongoose.Schema(
     toObject: {
       virtuals: true,
       transform: function (doc, ret) {
-        // Transform variants to remove duplicate id
+        // Transform category to just the name
+        if (ret.category) {
+          ret.category = ret.category.name || ret.category;
+        }
+
+        // Transform variants to handle color/size objects and remove duplicate ids
         if (ret.variants) {
           ret.variants = ret.variants.map((variant) => {
+            // Remove id from variant level
             const { id, ...variantWithoutId } = variant;
+
+            // Handle color object
+            if (variant.color && typeof variant.color === "object") {
+              const { id, ...colorWithoutId } = variant.color;
+              variantWithoutId.color = colorWithoutId;
+            }
+
+            // Handle size - return name directly
+            if (variant.size) {
+              if (typeof variant.size === "object") {
+                variantWithoutId.size = variant.size.name;
+              } else {
+                variantWithoutId.size = variant.size;
+              }
+            }
+
             return variantWithoutId;
           });
         }
+
         // Transform priceRange to remove numeric key and duplicate id
         if (ret.priceRange && ret.priceRange.length > 0) {
           const { id, ...priceRangeWithoutId } = ret.priceRange[0];
