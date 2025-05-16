@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CheckIcon, XIcon } from 'lucide-react';
 import ColorPicker from 'react-pick-color';
+import { useFilterStore } from '@/app/store/useFilterStore';
 
 interface colorProps {
   selectedColor: string;
@@ -10,6 +11,7 @@ interface colorProps {
 export default function Color({ selectedColor, onColorChange }: colorProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [tempColor, setTempColor] = useState('#ffffff');
+  const { colors } = useFilterStore();
 
   const handleConfirm = () => {
     onColorChange(tempColor);
@@ -70,6 +72,19 @@ export default function Color({ selectedColor, onColorChange }: colorProps) {
           </div>
         </div>
       )}
+
+      <div className='mt-2 flex flex-wrap gap-2'>
+        {colors.map(color => (
+          <button
+            key={color._id}
+            type='button'
+            onClick={() => onColorChange(color.hexCode)}
+            className='w-6 h-6 rounded-full border cursor-pointer hover:scale-110 transition-transform'
+            style={{ backgroundColor: color.hexCode }}
+            title={color.name}
+          />
+        ))}
+      </div>
     </div>
   );
 }

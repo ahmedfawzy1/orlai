@@ -1,7 +1,12 @@
+'use client';
+
+import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
-
+import { Color, Size } from '@/app/types/filter';
 import {
   Table,
   TableHeader,
@@ -11,89 +16,738 @@ import {
   TableCell,
 } from '@/app/components/ui/table';
 import { Checkbox } from '@/app/components/ui/checkbox';
+import { useFilterStore } from '@/app/store/useFilterStore';
+import {
+  createCategory,
+  deleteCategory,
+  updateCategory,
+} from '@/app/lib/filters/category';
+import { createColor, updateColor, deleteColor } from '@/app/lib/filters/color';
+import { createSize, updateSize, deleteSize } from '@/app/lib/filters/size';
+import toast from 'react-hot-toast';
+import { CheckIcon, XIcon } from 'lucide-react';
+import ColorPicker from 'react-pick-color';
 
 export default function CategoriesPage() {
+  const router = useRouter();
+  const { categories, colors, sizes } = useFilterStore();
+
+  const [newCategory, setNewCategory] = useState({
+    name: '',
+    description: '',
+    slug: '',
+  });
+  const [newColor, setNewColor] = useState<Partial<Color>>({
+    name: '',
+    hexCode: '',
+  });
+  const [newSize, setNewSize] = useState<Partial<Size>>({ name: '' });
+
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
+  const [showColorInput, setShowColorInput] = useState(false);
+  const [showSizeInput, setShowSizeInput] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
+    null
+  );
+  const [editingCategory, setEditingCategory] = useState({
+    name: '',
+    description: '',
+    slug: '',
+  });
+  const [editingColorId, setEditingColorId] = useState<string | null>(null);
+  const [editingColor, setEditingColor] = useState<Partial<Color>>({
+    name: '',
+    hexCode: '',
+  });
+  const [showColorPickerEdit, setShowColorPickerEdit] = useState(false);
+  const [editingSizeId, setEditingSizeId] = useState<string | null>(null);
+  const [editingSize, setEditingSize] = useState<Partial<Size>>({ name: '' });
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await deleteCategory(categoryId);
+      toast.success('Category deleted successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      toast.error('Failed to delete category');
+    }
+  };
+
+  const handleDeleteColor = async (colorId: string) => {
+    try {
+      await deleteColor(colorId);
+      toast.success('Color deleted successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting color:', error);
+      toast.error('Failed to delete color');
+    }
+  };
+
+  const handleDeleteSize = async (sizeId: string) => {
+    try {
+      await deleteSize(sizeId);
+      toast.success('Size deleted successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting size:', error);
+      toast.error('Failed to delete size');
+    }
+  };
+
+  const handleAddCategory = async () => {
+    try {
+      if (!newCategory.name || !newCategory.description || !newCategory.slug) {
+        toast.error('Please fill all fields');
+        return;
+      }
+      await createCategory(newCategory);
+      setNewCategory({ name: '', description: '', slug: '' });
+      setShowCategoryInput(false);
+      toast.success('Category added successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error adding category:', error);
+      toast.error('Failed to add category');
+    }
+  };
+
+  const handleAddColor = async () => {
+    try {
+      if (!newColor.name || !newColor.hexCode) {
+        toast.error('Please fill all fields');
+        return;
+      }
+      const colorData: Color = {
+        _id: '',
+        name: newColor.name,
+        hexCode: newColor.hexCode,
+        __v: 0,
+      };
+      await createColor(colorData);
+      setNewColor({ name: '', hexCode: '' });
+      setShowColorInput(false);
+      toast.success('Color added successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error adding color:', error);
+      toast.error('Failed to add color');
+    }
+  };
+
+  const handleAddSize = async () => {
+    try {
+      if (!newSize.name) {
+        toast.error('Please enter a size name');
+        return;
+      }
+      const sizeData: Size = {
+        _id: '',
+        name: newSize.name,
+        __v: 0,
+      };
+      await createSize(sizeData);
+      setNewSize({ name: '' });
+      setShowSizeInput(false);
+      toast.success('Size added successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error adding size:', error);
+      toast.error('Failed to add size');
+    }
+  };
+
+  // CATEGORY EDIT HANDLERS
+  const handleEditCategory = (cat: any) => {
+    setEditingCategoryId(cat._id);
+    setEditingCategory({
+      name: cat.name,
+      description: cat.description,
+      slug: cat.slug,
+    });
+  };
+  const handleSaveCategory = async (id: string) => {
+    try {
+      await updateCategory(id, editingCategory);
+      setEditingCategoryId(null);
+      toast.success('Category updated successfully');
+      router.refresh();
+    } catch {
+      toast.error('Failed to update category');
+    }
+  };
+  const handleCancelCategory = () => {
+    setEditingCategoryId(null);
+  };
+
+  // COLOR EDIT HANDLERS
+  const handleEditColor = (color: any) => {
+    setEditingColorId(color._id);
+    setEditingColor({ name: color.name, hexCode: color.hexCode });
+  };
+  const handleSaveColor = async (id: string) => {
+    try {
+      await updateColor(id, editingColor);
+      setEditingColorId(null);
+      toast.success('Color updated successfully');
+      router.refresh();
+    } catch {
+      toast.error('Failed to update color');
+    }
+  };
+  const handleCancelColor = () => {
+    setEditingColorId(null);
+    setShowColorPickerEdit(false);
+  };
+
+  // SIZE EDIT HANDLERS
+  const handleEditSize = (size: any) => {
+    setEditingSizeId(size._id);
+    setEditingSize({ name: size.name });
+  };
+  const handleSaveSize = async (id: string) => {
+    try {
+      await updateSize(id, editingSize);
+      setEditingSizeId(null);
+      toast.success('Size updated successfully');
+      router.refresh();
+    } catch {
+      toast.error('Failed to update size');
+    }
+  };
+  const handleCancelSize = () => {
+    setEditingSizeId(null);
+  };
+
   return (
-    <div className='p-6 space-y-6'>
-      <h1 className='text-2xl font-bold'>Categories</h1>
-      <Card>
-        <CardContent className='flex flex-wrap gap-2 p-4 items-center justify-between'>
-          <div className='flex gap-2'>
-            <Button variant='outline'>Export</Button>
-            <Button variant='outline'>Import</Button>
-          </div>
-          <div className='flex gap-2'>
-            <Button variant='outline'>Bulk Action</Button>
-            <Button variant='destructive'>Delete</Button>
-            <Button>Add Product</Button>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className='p-4 flex flex-wrap gap-2 items-center'>
-          <Input placeholder='Search category...' className='w-64' />
-          <Button>Filter</Button>
-          <Button variant='outline'>Reset</Button>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className='p-0'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <Checkbox />
-                </TableHead>
-                <TableHead>id</TableHead>
-                <TableHead>icon</TableHead>
-                <TableHead>name</TableHead>
-                <TableHead>description</TableHead>
-                <TableHead>published</TableHead>
-                <TableHead>actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(8)].map((_, i) => (
-                <TableRow key={i} className='opacity-50'>
-                  <TableCell>
+    <div className='px-4 py-6 space-y-6'>
+      <div className=''>
+        <div className='flex justify-between items-center pb-4'>
+          <h1 className='text-2xl font-bold'>Categories</h1>
+          <Button
+            onClick={() => setShowCategoryInput(!showCategoryInput)}
+            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+          >
+            {showCategoryInput ? 'Cancel' : 'Add Category'}
+          </Button>
+        </div>
+        <Card>
+          <CardContent className='p-0'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
                     <Checkbox />
-                  </TableCell>
-                  <TableCell>
-                    <div className='flex items-center gap-2'>
-                      <div className='w-6 h-6 bg-muted rounded-full' />
-                      <div className='bg-muted rounded w-24 h-4' />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-20 h-4' />
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-16 h-4' />
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-16 h-4' />
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-12 h-4' />
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-14 h-4' />
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-8 h-4' />
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-10 h-4' />
-                  </TableCell>
-                  <TableCell>
-                    <div className='bg-muted rounded w-16 h-4' />
-                  </TableCell>
+                  </TableHead>
+                  <TableHead>NAME</TableHead>
+                  <TableHead>DESCRIPTION</TableHead>
+                  <TableHead>SLUG</TableHead>
+                  <TableHead>ACTIONS</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {showCategoryInput && (
+                  <TableRow>
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        placeholder='Category name'
+                        value={newCategory.name}
+                        onChange={e =>
+                          setNewCategory({
+                            ...newCategory,
+                            name: e.target.value,
+                          })
+                        }
+                        className='h-8 !ring-0'
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        placeholder='Description'
+                        value={newCategory.description}
+                        onChange={e =>
+                          setNewCategory({
+                            ...newCategory,
+                            description: e.target.value,
+                          })
+                        }
+                        className='h-8 !ring-0'
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        placeholder='Slug'
+                        value={newCategory.slug}
+                        onChange={e =>
+                          setNewCategory({
+                            ...newCategory,
+                            slug: e.target.value,
+                          })
+                        }
+                        className='h-8 !ring-0'
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button onClick={handleAddCategory}>Add</Button>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {categories.map(category => (
+                  <TableRow key={category._id}>
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    {editingCategoryId === category._id ? (
+                      <>
+                        <TableCell>
+                          <Input
+                            value={editingCategory.name}
+                            onChange={e =>
+                              setEditingCategory({
+                                ...editingCategory,
+                                name: e.target.value,
+                              })
+                            }
+                            className='h-8 !ring-0'
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={editingCategory.description}
+                            onChange={e =>
+                              setEditingCategory({
+                                ...editingCategory,
+                                description: e.target.value,
+                              })
+                            }
+                            className='h-8 !ring-0'
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={editingCategory.slug}
+                            onChange={e =>
+                              setEditingCategory({
+                                ...editingCategory,
+                                slug: e.target.value,
+                              })
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className='flex items-center gap-2'>
+                            <Button
+                              size='sm'
+                              onClick={() => handleSaveCategory(category._id!)}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size='sm'
+                              variant='ghost'
+                              onClick={handleCancelCategory}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell>{category.name}</TableCell>
+                        <TableCell>{category.description}</TableCell>
+                        <TableCell>{category.slug}</TableCell>
+                        <TableCell>
+                          <div className='flex items-center gap-2'>
+                            <Link
+                              href={`/admin/categories/edit/${category._id}`}
+                              className='text-blue-600 hover:underline'
+                              onClick={e => {
+                                e.preventDefault();
+                                handleEditCategory(category);
+                              }}
+                            >
+                              Edit
+                            </Link>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='text-red-600'
+                              onClick={() =>
+                                handleDeleteCategory(category._id || '')
+                              }
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+      <div className=''>
+        <div className='flex justify-between items-center pb-4'>
+          <h1 className='text-2xl font-bold'>Colors</h1>
+          <Button
+            onClick={() => setShowColorInput(!showColorInput)}
+            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+          >
+            {showColorInput ? 'Cancel' : 'Add Color'}
+          </Button>
+        </div>
+        <Card>
+          <CardContent className='p-0'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className='w-8'>
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead>NAME</TableHead>
+                  <TableHead className='text-center'>HEX CODE</TableHead>
+                  <TableHead className='text-center'>ACTIONS</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {showColorInput && (
+                  <TableRow>
+                    <TableCell className='w-8'>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        placeholder='Color name'
+                        value={newColor.name}
+                        onChange={e =>
+                          setNewColor({ ...newColor, name: e.target.value })
+                        }
+                        className='h-8 !ring-0'
+                      />
+                    </TableCell>
+                    <TableCell className='text-center'>
+                      <div className='relative'>
+                        {newColor.hexCode ? (
+                          <button
+                            type='button'
+                            onClick={() => setShowColorPicker(true)}
+                            className='text-blue-600 hover:underline'
+                          >
+                            {newColor.hexCode}
+                          </button>
+                        ) : (
+                          <Button
+                            type='button'
+                            onClick={() => setShowColorPicker(true)}
+                            className='bg-primary rounded-lg text-center text-[14px] px-3 py-1 cursor-pointer hover:bg-primary/90 transition-all duration-200'
+                          >
+                            Select Color
+                          </Button>
+                        )}
+                        {showColorPicker && (
+                          <div className='absolute z-10 mt-2'>
+                            <div className='bg-white pt-1 rounded-lg shadow-lg'>
+                              <div className='flex justify-end items-center'>
+                                <button
+                                  type='button'
+                                  onClick={() => setShowColorPicker(false)}
+                                  className='p-1 cursor-pointer'
+                                >
+                                  <XIcon size={16} />
+                                </button>
+                                <button
+                                  type='button'
+                                  onClick={() => setShowColorPicker(false)}
+                                  className='p-1 cursor-pointer'
+                                >
+                                  <CheckIcon size={16} />
+                                </button>
+                              </div>
+                              <ColorPicker
+                                color={newColor.hexCode || '#ffffff'}
+                                onChange={color =>
+                                  setNewColor({
+                                    ...newColor,
+                                    hexCode: color.hex,
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className='text-center'>
+                      <div className='flex items-center gap-2 justify-center'>
+                        <Button onClick={handleAddColor}>Add</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {colors.map(color => (
+                  <TableRow key={color._id}>
+                    <TableCell className='w-8'>
+                      <Checkbox />
+                    </TableCell>
+                    {editingColorId === color._id ? (
+                      <>
+                        <TableCell>
+                          <Input
+                            value={editingColor.name}
+                            onChange={e =>
+                              setEditingColor({
+                                ...editingColor,
+                                name: e.target.value,
+                              })
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className='text-center'>
+                          <div className='relative flex items-center gap-2 justify-center'>
+                            {editingColor.hexCode ? (
+                              <button
+                                type='button'
+                                onClick={() => setShowColorPickerEdit(true)}
+                                className='text-blue-600 hover:underline'
+                              >
+                                {editingColor.hexCode}
+                              </button>
+                            ) : (
+                              <Button
+                                type='button'
+                                onClick={() => setShowColorPickerEdit(true)}
+                                className='bg-[#efefef] rounded-lg text-center text-[14px] px-3 py-1 cursor-pointer hover:bg-[#e2e2e2] transition-all duration-200'
+                              >
+                                Select Color
+                              </Button>
+                            )}
+                            {showColorPickerEdit && (
+                              <div className='absolute z-10 mt-2'>
+                                <div className='bg-white pt-1 rounded-lg shadow-lg'>
+                                  <div className='flex justify-end items-center'>
+                                    <button
+                                      type='button'
+                                      onClick={() =>
+                                        setShowColorPickerEdit(false)
+                                      }
+                                      className='p-1 cursor-pointer'
+                                    >
+                                      <XIcon size={16} />
+                                    </button>
+                                    <button
+                                      type='button'
+                                      onClick={() =>
+                                        setShowColorPickerEdit(false)
+                                      }
+                                      className='p-1 cursor-pointer'
+                                    >
+                                      <CheckIcon size={16} />
+                                    </button>
+                                  </div>
+                                  <ColorPicker
+                                    color={editingColor.hexCode || '#ffffff'}
+                                    onChange={color =>
+                                      setEditingColor({
+                                        ...editingColor,
+                                        hexCode: color.hex,
+                                      })
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            {editingColor.hexCode && (
+                              <div
+                                className='w-6 h-6 rounded-full border ml-2'
+                                style={{
+                                  backgroundColor: editingColor.hexCode,
+                                }}
+                              />
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className='text-center'>
+                          <div className='flex items-center gap-2 justify-center'>
+                            <Button
+                              size='sm'
+                              onClick={() => handleSaveColor(color._id!)}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size='sm'
+                              variant='ghost'
+                              onClick={handleCancelColor}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell>{color.name}</TableCell>
+                        <TableCell className='text-center'>
+                          <div className='flex items-center gap-2 justify-center'>
+                            <div
+                              className='w-6 h-6 rounded-full border'
+                              style={{ backgroundColor: color.hexCode }}
+                            />
+                            <span>{color.hexCode}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className='text-center'>
+                          <div className='flex items-center gap-2 justify-center'>
+                            <Link
+                              href={`/admin/colors/edit/${color._id}`}
+                              className='text-blue-600 hover:underline'
+                              onClick={e => {
+                                e.preventDefault();
+                                handleEditColor(color);
+                              }}
+                            >
+                              Edit
+                            </Link>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='text-red-600'
+                              onClick={() => handleDeleteColor(color._id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+      <div className=''>
+        <div className='flex justify-between items-center pb-4'>
+          <h1 className='text-2xl font-bold'>Sizes</h1>
+          <Button
+            onClick={() => setShowSizeInput(!showSizeInput)}
+            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+          >
+            {showSizeInput ? 'Cancel' : 'Add Size'}
+          </Button>
+        </div>
+        <Card>
+          <CardContent className='p-0'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead>NAME</TableHead>
+                  <TableHead className='text-center'>ACTIONS</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {showSizeInput && (
+                  <TableRow>
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        placeholder='Size name'
+                        value={newSize.name}
+                        onChange={e => setNewSize({ name: e.target.value })}
+                        className='h-8 !ring-0'
+                      />
+                    </TableCell>
+                    <TableCell className='text-center'>
+                      <div className='flex justify-center'>
+                        <Button onClick={handleAddSize}>Add</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {sizes.map(size => (
+                  <TableRow key={size._id}>
+                    <TableCell className='w-8'>
+                      <Checkbox />
+                    </TableCell>
+                    {editingSizeId === size._id ? (
+                      <>
+                        <TableCell>
+                          <Input
+                            value={editingSize.name}
+                            onChange={e =>
+                              setEditingSize({ name: e.target.value })
+                            }
+                            className='h-8 !ring-0'
+                          />
+                        </TableCell>
+                        <TableCell className='text-center'>
+                          <div className='flex justify-center items-center gap-2'>
+                            <Button
+                              size='sm'
+                              onClick={() => handleSaveSize(size._id!)}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size='sm'
+                              variant='ghost'
+                              onClick={handleCancelSize}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell>{size.name}</TableCell>
+                        <TableCell className='text-center'>
+                          <div className='flex justify-center items-center gap-2'>
+                            <Link
+                              href={`/admin/sizes/edit/${size._id}`}
+                              className='text-blue-600 hover:underline'
+                              onClick={e => {
+                                e.preventDefault();
+                                handleEditSize(size);
+                              }}
+                            >
+                              Edit
+                            </Link>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='text-red-600 ml-2'
+                              onClick={() => handleDeleteSize(size._id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
