@@ -10,7 +10,7 @@ export default function Dashboard() {
   return (
     <div className='flex h-dvh bg-gray-50'>
       {/* Main Content */}
-      <main className='flex-1 py-5'>
+      <main className='w-full flex-1 py-5'>
         <section>
           <PageTitle>Dashboard Overview</PageTitle>
           <div className='space-y-8 px-4 mb-8'>

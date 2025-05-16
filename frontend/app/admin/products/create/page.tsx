@@ -5,15 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoaderCircle, PackagePlus, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { ChevronDown, LoaderCircle, PackagePlus, X } from 'lucide-react';
+import { axiosInstance } from '@/app/lib/axios';
+import { useFilterStore } from '@/app/store/useFilterStore';
 import Size from '@/app/components/Admin/Products/Size';
 import Color from '@/app/components/Admin/Products/Color';
 import ImageGallery from '@/app/components/Admin/Products/ImageGallery';
-import { axiosInstance } from '@/app/lib/axios';
+import toast from 'react-hot-toast';
 
 export default function CreateProduct() {
   const router = useRouter();
+  const { categories } = useFilterStore();
+
   const submitButton = useRef<HTMLButtonElement | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const defaultImage =
@@ -44,10 +47,7 @@ export default function CreateProduct() {
       .string()
       .min(10, 'Description must be at least 10 characters long')
       .max(1000, 'Description cannot exceed 1000 characters'),
-    category: z
-      .string()
-      .min(2, 'Category must be at least 2 characters')
-      .max(50, 'Category cannot exceed 50 characters'),
+    category: z.string().min(2, 'Please select a category'),
     priceRange: z.object({
       maxVariantPrice: z
         .number()
@@ -75,7 +75,9 @@ export default function CreateProduct() {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({
@@ -272,14 +274,25 @@ export default function CreateProduct() {
                   <label className='text-[15px] font-medium text-gray-900 block mb-2'>
                     Category
                   </label>
-                  <input
-                    id='category'
-                    type='text'
-                    {...register('category')}
-                    value={formData.category}
-                    onChange={handleChange}
-                    className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none'
-                  />
+                  <div className='relative'>
+                    <select
+                      id='category'
+                      {...register('category')}
+                      value={formData.category}
+                      onChange={handleChange}
+                      className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none appearance-none pr-10'
+                    >
+                      <option value=''>Select a category</option>
+                      {categories.map(category => (
+                        <option key={category._id} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <span className='pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2'>
+                      <ChevronDown size={19} />
+                    </span>
+                  </div>
                   {errors.category && (
                     <p className='text-red-500 text-sm'>
                       {errors.category?.message}

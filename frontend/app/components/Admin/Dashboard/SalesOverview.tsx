@@ -36,11 +36,11 @@ const summaryCards = [
 
 export default function SalesOverview() {
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2 my-6'>
+    <div className='grid md:grid-cols-2 xl:grid-cols-5 gap-2 my-6'>
       {summaryCards.map(card => (
         <Card
           key={card.title}
-          className={`flex flex-col items-center justify-center h-48 rounded-lg shadow-md p-0 border-0 ${card.color}`}
+          className={`flex flex-col items-center justify-center h-[10rem] rounded-lg shadow-md p-0 border-0 ${card.color}`}
         >
           <div className='flex flex-col items-center justify-center h-full w-full text-white'>
             <div className='mb-2'>{card.icon}</div>

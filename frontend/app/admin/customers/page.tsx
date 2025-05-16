@@ -14,7 +14,7 @@ import { Checkbox } from '@/app/components/ui/checkbox';
 
 export default function CustomersPage() {
   return (
-    <div className='p-6 space-y-6'>
+    <div className='px-4 pt-6 space-y-6'>
       <h1 className='text-2xl font-bold'>Customers</h1>
       <Card>
         <CardContent className='flex flex-wrap gap-2 p-4 items-center justify-between'>

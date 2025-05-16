@@ -25,19 +25,15 @@ import {
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { useProductStore } from '@/app/store/useProductStore';
 import { toast } from 'react-hot-toast';
+import { useFilterStore } from '@/app/store/useFilterStore';
 
 export default function ProductsPage() {
   const router = useRouter();
   const { products, deleteProduct } = useProductStore();
+  const { categories } = useFilterStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priceSort, setPriceSort] = useState('');
-
-  // Get unique categories from products
-  const categories = useMemo(() => {
-    const uniqueCategories = new Set(products.map(product => product.category));
-    return Array.from(uniqueCategories);
-  }, [products]);
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
@@ -87,44 +83,50 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className='p-6 space-y-6'>
+    <div className='px-4 pt-6 space-y-6'>
       <h1 className='text-2xl font-bold'>Products</h1>
       <Card className='py-0'>
-        <CardContent className='p-4 flex flex-nowrap gap-2 items-center'>
+        <CardContent className='p-2 md:p-4 flex flex-col md:flex-row gap-2 md:gap-4 items-stretch md:items-center'>
           <Input
             placeholder='Search product...'
-            className='w-full !ring-0'
+            className='w-full md:w-1/2 !ring-0'
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className='w-44'>
-              <SelectValue placeholder='Category' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Categories</SelectItem>
-              {categories.map(category => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={priceSort} onValueChange={setPriceSort}>
-            <SelectTrigger className='w-44'>
-              <SelectValue placeholder='Price' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='asc'>Low to High</SelectItem>
-              <SelectItem value='desc'>High to Low</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant='outline' onClick={handleReset}>
+          <div className='flex flex-row gap-2 w-full'>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className='w-1/2 md:w-44'>
+                <SelectValue placeholder='Category' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Categories</SelectItem>
+                {categories.map(category => (
+                  <SelectItem key={category._id} value={category.name}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={priceSort} onValueChange={setPriceSort}>
+              <SelectTrigger className='w-1/2 md:w-44'>
+                <SelectValue placeholder='Price' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='asc'>Low to High</SelectItem>
+                <SelectItem value='desc'>High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant='outline'
+            className='w-full md:w-auto'
+            onClick={handleReset}
+          >
             Reset
           </Button>
           <Link
             href='/admin/products/create'
-            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+            className='w-full md:w-auto mt-2 md:mt-0 inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
           >
             Add Product
           </Link>
