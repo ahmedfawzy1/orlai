@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -29,8 +28,7 @@ import { CheckIcon, XIcon } from 'lucide-react';
 import ColorPicker from 'react-pick-color';
 
 export default function CategoriesPage() {
-  const router = useRouter();
-  const { categories, colors, sizes } = useFilterStore();
+  const { categories, colors, sizes, getFilters } = useFilterStore();
 
   const [newCategory, setNewCategory] = useState({
     name: '',
@@ -47,6 +45,7 @@ export default function CategoriesPage() {
   const [showColorInput, setShowColorInput] = useState(false);
   const [showSizeInput, setShowSizeInput] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [tempHexCode, setTempHexCode] = useState<string>('');
 
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null
@@ -62,14 +61,15 @@ export default function CategoriesPage() {
     hexCode: '',
   });
   const [showColorPickerEdit, setShowColorPickerEdit] = useState(false);
+  const [tempEditHexCode, setTempEditHexCode] = useState<string>('');
   const [editingSizeId, setEditingSizeId] = useState<string | null>(null);
   const [editingSize, setEditingSize] = useState<Partial<Size>>({ name: '' });
 
   const handleDeleteCategory = async (categoryId: string) => {
     try {
       await deleteCategory(categoryId);
+      await getFilters();
       toast.success('Category deleted successfully');
-      router.refresh();
     } catch (error) {
       console.error('Error deleting category:', error);
       toast.error('Failed to delete category');
@@ -79,8 +79,8 @@ export default function CategoriesPage() {
   const handleDeleteColor = async (colorId: string) => {
     try {
       await deleteColor(colorId);
+      await getFilters();
       toast.success('Color deleted successfully');
-      router.refresh();
     } catch (error) {
       console.error('Error deleting color:', error);
       toast.error('Failed to delete color');
@@ -90,8 +90,8 @@ export default function CategoriesPage() {
   const handleDeleteSize = async (sizeId: string) => {
     try {
       await deleteSize(sizeId);
+      await getFilters();
       toast.success('Size deleted successfully');
-      router.refresh();
     } catch (error) {
       console.error('Error deleting size:', error);
       toast.error('Failed to delete size');
@@ -105,10 +105,10 @@ export default function CategoriesPage() {
         return;
       }
       await createCategory(newCategory);
+      await getFilters();
       setNewCategory({ name: '', description: '', slug: '' });
       setShowCategoryInput(false);
       toast.success('Category added successfully');
-      router.refresh();
     } catch (error) {
       console.error('Error adding category:', error);
       toast.error('Failed to add category');
@@ -128,10 +128,10 @@ export default function CategoriesPage() {
         __v: 0,
       };
       await createColor(colorData);
+      await getFilters();
       setNewColor({ name: '', hexCode: '' });
       setShowColorInput(false);
       toast.success('Color added successfully');
-      router.refresh();
     } catch (error) {
       console.error('Error adding color:', error);
       toast.error('Failed to add color');
@@ -150,10 +150,10 @@ export default function CategoriesPage() {
         __v: 0,
       };
       await createSize(sizeData);
+      await getFilters();
       setNewSize({ name: '' });
       setShowSizeInput(false);
       toast.success('Size added successfully');
-      router.refresh();
     } catch (error) {
       console.error('Error adding size:', error);
       toast.error('Failed to add size');
@@ -174,7 +174,7 @@ export default function CategoriesPage() {
       await updateCategory(id, editingCategory);
       setEditingCategoryId(null);
       toast.success('Category updated successfully');
-      router.refresh();
+      await getFilters();
     } catch {
       toast.error('Failed to update category');
     }
@@ -193,7 +193,7 @@ export default function CategoriesPage() {
       await updateColor(id, editingColor);
       setEditingColorId(null);
       toast.success('Color updated successfully');
-      router.refresh();
+      await getFilters();
     } catch {
       toast.error('Failed to update color');
     }
@@ -213,7 +213,7 @@ export default function CategoriesPage() {
       await updateSize(id, editingSize);
       setEditingSizeId(null);
       toast.success('Size updated successfully');
-      router.refresh();
+      await getFilters();
     } catch {
       toast.error('Failed to update size');
     }
@@ -440,7 +440,10 @@ export default function CategoriesPage() {
                         {newColor.hexCode ? (
                           <button
                             type='button'
-                            onClick={() => setShowColorPicker(true)}
+                            onClick={() => {
+                              setTempHexCode(newColor.hexCode || '#ffffff');
+                              setShowColorPicker(true);
+                            }}
                             className='text-blue-600 hover:underline'
                           >
                             {newColor.hexCode}
@@ -448,7 +451,10 @@ export default function CategoriesPage() {
                         ) : (
                           <Button
                             type='button'
-                            onClick={() => setShowColorPicker(true)}
+                            onClick={() => {
+                              setTempHexCode(newColor.hexCode || '#ffffff');
+                              setShowColorPicker(true);
+                            }}
                             className='bg-primary rounded-lg text-center text-[14px] px-3 py-1 cursor-pointer hover:bg-primary/90 transition-all duration-200'
                           >
                             Select Color
@@ -467,20 +473,21 @@ export default function CategoriesPage() {
                                 </button>
                                 <button
                                   type='button'
-                                  onClick={() => setShowColorPicker(false)}
+                                  onClick={() => {
+                                    setNewColor({
+                                      ...newColor,
+                                      hexCode: tempHexCode,
+                                    });
+                                    setShowColorPicker(false);
+                                  }}
                                   className='p-1 cursor-pointer'
                                 >
                                   <CheckIcon size={16} />
                                 </button>
                               </div>
                               <ColorPicker
-                                color={newColor.hexCode || '#ffffff'}
-                                onChange={color =>
-                                  setNewColor({
-                                    ...newColor,
-                                    hexCode: color.hex,
-                                  })
-                                }
+                                color={tempHexCode}
+                                onChange={color => setTempHexCode(color.hex)}
                               />
                             </div>
                           </div>
@@ -513,11 +520,16 @@ export default function CategoriesPage() {
                           />
                         </TableCell>
                         <TableCell className='text-center'>
-                          <div className='relative flex items-center gap-2 justify-center'>
+                          <div className='relative flex flex-row-reverse items-center gap-2 justify-center'>
                             {editingColor.hexCode ? (
                               <button
                                 type='button'
-                                onClick={() => setShowColorPickerEdit(true)}
+                                onClick={() => {
+                                  setTempEditHexCode(
+                                    editingColor.hexCode || '#ffffff'
+                                  );
+                                  setShowColorPickerEdit(true);
+                                }}
                                 className='text-blue-600 hover:underline'
                               >
                                 {editingColor.hexCode}
@@ -525,14 +537,19 @@ export default function CategoriesPage() {
                             ) : (
                               <Button
                                 type='button'
-                                onClick={() => setShowColorPickerEdit(true)}
+                                onClick={() => {
+                                  setTempEditHexCode(
+                                    editingColor.hexCode || '#ffffff'
+                                  );
+                                  setShowColorPickerEdit(true);
+                                }}
                                 className='bg-[#efefef] rounded-lg text-center text-[14px] px-3 py-1 cursor-pointer hover:bg-[#e2e2e2] transition-all duration-200'
                               >
                                 Select Color
                               </Button>
                             )}
                             {showColorPickerEdit && (
-                              <div className='absolute z-10 mt-2'>
+                              <div className='absolute z-50 mt-2'>
                                 <div className='bg-white pt-1 rounded-lg shadow-lg'>
                                   <div className='flex justify-end items-center'>
                                     <button
@@ -546,21 +563,22 @@ export default function CategoriesPage() {
                                     </button>
                                     <button
                                       type='button'
-                                      onClick={() =>
-                                        setShowColorPickerEdit(false)
-                                      }
+                                      onClick={() => {
+                                        setEditingColor({
+                                          ...editingColor,
+                                          hexCode: tempEditHexCode,
+                                        });
+                                        setShowColorPickerEdit(false);
+                                      }}
                                       className='p-1 cursor-pointer'
                                     >
                                       <CheckIcon size={16} />
                                     </button>
                                   </div>
                                   <ColorPicker
-                                    color={editingColor.hexCode || '#ffffff'}
+                                    color={tempEditHexCode}
                                     onChange={color =>
-                                      setEditingColor({
-                                        ...editingColor,
-                                        hexCode: color.hex,
-                                      })
+                                      setTempEditHexCode(color.hex)
                                     }
                                   />
                                 </div>
