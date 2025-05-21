@@ -7,8 +7,8 @@ import {
 import Logo from './Logo';
 import DesktopNav from './DesktopNav';
 import MobileNav from './MobileNav';
-import AuthButtons from './AuthButtons';
 import HeaderIcons from './HeaderIcons';
+import DesktopUserMenu from './DesktopUserMenu';
 
 interface NavbarProps {
   logo?: {
@@ -32,7 +32,7 @@ const Navbar = ({
 }: NavbarProps) => {
   return (
     <header className='py-4'>
-      <div className='container mx-auto'>
+      <div className='max-w-[1280px] mx-auto'>
         {/* Desktop Menu */}
         <div className='hidden lg:flex justify-between items-center'>
           <Logo {...logo} />
@@ -41,7 +41,7 @@ const Navbar = ({
           </div>
           <div className='flex gap-4'>
             <HeaderIcons />
-            <AuthButtons {...auth} />
+            <DesktopUserMenu />
           </div>
         </div>
 
