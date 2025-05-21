@@ -10,6 +10,7 @@ import connectDB from "./config/db.js";
 import corsOptions from "./config/corsOptions.js";
 import rootRoutes from "./routes/root.js";
 import authRoutes from "./routes/auth.route.js";
+import customerRoutes from "./routes/customer.route.js";
 import productRoutes from "./routes/product.route.js";
 import categoryRoutes from "./routes/category.route.js";
 import sizeRoutes from "./routes/size.route.js";
@@ -32,6 +33,7 @@ app.use(express.json());
 // Routes
 app.use("/api/", rootRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/customers", customerRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/filters", filtersRoutes);
 app.use("/api/categories", categoryRoutes);

@@ -4,7 +4,8 @@ import { getBestSellingProducts } from '@/app/lib/products';
 import { Product } from '@/app/types/product';
 
 export default async function BestSelling() {
-  const bestSellingProducts = await getBestSellingProducts();
+  // const bestSellingProducts = await getBestSellingProducts();
+  const bestSellingProducts = [];
 
   return (
     <section className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'>
