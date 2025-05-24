@@ -15,14 +15,14 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
   const product = await getProduct(slug);
-  const { _id } = await getServerSession();
+  const user = await getServerSession();
   const { products } = await getProducts();
 
   return (
     <section className='px-5 py-8 max-w-[1280px] mx-auto'>
       <div className='flex flex-col md:flex-row gap-10 mt-10'>
         <ImageGallery ImageUrls={product.images} />
-        <ProductDetails product={product} userId={_id} />
+        <ProductDetails product={product} userId={user?._id} />
       </div>
       <TabMenu product={product} />
       <RelatedProducts products={products} />

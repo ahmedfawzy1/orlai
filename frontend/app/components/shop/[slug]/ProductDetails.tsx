@@ -1,8 +1,9 @@
 'use client';
 
-import { Product } from '@/app/types/product';
-import { Heart } from 'lucide-react';
 import { useState } from 'react';
+import { addToWishlist, removeFromWishlist } from '@/app/lib/wishlist';
+import { Product } from '@/app/types/product';
+import { Heart, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ReactStars from 'react-rating-star-with-type';
 
@@ -21,6 +22,7 @@ export default function ProductDetails({
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleAddToCart = async () => {
     if (!selectedColor || !selectedSize) {
@@ -32,19 +34,31 @@ export default function ProductDetails({
     toast.success('Product added to cart');
   };
 
-  const handleAddToWishlist = async () => {
+  const handleAddToWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!userId) {
-      toast.error('Please login to add to wishlist');
+      toast.error('Please login to add items to your wishlist');
       return;
     }
-    if (isWishlisted) {
-      setIsWishlisted(false);
-      toast.error('Product removed from wishlist');
-      // await removeFromWishlist(userId, product._id);
-    } else {
-      setIsWishlisted(true);
-      toast.success('Product added to wishlist');
-      // await addToWishlist(userId, product._id);
+
+    setIsLoading(true);
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(userId, product._id);
+        setIsWishlisted(false);
+        toast.success('Product removed from wishlist');
+      } else {
+        await addToWishlist(userId, product._id);
+        setIsWishlisted(true);
+        toast.success('Product added to wishlist');
+      }
+    } catch (error: any) {
+      console.error('Error toggling wishlist:', error.response.data);
+      toast.error('Failed to update wishlist');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -154,13 +168,17 @@ export default function ProductDetails({
           Add to Cart
         </button>
         <button
-          onClick={() => handleAddToWishlist()}
+          onClick={e => handleAddToWishlist(e)}
           className={`border-1 border-black rounded-md w-12 h-12 flex items-center justify-center transition-colors duration-150 cursor-pointer ${
             isWishlisted ? 'bg-gray-900 text-white' : 'bg-transparent'
           }`}
           aria-label='Add to Wishlist'
         >
-          <Heart size={24} strokeWidth={1.5} />
+          {isLoading ? (
+            <Loader2 size={20} className='animate-spin' />
+          ) : (
+            <Heart size={20} />
+          )}
         </button>
       </div>
     </div>
