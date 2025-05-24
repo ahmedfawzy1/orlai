@@ -8,7 +8,10 @@ export interface Product {
   images: string[];
   variants: {
     _id: string;
-    color: string;
+    color: {
+      hexCode: string;
+      name: string;
+    };
     size: string;
     stock: number;
   }[];

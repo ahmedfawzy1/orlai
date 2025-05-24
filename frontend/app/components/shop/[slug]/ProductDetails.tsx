@@ -1,0 +1,168 @@
+'use client';
+
+import { Product } from '@/app/types/product';
+import { Heart } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import ReactStars from 'react-rating-star-with-type';
+
+export default function ProductDetails({
+  product,
+  userId,
+}: {
+  product: Product;
+  userId: string;
+}) {
+  const [selectedColor, setSelectedColor] = useState<any>(
+    product.variants.length > 0 ? product.variants[0]?.color.hexCode : null
+  );
+  const [selectedSize, setSelectedSize] = useState<string | null>(
+    product.variants.length > 0 ? product.variants[0]?.size : null
+  );
+  const [quantity, setQuantity] = useState<number>(1);
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+
+  const handleAddToCart = async () => {
+    if (!selectedColor || !selectedSize) {
+      toast.error('Please select a color and size');
+      return;
+    }
+    setSelectedColor(null);
+    setSelectedSize(null);
+    toast.success('Product added to cart');
+  };
+
+  const handleAddToWishlist = async () => {
+    if (!userId) {
+      toast.error('Please login to add to wishlist');
+      return;
+    }
+    if (isWishlisted) {
+      setIsWishlisted(false);
+      toast.error('Product removed from wishlist');
+      // await removeFromWishlist(userId, product._id);
+    } else {
+      setIsWishlisted(true);
+      toast.success('Product added to wishlist');
+      // await addToWishlist(userId, product._id);
+    }
+  };
+
+  return (
+    <div className='flex-1 max-w-xl'>
+      <div className='flex justify-between items-center'>
+        <h1 className='text-2xl md:text-3xl font-bold'>{product.name}</h1>
+        {product.availableForSale && product.inventory > 0 ? (
+          <span className='bg-green-100 text-green-800 font-medium text-xs md:mb-2 inline-block rounded px-3 py-1.5'>
+            In Stock
+          </span>
+        ) : (
+          <span className='bg-red-100 text-red-500 font-medium text-xs md:mb-2 inline-block rounded px-3 py-1.5'>
+            Out of Stock
+          </span>
+        )}
+      </div>
+      <div className='text-lg md:text-xl md:my-2'>{product.category}</div>
+      <div className='flex items-center gap-2 mb-2'>
+        <span className='text-orange-400 text-xl'>
+          <ReactStars
+            value={product.averageRating}
+            isEdit={false}
+            activeColors={['red', 'orange', '#FFCE00', '#9177FF', '#FFC633']}
+          />
+        </span>
+        <span className='text-gray-500'>
+          {product.averageRating.toFixed(1)} ({product.reviews.length} Reviews)
+        </span>
+      </div>
+      <div className='flex items-center gap-2 mb-2'>
+        <span className='text-[22px] text-black-500'>
+          $
+          {Number.isInteger(product.priceRange.minVariantPrice)
+            ? product.priceRange.minVariantPrice.toFixed(2)
+            : product.priceRange.minVariantPrice}
+        </span>
+        <span className='text-[22px] text-gray-500 line-through'>
+          $
+          {Number.isInteger(product.priceRange.maxVariantPrice)
+            ? product.priceRange.maxVariantPrice.toFixed(2)
+            : product.priceRange.maxVariantPrice}
+        </span>
+      </div>
+
+      <p className='my-2 md:my-4 text-gray-900 font-semibold'>
+        {product.description}
+      </p>
+      <div className='mb-4'>
+        <div className='text-xl font-bold mb-2'>Color</div>
+        <div className='flex gap-3'>
+          {product.variants.map((variant: any) => (
+            <button
+              key={variant.color.hexCode}
+              title={variant.color.name}
+              className={`inline-block w-8 h-8 rounded-sm cursor-pointer border-2 ${
+                selectedColor === variant.color.hexCode
+                  ? 'border-black'
+                  : 'border-transparent'
+              }`}
+              style={{ background: variant.color.hexCode }}
+              onClick={() => setSelectedColor(variant.color.hexCode)}
+            />
+          ))}
+        </div>
+      </div>
+      <div className='mb-4'>
+        <div className='text-xl font-bold mb-2'>Size</div>
+        <div className='flex gap-3'>
+          {product.variants.map((variant: any) => (
+            <button
+              key={variant.size}
+              className={`px-4 py-2 border rounded-sm font-medium cursor-pointer transition-colors duration-150 border-gray-900 ${
+                selectedSize === variant.size
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-white text-gray-900 hover:bg-gray-100'
+              }`}
+              onClick={() => setSelectedSize(variant.size)}
+            >
+              {variant.size}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className='flex items-center gap-4 mt-6'>
+        <div className='flex items-center border border-black rounded-lg'>
+          <button
+            className='px-4 py-3 text-xl border-none bg-transparent cursor-pointer'
+            onClick={() => setQuantity(quantity - 1)}
+          >
+            -
+          </button>
+          <span className='px-4 text-lg'>{quantity}</span>
+          <button
+            className='px-4 py-3 text-xl border-none bg-transparent cursor-pointer'
+            onClick={() => setQuantity(quantity + 1)}
+          >
+            +
+          </button>
+        </div>
+        <button
+          className='flex-1 bg-gray-900 text-white font-semibold text-lg py-4 rounded-xl border-none cursor-pointer transition-colors duration-300 hover:bg-gray-800'
+          disabled={!product.availableForSale || product.inventory === 0}
+          onClick={() => handleAddToCart()}
+          aria-label='Add to Cart'
+        >
+          Add to Cart
+        </button>
+        <button
+          onClick={() => handleAddToWishlist()}
+          className={`border-1 border-black rounded-md w-12 h-12 flex items-center justify-center transition-colors duration-150 cursor-pointer ${
+            isWishlisted ? 'bg-gray-900 text-white' : 'bg-transparent'
+          }`}
+          aria-label='Add to Wishlist'
+        >
+          <Heart size={24} strokeWidth={1.5} />
+        </button>
+      </div>
+    </div>
+  );
+}
