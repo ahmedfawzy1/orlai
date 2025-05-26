@@ -12,12 +12,15 @@ import {
   addToWishlist,
   removeFromWishlist,
 } from '@/app/lib/wishlist';
+import { useCartStore } from '@/app/store/useCartStore';
 
 export default function ItemCard({ product }: { product: Product }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { authUser } = useAuthStore();
   const userId = authUser?._id;
+
+  const { addToCart } = useCartStore();
 
   useEffect(() => {
     if (!userId) return;
@@ -28,7 +31,10 @@ export default function ItemCard({ product }: { product: Product }) {
       } catch (error: any) {
         setIsWishlisted(false);
         toast.error('Failed to load wishlist status');
-        console.error('Error fetching wishlist:', error.response.data);
+        console.error(
+          'Error fetching wishlist:',
+          error?.response?.data || error
+        );
       }
     };
     fetchWishlist();
@@ -55,11 +61,41 @@ export default function ItemCard({ product }: { product: Product }) {
         toast.success('Added to your wishlist');
       }
     } catch (error: any) {
-      console.error('Error toggling wishlist:', error.response.data);
+      console.error('Error toggling wishlist:', error?.response?.data || error);
       toast.error('Failed to update wishlist');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!product.availableForSale || product.inventory === 0) {
+      toast.error('Product is out of stock');
+      return;
+    }
+
+    const variant = product.variants[0];
+
+    const item = {
+      _id: crypto.randomUUID(), // Local unique ID
+      product,
+      variantId: variant._id,
+      color: {
+        _id: crypto.randomUUID(),
+        name: variant.color.name,
+        hexCode: variant.color.hexCode,
+      },
+      size: {
+        _id: crypto.randomUUID(),
+        name: variant.size,
+      },
+      quantity: 1,
+    };
+
+    addToCart(item);
   };
 
   return (
@@ -104,13 +140,11 @@ export default function ItemCard({ product }: { product: Product }) {
             </Link>
           </div>
         </div>
+
         <button
-          className='px-4 py-2 text-black text-lg font-medium text-center w-[calc(100%-2rem)] absolute bottom-5 left-1/2 z-50 -translate-x-1/2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 bg-white rounded-lg hover:scale-105 hover:bg-gray-100 transition-all duration-300 transform-gpu cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
-          onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
+          onClick={handleAddToCart}
           disabled={!product.availableForSale || product.inventory === 0}
+          className='px-4 py-2 text-black text-lg font-medium text-center w-[calc(100%-2rem)] absolute bottom-5 left-1/2 z-50 -translate-x-1/2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 bg-white rounded-lg hover:scale-105 hover:bg-gray-100 transition-all duration-300 transform-gpu cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
           aria-label={
             product.availableForSale && product.inventory > 0
               ? 'Add to cart'

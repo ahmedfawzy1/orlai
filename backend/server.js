@@ -18,6 +18,7 @@ import colorRoutes from "./routes/color.route.js";
 import reviewRoutes from "./routes/review.route.js";
 import filtersRoutes from "./routes/filters.route.js";
 import wishlistRoutes from "./routes/wishlist.route.js";
+import cartRoutes from "./routes/cart.route.js";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use("/api/sizes", sizeRoutes);
 app.use("/api/colors", colorRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/cart", cartRoutes);
 
 // 404 handler
 app.use((req, res) => {

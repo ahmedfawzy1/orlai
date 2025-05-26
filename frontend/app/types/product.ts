@@ -9,8 +9,8 @@ export interface Product {
   variants: {
     _id: string;
     color: {
-      hexCode: string;
       name: string;
+      hexCode: string;
     };
     size: string;
     stock: number;
@@ -18,12 +18,15 @@ export interface Product {
   priceRange: {
     maxVariantPrice: number;
     minVariantPrice: number;
+    _id?: string;
   };
   averageRating: number;
   slug: string;
   reviews: string[];
   createdAt: string;
   updatedAt: string;
+  __v?: number;
+  id?: string;
 }
 
 export interface SearchQuery {
