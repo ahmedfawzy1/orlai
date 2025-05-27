@@ -1,4 +1,7 @@
 import Product from "../models/product.model.js";
+import Category from "../models/category.model.js";
+import Color from "../models/color.model.js";
+import Size from "../models/size.model.js";
 
 export const createProduct = async (req, res) => {
   try {
@@ -31,36 +34,67 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const { category, min_price, max_price, sort, order, search } = req.query;
+    const { category, min_price, max_price, color, size, sort, order, search } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-
     const skip = (page - 1) * limit;
-
     let query = {};
 
-    // Filter by category
-    if (category) query.category = category;
-
-    // Filter by price range
-    if (min_price && max_price) {
-      query.priceRange = {
-        $elemMatch: {
-          minVariantPrice: { $gte: parseFloat(min_price) },
-          maxVariantPrice: { $lte: parseFloat(max_price) },
-        },
-      };
+    // Filter by Category (name to ID lookup)
+    if (category) {
+      const categoryNames = category.split(",");
+      const categoryDocs = await Category.find({ name: { $in: categoryNames } });
+      if (categoryDocs.length === 0) {
+        return res.status(200).json({ products: [], total_count: 0, total_pages: 0, current_page: page, per_page: limit });
+      }
+      query.category = { $in: categoryDocs.map((doc) => doc._id) };
     }
 
-    // search by product name
-    if (search) query.name = { $regex: search, $options: "i" };
+    // Filter by Color (name to ID lookup)
+    if (color) {
+      const colorNames = color.split(",");
+      const colorDocs = await Color.find({ name: { $in: colorNames } });
+      if (colorDocs.length === 0) {
+        return res.status(200).json({ products: [], total_count: 0, total_pages: 0, current_page: page, per_page: limit });
+      }
+      query["variants.color"] = { $in: colorDocs.map((doc) => doc._id) };
+    }
 
-    // sort by price
+    // Filter by Size (name to ID lookup)
+    if (size) {
+      const sizeNames = size.split(",");
+      const sizeDocs = await Size.find({ name: { $in: sizeNames } });
+      if (sizeDocs.length === 0) {
+        return res.status(200).json({ products: [], total_count: 0, total_pages: 0, current_page: page, per_page: limit });
+      }
+      query["variants.size"] = { $in: sizeDocs.map((doc) => doc._id) };
+    }
+
+    // Filter by Price Range
+    if (min_price && max_price) {
+      query["priceRange.minVariantPrice"] = { $gte: parseFloat(min_price) };
+      query["priceRange.maxVariantPrice"] = { $lte: parseFloat(max_price) };
+    }
+
+    // Search by Product Name
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    // Sorting
+    const allowedSortFields = {
+      price: "priceRange.minVariantPrice",
+      createdAt: "createdAt",
+      name: "name",
+    };
     let sortQuery = {};
-    if (sort) {
+    if (sort && allowedSortFields[sort]) {
+      sortQuery[allowedSortFields[sort]] = order === "asc" ? 1 : -1;
+    } else if (sort) {
       sortQuery[sort] = order === "asc" ? 1 : -1;
     }
 
+    // Fetch Products
     const products = await Product.find(query)
       .populate("category", "name -_id")
       .populate("variants.color", "name hexCode -_id")
@@ -70,10 +104,6 @@ export const getProducts = async (req, res) => {
       .limit(limit);
 
     const totalCount = await Product.countDocuments(query);
-
-    if (!products || products.length === 0) {
-      return res.status(404).json({ message: "No products found" });
-    }
 
     res.status(200).json({
       products,
@@ -163,7 +193,7 @@ export const deleteProduct = async (req, res) => {
 
 export const searchProduct = async (req, res) => {
   try {
-    const { name, category, min_price, max_price } = req.query;
+    const { name, category, color, size, min_price, max_price } = req.query;
 
     let query = {};
 
@@ -178,7 +208,13 @@ export const searchProduct = async (req, res) => {
       };
     }
 
-    const products = await Product.find(query);
+    if (color) query["variants.color"] = color;
+    if (size) query["variants.size"] = size;
+
+    const products = await Product.find(query)
+      .populate("category", "name -_id")
+      .populate("variants.color", "name hexCode -_id")
+      .populate("variants.size", "name -_id");
 
     res.status(200).json({
       products,

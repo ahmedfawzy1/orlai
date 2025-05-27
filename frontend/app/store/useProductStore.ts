@@ -6,7 +6,6 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  searchProducts,
 } from '../lib/products';
 
 interface FilterState {
@@ -15,12 +14,15 @@ interface FilterState {
   sizes: string[];
   priceRange: [number, number];
   searchQuery: string;
+  sort: string;
+  order: 'asc' | 'desc';
 }
 
 interface ProductStore {
   products: Product[];
   selectedProduct: Product | null;
   totalPages: number;
+  currentPage: number;
   filters: FilterState;
   isLoading: boolean;
   error: string | null;
@@ -31,6 +33,7 @@ interface ProductStore {
   setFilters: (filters: Partial<FilterState>) => void;
   resetFilters: () => void;
   setError: (error: string | null) => void;
+  setCurrentPage: (page: number) => void;
 
   // CRUD operations
   getProducts: (page: number, limit: number) => Promise<void>;
@@ -38,7 +41,6 @@ interface ProductStore {
   createProduct: (productData: Product) => Promise<void>;
   updateProduct: (id: string, updateData: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  searchProducts: (query: Partial<FilterState>) => Promise<void>;
 
   // Initialization
   init: () => void;
@@ -50,12 +52,15 @@ const initialFilters: FilterState = {
   sizes: [],
   priceRange: [0, 250],
   searchQuery: '',
+  sort: 'createdAt',
+  order: 'desc',
 };
 
 export const useProductStore = create<ProductStore>()(set => ({
   products: [],
   selectedProduct: null,
   totalPages: 0,
+  currentPage: 1,
   filters: initialFilters,
   isLoading: false,
   error: null,
@@ -69,41 +74,52 @@ export const useProductStore = create<ProductStore>()(set => ({
   setFilters: (newFilters: Partial<FilterState>) =>
     set(state => ({
       filters: { ...state.filters, ...newFilters },
+      currentPage: 1, // Reset to first page when filters change
     })),
 
-  resetFilters: () => set({ filters: initialFilters }),
+  resetFilters: () => set({ filters: initialFilters, currentPage: 1 }),
 
   setError: (error: string | null) => set({ error }),
+
+  setCurrentPage: (page: number) => set({ currentPage: page }),
 
   getProducts: async (page: number, limit: number) => {
     set({ isLoading: true, error: null });
     try {
       const { filters } = useProductStore.getState();
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
+      const queryParams = {
+        page,
+        limit,
         ...(filters.categories.length > 0 && {
-          categories: filters.categories.join(','),
+          category: filters.categories.join(','),
         }),
         ...(filters.colors.length > 0 && {
-          colors: filters.colors.join(','),
+          color: filters.colors.join(','),
         }),
         ...(filters.sizes.length > 0 && {
-          sizes: filters.sizes.join(','),
+          size: filters.sizes.join(','),
         }),
         ...(filters.priceRange[0] > 0 && {
-          minPrice: filters.priceRange[0].toString(),
+          min_price: filters.priceRange[0],
         }),
         ...(filters.priceRange[1] < 250 && {
-          maxPrice: filters.priceRange[1].toString(),
+          max_price: filters.priceRange[1],
         }),
         ...(filters.searchQuery && {
           search: filters.searchQuery,
         }),
-      });
+        ...(filters.sort && {
+          sort: filters.sort,
+          order: filters.order,
+        }),
+      };
 
-      const response = await getProducts(page, limit, queryParams.toString());
-      set({ products: response.products, totalPages: response.totalPages });
+      const response = await getProducts(page, limit, queryParams);
+      set({
+        products: response.products,
+        totalPages: response.total_pages,
+        currentPage: response.current_page,
+      });
     } catch (error) {
       set({ error: 'Failed to fetch products' });
       console.error('Error fetching products:', error);
@@ -173,19 +189,6 @@ export const useProductStore = create<ProductStore>()(set => ({
     } catch (error) {
       set({ error: 'Failed to delete product' });
       console.error('Error deleting product:', error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  searchProducts: async (query: Partial<FilterState>) => {
-    set({ isLoading: true, error: null });
-    try {
-      const results = await searchProducts(query);
-      set({ products: results });
-    } catch (error) {
-      set({ error: 'Failed to search products' });
-      console.error('Error searching products:', error);
     } finally {
       set({ isLoading: false });
     }

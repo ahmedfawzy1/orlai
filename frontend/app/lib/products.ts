@@ -1,25 +1,51 @@
 import axios from 'axios';
-import { Product, SearchQuery } from '../types/product';
+import { Product } from '../types/product';
 
 export async function getProducts(
   page: number = 1,
   limit: number = 8,
-  queryParams: string = ''
+  queryParams: {
+    category?: string;
+    min_price?: number;
+    max_price?: number;
+    color?: string;
+    size?: string;
+    sort?: string;
+    order?: 'asc' | 'desc';
+    search?: string;
+  } = {}
 ) {
   try {
     let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/products`;
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(queryParams.category && { category: queryParams.category }),
+      ...(queryParams.min_price && {
+        min_price: queryParams.min_price.toString(),
+      }),
+      ...(queryParams.max_price && {
+        max_price: queryParams.max_price.toString(),
+      }),
+      ...(queryParams.color && { color: queryParams.color }),
+      ...(queryParams.size && { size: queryParams.size }),
+      ...(queryParams.sort && { sort: queryParams.sort }),
+      ...(queryParams.order && { order: queryParams.order }),
+      ...(queryParams.search && { search: queryParams.search }),
+    });
 
-    if (queryParams) {
-      url = `${url}?${page}&${limit}&${queryParams}`;
-    } else {
-      url = `${url}?page=${page}&limit=${limit}`;
-    }
-
+    url = `${url}?${params.toString()}`;
     const res = await axios.get(url);
     return res.data;
   } catch (error) {
     console.error('Error fetching products:', error);
-    return { products: [], totalPages: 1 };
+    return {
+      products: [],
+      total_count: 0,
+      total_pages: 1,
+      current_page: page,
+      per_page: limit,
+    };
   }
 }
 
@@ -114,44 +140,5 @@ export async function deleteProduct(id: string) {
   } catch (error) {
     console.error('Error deleting product:', error);
     return null;
-  }
-}
-
-export async function searchProducts(query: SearchQuery) {
-  try {
-    const queryParams = new URLSearchParams({
-      ...(query.categories &&
-        query.categories.length > 0 && {
-          categories: query.categories.join(','),
-        }),
-      ...(query.colors &&
-        query.colors.length > 0 && {
-          colors: query.colors.join(','),
-        }),
-      ...(query.sizes &&
-        query.sizes.length > 0 && {
-          sizes: query.sizes.join(','),
-        }),
-      ...(query.priceRange &&
-        query.priceRange[0] > 0 && {
-          minPrice: query.priceRange[0].toString(),
-        }),
-      ...(query.priceRange &&
-        query.priceRange[1] < 250 && {
-          maxPrice: query.priceRange[1].toString(),
-        }),
-      ...(query.searchQuery && { search: query.searchQuery }),
-    });
-
-    const res = await axios.get(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL
-      }/api/products/search?${queryParams.toString()}`
-    );
-
-    return res.data;
-  } catch (error) {
-    console.error('Error searching products:', error);
-    return [];
   }
 }

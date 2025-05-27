@@ -13,78 +13,124 @@ import { Slider } from '../ui/slider';
 import { Button } from '../ui/button';
 import { SlidersVertical } from 'lucide-react';
 import { useProductStore } from '@/app/store/useProductStore';
-
-const productCategories = [
-  'Men',
-  'Women',
-  'Kids',
-  'Bags',
-  'Belts',
-  'Wallets',
-  'Watches',
-  'Accessories',
-  'Winter Wear',
-];
-
-const colors = [
-  { name: 'Red', count: 10 },
-  { name: 'Blue', count: 14 },
-  { name: 'Orange', count: 8 },
-  { name: 'Black', count: 12 },
-  { name: 'Green', count: 4 },
-  { name: 'Yellow', count: 2 },
-];
-
-const sizes = [
-  { name: 'S', count: 6 },
-  { name: 'M', count: 20 },
-  { name: 'L', count: 12 },
-  { name: 'XL', count: 16 },
-  { name: 'XXL', count: 10 },
-  { name: 'XXXL', count: 3 },
-];
+import { useFilterStore } from '@/app/store/useFilterStore';
+import { Skeleton } from '../ui/skeleton';
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([
+    0, 250,
+  ]);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { filters, setFilters } = useProductStore();
+  const { filters, setFilters, getProducts } = useProductStore();
+  const { categories, colors, sizes } = useFilterStore();
 
   useEffect(() => {
     const category = searchParams.get('category');
     const color = searchParams.get('color');
     const size = searchParams.get('size');
-    const minPrice = searchParams.get('minPrice');
-    const maxPrice = searchParams.get('maxPrice');
+    const minPrice = searchParams.get('min_price');
+    const maxPrice = searchParams.get('max_price');
+    const sort = searchParams.get('sort');
+    const order = searchParams.get('order');
+    const search = searchParams.get('search');
 
-    if (category) setFilters({ categories: [category] });
-    if (color) setFilters({ colors: [color] });
-    if (size) setFilters({ sizes: [size] });
+    const newFilters: any = {};
+
+    if (category) newFilters.categories = category.split(',');
+    if (color) newFilters.colors = color.split(',');
+    if (size) newFilters.sizes = size.split(',');
     if (minPrice && maxPrice) {
-      setFilters({
-        priceRange: [Number(minPrice), Number(maxPrice)],
-      });
+      newFilters.priceRange = [Number(minPrice), Number(maxPrice)];
+    }
+    if (sort) newFilters.sort = sort;
+    if (order) newFilters.order = order;
+    if (search) newFilters.searchQuery = search;
+
+    if (Object.keys(newFilters).length > 0) {
+      setFilters(newFilters);
     }
   }, [searchParams, setFilters]);
 
+  useEffect(() => {
+    updateFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
+
+  // Initialize tempPriceRange when filters change
+  useEffect(() => {
+    setTempPriceRange(filters.priceRange);
+  }, [filters.priceRange]);
+
+  const defaultFilters = {
+    categories: [],
+    colors: [],
+    sizes: [],
+    priceRange: [0, 250],
+    searchQuery: '',
+    sort: 'createdAt',
+    order: 'desc',
+  };
+
   const updateFilters = () => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
 
     if (filters.categories.length > 0) {
       params.set('category', filters.categories.join(','));
+    } else {
+      params.delete('category');
     }
+
     if (filters.colors.length > 0) {
       params.set('color', filters.colors.join(','));
+    } else {
+      params.delete('color');
     }
+
     if (filters.sizes.length > 0) {
       params.set('size', filters.sizes.join(','));
+    } else {
+      params.delete('size');
     }
+
     if (filters.priceRange[0] > 0 || filters.priceRange[1] < 250) {
-      params.set('minPrice', filters.priceRange[0].toString());
-      params.set('maxPrice', filters.priceRange[1].toString());
+      params.set('min_price', filters.priceRange[0].toString());
+      params.set('max_price', filters.priceRange[1].toString());
+    } else {
+      params.delete('min_price');
+      params.delete('max_price');
+    }
+
+    // Only set sort if not default
+    if (filters.sort && filters.sort !== defaultFilters.sort) {
+      params.set('sort', filters.sort);
+    } else {
+      params.delete('sort');
+    }
+
+    // Only set order if not default
+    if (filters.order && filters.order !== defaultFilters.order) {
+      params.set('order', filters.order);
+    } else {
+      params.delete('order');
+    }
+
+    // Only set page if not 1
+    if (searchParams.get('page') && searchParams.get('page') !== '1') {
+      // keep current page param if not 1
+    } else {
+      params.delete('page');
+    }
+
+    if (filters.searchQuery) {
+      params.set('search', filters.searchQuery);
+    } else {
+      params.delete('search');
     }
 
     router.push(`/shop?${params.toString()}`, { scroll: false });
+    getProducts(Number(params.get('page')) || 1, 12);
   };
 
   const handleCategoryChange = (category: string) => {
@@ -112,8 +158,61 @@ export default function Sidebar() {
   };
 
   const handlePriceChange = (value: number[]) => {
+    setTempPriceRange([value[0], value[1]]);
+  };
+
+  const handlePriceCommit = (value: number[]) => {
     setFilters({ priceRange: [value[0], value[1]] });
   };
+
+  const renderCategorySkeletons = () => (
+    <div className='space-y-2'>
+      {[1, 2, 3, 4, 5].map(i => (
+        <div key={i} className='flex items-center space-x-2'>
+          <Skeleton className='h-4 w-4' />
+          <Skeleton className='h-4 w-24' />
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderColorSkeletons = () => (
+    <div className='space-y-2'>
+      {[1, 2, 3, 4, 5, 6].map(i => (
+        <div key={i} className='flex items-center justify-between'>
+          <div className='flex items-center space-x-2'>
+            <Skeleton className='h-4 w-4' />
+            <Skeleton className='h-4 w-20' />
+          </div>
+          <Skeleton className='h-4 w-8' />
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderSizeSkeletons = () => (
+    <div className='space-y-2'>
+      {[1, 2, 3, 4, 5, 6].map(i => (
+        <div key={i} className='flex items-center justify-between'>
+          <div className='flex items-center space-x-2'>
+            <Skeleton className='h-4 w-4' />
+            <Skeleton className='h-4 w-8' />
+          </div>
+          <Skeleton className='h-4 w-8' />
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderPriceSkeletons = () => (
+    <div className='px-2'>
+      <Skeleton className='h-6 w-full mt-6' />
+      <div className='flex justify-between mt-2'>
+        <Skeleton className='h-4 w-16' />
+        <Skeleton className='h-4 w-16' />
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -154,23 +253,32 @@ export default function Sidebar() {
               Product Categories
             </AccordionTrigger>
             <AccordionContent>
-              <div className='space-y-2'>
-                {productCategories.map(category => (
-                  <div key={category} className='flex items-center space-x-2'>
-                    <Checkbox
-                      id={category}
-                      checked={filters.categories.includes(category)}
-                      onCheckedChange={() => handleCategoryChange(category)}
-                    />
-                    <label
-                      htmlFor={category}
-                      className='text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+              {categories.length === 0 ? (
+                renderCategorySkeletons()
+              ) : (
+                <div className='space-y-2'>
+                  {categories.map(category => (
+                    <div
+                      key={category.name}
+                      className='flex items-center space-x-2'
                     >
-                      {category}
-                    </label>
-                  </div>
-                ))}
-              </div>
+                      <Checkbox
+                        id={category.name}
+                        checked={filters.categories.includes(category.name)}
+                        onCheckedChange={() =>
+                          handleCategoryChange(category.name)
+                        }
+                      />
+                      <label
+                        htmlFor={category.name}
+                        className='text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                      >
+                        {category.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
 
@@ -179,19 +287,24 @@ export default function Sidebar() {
               Filter by Price
             </AccordionTrigger>
             <AccordionContent>
-              <div className='px-2'>
-                <Slider
-                  defaultValue={filters.priceRange}
-                  max={250}
-                  step={1}
-                  className='mt-6'
-                  onValueChange={handlePriceChange}
-                />
-                <div className='flex justify-between mt-2'>
-                  <span className='text-sm'>${filters.priceRange[0]}</span>
-                  <span className='text-sm'>${filters.priceRange[1]}</span>
+              {categories.length === 0 ? (
+                renderPriceSkeletons()
+              ) : (
+                <div className='px-2'>
+                  <Slider
+                    value={tempPriceRange}
+                    max={250}
+                    step={1}
+                    className='mt-6'
+                    onValueChange={handlePriceChange}
+                    onValueCommit={handlePriceCommit}
+                  />
+                  <div className='flex justify-between mt-2'>
+                    <span className='text-sm'>${tempPriceRange[0]}</span>
+                    <span className='text-sm'>${tempPriceRange[1]}</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </AccordionContent>
           </AccordionItem>
 
@@ -200,26 +313,28 @@ export default function Sidebar() {
               Filter by Color
             </AccordionTrigger>
             <AccordionContent>
-              <div className='space-y-2'>
-                {colors.map(color => (
-                  <div
-                    key={color.name}
-                    className='flex items-center justify-between'
-                  >
-                    <div className='flex items-center space-x-2'>
-                      <Checkbox
-                        id={color.name}
-                        checked={filters.colors.includes(color.name)}
-                        onCheckedChange={() => handleColorChange(color.name)}
-                      />
-                      <span className='text-sm'>{color.name}</span>
+              {colors.length === 0 ? (
+                renderColorSkeletons()
+              ) : (
+                <div className='space-y-2'>
+                  {colors.map(color => (
+                    <div
+                      key={color.name}
+                      className='flex items-center justify-between'
+                    >
+                      <div className='flex items-center space-x-2'>
+                        <Checkbox
+                          id={color.name}
+                          checked={filters.colors.includes(color.name)}
+                          onCheckedChange={() => handleColorChange(color.name)}
+                        />
+                        <span className='text-sm'>{color.name}</span>
+                      </div>
+                      <span className='text-sm text-gray-500'>0</span>
                     </div>
-                    <span className='text-sm text-gray-500'>
-                      ({color.count})
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
 
@@ -228,40 +343,36 @@ export default function Sidebar() {
               Filter by Size
             </AccordionTrigger>
             <AccordionContent>
-              <div className='space-y-2'>
-                {sizes.map(size => (
-                  <div
-                    key={size.name}
-                    className='flex items-center justify-between'
-                  >
-                    <div className='flex items-center space-x-2'>
-                      <Checkbox
-                        id={`size-${size.name}`}
-                        checked={filters.sizes.includes(size.name)}
-                        onCheckedChange={() => handleSizeChange(size.name)}
-                      />
-                      <label
-                        htmlFor={`size-${size.name}`}
-                        className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                      >
-                        {size.name}
-                      </label>
+              {sizes.length === 0 ? (
+                renderSizeSkeletons()
+              ) : (
+                <div className='space-y-2'>
+                  {sizes.map(size => (
+                    <div
+                      key={size.name}
+                      className='flex items-center justify-between'
+                    >
+                      <div className='flex items-center space-x-2'>
+                        <Checkbox
+                          id={`size-${size.name}`}
+                          checked={filters.sizes.includes(size.name)}
+                          onCheckedChange={() => handleSizeChange(size.name)}
+                        />
+                        <label
+                          htmlFor={`size-${size.name}`}
+                          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                        >
+                          {size.name}
+                        </label>
+                      </div>
+                      <span className='text-sm text-gray-500'>0</span>
                     </div>
-                    <span className='text-sm text-gray-500'>
-                      ({size.count})
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-
-        <div className='px-4 pb-4'>
-          <Button className='w-full' onClick={updateFilters}>
-            Apply Filters
-          </Button>
-        </div>
       </aside>
     </>
   );

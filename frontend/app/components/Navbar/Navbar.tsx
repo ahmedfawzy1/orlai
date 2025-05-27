@@ -31,7 +31,7 @@ const Navbar = ({
   auth = defaultAuthConfig,
 }: NavbarProps) => {
   return (
-    <header className='py-4'>
+    <header className='p-4'>
       <div className='max-w-[1280px] mx-auto'>
         {/* Desktop Menu */}
         <div className='hidden lg:flex justify-between items-center'>
