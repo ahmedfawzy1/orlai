@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 import { useAuthStore } from '@/app/store/useAuthStore';
+import { useCartStore } from '@/app/store/useCartStore';
 import { MenuItem } from './menuConfig';
 import { Menu, Heart, ShoppingBag, X, Search } from 'lucide-react';
 import { icons } from './icons';
@@ -20,6 +21,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from '@/app/components/ui/sheet';
 import { Input } from '../ui/input';
 import toast from 'react-hot-toast';
@@ -41,7 +43,7 @@ interface MobileNavProps {
 const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { authUser, logout } = useAuthStore();
-
+  const { items, removeFromCart } = useCartStore();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(searchQuery);
@@ -109,9 +111,97 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
           >
             <Heart size={22} strokeWidth={1.5} />
           </Link>
-          <Link onClick={handleNavigation} href={'/cart'} aria-label='Cart'>
-            <ShoppingBag size={22} strokeWidth={1.5} />
-          </Link>
+          <Sheet>
+            <SheetTrigger asChild>
+              <button aria-label='Cart' className='h-fit cursor-pointer'>
+                <ShoppingBag size={22} strokeWidth={1.5} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side='right' className='w-[350px] max-w-full p-0'>
+              <div className='p-6 flex flex-col h-full'>
+                <div className='mb-4'>
+                  <div className='text-lg font-medium mb-2'>
+                    You have {items.length} item{items.length !== 1 ? 's' : ''}{' '}
+                    in your cart
+                  </div>
+                </div>
+                <div className='flex-1 space-y-4 overflow-y-auto mb-4'>
+                  {items.length === 0 ? (
+                    <div className='text-center text-gray-500'>
+                      Your cart is empty.
+                    </div>
+                  ) : (
+                    items.map((item, index) => (
+                      <div
+                        key={item._id}
+                        className={`flex items-center gap-3 border-b pb-4 ${
+                          index === items.length - 1 ? 'border-b-0' : ''
+                        }`}
+                      >
+                        <Image
+                          src={item.product.images[0] || '/placeholder.png'}
+                          alt={item.product.name}
+                          className='w-16 h-16 object-cover'
+                          width={56}
+                          height={56}
+                        />
+                        <div className='flex-1'>
+                          <div className='font-medium'>{item.product.name}</div>
+                          <div className='text-sm'>
+                            {item.quantity} x{' '}
+                            <span className='font-semibold'>
+                              $
+                              {item.product.priceRange.minVariantPrice.toFixed(
+                                2
+                              )}
+                            </span>
+                          </div>
+                          <div className='text-xs text-gray-500'>
+                            Size: {item.size.name}
+                          </div>
+                        </div>
+                        <button
+                          aria-label='Remove item'
+                          className='text-red-500 hover:text-red-700'
+                          onClick={() => removeFromCart(item._id)}
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className='border-t pt-4'>
+                  <div className='flex justify-between font-semibold text-lg mb-4'>
+                    <span>Subtotal</span>
+                    <span>
+                      $
+                      {items
+                        .reduce(
+                          (sum, item) =>
+                            sum +
+                            (item.product?.priceRange?.minVariantPrice || 0) *
+                              item.quantity,
+                          0
+                        )
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                  <SheetClose asChild>
+                    <Link
+                      href='/cart'
+                      className='w-full border border-black rounded-md py-2 mb-2 font-medium hover:bg-gray-100 transition block text-center'
+                    >
+                      View Cart
+                    </Link>
+                  </SheetClose>
+                  <button className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'>
+                    Checkout
+                  </button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
           <Sheet>
             <SheetTrigger asChild>
               <Button

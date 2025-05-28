@@ -39,7 +39,7 @@ const Navbar = ({
           <div className='flex items-center gap-6'>
             <DesktopNav menuItems={menu} />
           </div>
-          <div className='flex gap-4'>
+          <div className='flex gap-3'>
             <HeaderIcons />
             <DesktopUserMenu />
           </div>
