@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useCartStore } from '@/app/store/useCartStore';
 import { MenuItem } from './menuConfig';
-import { Menu, Heart, ShoppingBag, X, Search } from 'lucide-react';
+import { Menu, Heart, ShoppingBag, X, Search, Trash2 } from 'lucide-react';
 import { icons } from './icons';
 import {
   Accordion,
@@ -165,7 +165,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                           className='text-red-500 hover:text-red-700'
                           onClick={() => removeFromCart(item._id)}
                         >
-                          <X size={18} />
+                          <Trash2 size={18} strokeWidth={1.5} />
                         </button>
                       </div>
                     ))

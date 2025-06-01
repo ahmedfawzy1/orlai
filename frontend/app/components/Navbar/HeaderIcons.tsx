@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Heart, Search, ShoppingBag, X } from 'lucide-react';
+import { Heart, Search, ShoppingBag, Trash2, X } from 'lucide-react';
 import { Input } from '../ui/input';
 import {
   Sheet,
@@ -144,7 +144,7 @@ const HeaderIcons = () => {
                         className='text-red-500 hover:text-red-700'
                         onClick={() => removeFromCart(item._id)}
                       >
-                        <X size={18} />
+                        <Trash2 size={18} strokeWidth={1.5} />
                       </button>
                     </div>
                   ))

@@ -7,11 +7,11 @@ import { Input } from '../components/ui/input';
 import Image from 'next/image';
 import { Minus, Plus } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
+import { Skeleton } from '../components/ui/skeleton';
 
 export default function CartPage() {
   const {
     items,
-    total,
     delivery,
     discount,
     discountApplied,
@@ -45,14 +45,83 @@ export default function CartPage() {
     applyDiscount();
   };
 
-  const grandTotal = total + delivery;
+  const subtotal = items.reduce(
+    (sum, item) =>
+      sum + (item.product?.priceRange?.minVariantPrice || 0) * item.quantity,
+    0
+  );
 
-  if (items.length === 0) {
-    return <p className='text-center text-gray-600'>Your cart is empty.</p>;
+  let discountAmount = 0;
+  if (discountApplied) {
+    if (discount === 'FLAT50') {
+      discountAmount = 50;
+    }
   }
 
-  if (loading) {
-    return <p className='text-center text-gray-600'>Loading cart...</p>;
+  // Calculate grand total
+  let grandTotal = subtotal - discountAmount + delivery;
+  if (grandTotal < 0) grandTotal = 0;
+
+  if (loading && items.length === 0) {
+    return (
+      <div className='min-h-screen max-w-[1280px] mx-auto py-10 px-2'>
+        <h1 className='text-4xl font-semibold mb-8'>Checkout</h1>
+        <p className='text-center text-gray-600 mb-4'>Your cart is empty.</p>
+        <div className='w-full grid grid-cols-1 md:grid-cols-3 items-start gap-8'>
+          <div className='md:col-span-2'>
+            <Card className='divide-y'>
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className='flex flex-col md:flex-row items-center gap-4 py-6 px-2 md:px-6'
+                >
+                  <Skeleton className='w-14 h-14 flex-shrink-0' />
+                  <div className='flex-1 min-w-0'>
+                    <Skeleton className='h-5 w-32 mb-2' />
+                    <Skeleton className='h-3 w-24' />
+                  </div>
+                  <Skeleton className='w-20 h-6' />
+                  <Skeleton className='w-28 h-10' />
+                  <Skeleton className='w-20 h-6' />
+                </div>
+              ))}
+            </Card>
+          </div>
+          <div className='flex flex-col gap-6'>
+            <Card>
+              <CardContent className='py-6'>
+                <div className='flex justify-between mb-4'>
+                  <Skeleton className='h-6 w-24' />
+                  <Skeleton className='h-6 w-16' />
+                </div>
+                <div className='mb-4'>
+                  <Skeleton className='h-4 w-32 mb-2' />
+                  <Skeleton className='h-10 w-full' />
+                </div>
+                <div className='flex justify-between mb-2'>
+                  <Skeleton className='h-5 w-24' />
+                  <Skeleton className='h-5 w-12' />
+                </div>
+                <div className='flex justify-between text-lg font-bold mt-4'>
+                  <Skeleton className='h-6 w-28' />
+                  <Skeleton className='h-6 w-16' />
+                </div>
+                <Skeleton className='w-full h-12 mt-6 rounded-lg' />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!loading && items.length === 0) {
+    return (
+      <div className='min-h-screen max-w-[1280px] mx-auto py-10 px-2'>
+        <h1 className='text-4xl font-semibold mb-8'>Checkout</h1>
+        <p className='text-center text-gray-600'>Your cart is empty.</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -60,11 +129,13 @@ export default function CartPage() {
   }
 
   return (
-    <div className='min-h-screen bg-[#fafafa] py-10 px-2 md:px-10'>
-      <h1 className='text-3xl font-bold mb-8'>Checkout</h1>
-      <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 items-start gap-8'>
-        <div className='md:col-span-2'>
-          <div className='hidden md:grid grid-cols-12 text-sm font-semibold text-gray-500 mb-4 px-2'>
+    <div className='min-h-screen max-w-[1280px] mx-auto py-6 px-2'>
+      <h1 className='text-3xl sm:text-4xl font-semibold mb-6 sm:mb-8'>
+        Checkout
+      </h1>
+      <div className='w-full grid grid-cols-1 md:grid-cols-3 items-center gap-4 sm:gap-8'>
+        <div className='md:col-span-2 w-full'>
+          <div className='hidden md:grid grid-cols-12 text-xs sm:text-sm font-semibold text-gray-500 mb-2 sm:mb-4 px-1 sm:px-2'>
             <div className='col-span-6'>Products</div>
             <div className='col-span-2 text-center'>Price</div>
             <div className='col-span-2 text-center'>Quantity</div>
@@ -74,16 +145,16 @@ export default function CartPage() {
             {items.map(item => (
               <div
                 key={item._id}
-                className='flex flex-col md:flex-row items-center gap-4 py-6 px-2 md:px-6'
+                className='flex flex-row sm:flex-row items-center gap-3 sm:gap-4 py-4 sm:py-6 px-1 sm:px-6 w-full'
               >
-                <div className='flex items-center gap-4 flex-1 min-w-0'>
-                  <div className='w-14 h-14 flex-shrink-0 flex items-center justify-center bg-white rounded-md border'>
+                <div className='flex items-center gap-3 sm:gap-4 flex-1 min-w-0 w-full'>
+                  <div className='w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-md overflow-hidden'>
                     <Image
                       src={item.product.images[0]}
                       alt={item.product.name}
                       width={56}
                       height={56}
-                      className='object-contain'
+                      className='object-contain w-full h-full'
                     />
                   </div>
                   <div className='min-w-0'>
@@ -95,17 +166,17 @@ export default function CartPage() {
                     </div>
                   </div>
                 </div>
-                <div className='w-20 text-center font-medium'>
+                <div className='w-fit text-center font-medium mt-2 sm:mt-0'>
                   ${item.product.priceRange.minVariantPrice.toFixed(2)}
                 </div>
-                <div className='flex items-center border rounded-md w-fit'>
+                <div className='flex items-center border rounded-md w-fit mt-2 sm:mt-0'>
                   <button
                     onClick={() => handleQuantity(item._id, -1)}
                     className='p-2 hover:bg-gray-100 transition-colors'
                   >
                     <Minus className='w-4 h-4' />
                   </button>
-                  <span className='px-4 py-2 min-w-[3rem] text-center'>
+                  <span className='px-1.5 md:px-4 py-2 text-center'>
                     {item.quantity}
                   </span>
                   <button
@@ -115,7 +186,7 @@ export default function CartPage() {
                     <Plus className='w-4 h-4' />
                   </button>
                 </div>
-                <div className='w-20 text-right font-semibold'>
+                <div className='w-fit text-right font-semibold mt-2 sm:mt-0'>
                   $
                   {(
                     (item.product?.priceRange?.minVariantPrice || 0) *
@@ -127,29 +198,29 @@ export default function CartPage() {
           </Card>
         </div>
 
-        <div className='flex flex-col gap-6'>
+        <div className='flex flex-col gap-4 sm:gap-6 w-full'>
           <Card>
-            <CardContent className='py-6'>
-              <div className='flex justify-between mb-4'>
+            <CardContent className='py-4 sm:py-6'>
+              <div className='flex justify-between mb-2 sm:mb-4 text-sm sm:text-base'>
                 <span className='font-semibold'>Subtotal</span>
-                <span className='font-bold'>${total.toFixed(2)}</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className='mb-4'>
+              <div className='mb-2 sm:mb-4'>
                 <div className='text-xs text-gray-500 mb-1'>
                   Enter Discount Code
                 </div>
-                <div className='flex gap-2'>
+                <div className='flex'>
                   <Input
                     placeholder='FLAT50'
                     value={discount}
                     onChange={e => setDiscount(e.target.value)}
                     disabled={discountApplied}
-                    className='rounded-r-none'
+                    className='rounded-r-none text-sm sm:text-base !ring-0 focus-visible:border-[#e5e5e5]'
                   />
                   <Button
                     onClick={handleApplyDiscount}
                     disabled={discountApplied || !discount}
-                    className='rounded-l-none'
+                    className='rounded-l-none text-sm sm:text-base px-3 sm:px-4'
                   >
                     {discountApplied ? 'Applied' : 'Apply'}
                   </Button>
@@ -160,15 +231,15 @@ export default function CartPage() {
                   </div>
                 )}
               </div>
-              <div className='flex justify-between mb-2'>
+              <div className='flex justify-between mb-1 sm:mb-2 text-sm sm:text-base'>
                 <span>Delivery Charge</span>
                 <span>${delivery.toFixed(2)}</span>
               </div>
-              <div className='flex justify-between text-lg font-bold mt-4'>
+              <div className='flex justify-between text-base sm:text-lg font-bold mt-3 sm:mt-4'>
                 <span>Grand Total</span>
                 <span>${grandTotal.toFixed(2)}</span>
               </div>
-              <Button className='w-full mt-6 py-6 text-base font-normal rounded-lg'>
+              <Button className='w-full mt-4 sm:mt-6 py-4 sm:py-6 text-base font-normal rounded-lg'>
                 Proceed to Checkout
               </Button>
             </CardContent>
