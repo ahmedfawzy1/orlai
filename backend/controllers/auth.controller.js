@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import { generateToken } from "../config/utils.js";
 import nodemailer from "nodemailer";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const signup = async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
@@ -184,6 +187,48 @@ export const resetPassword = async (req, res) => {
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     console.error("Error in resetPassword controller", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const googleAuth = async (req, res) => {
+  const { token } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, given_name, family_name, sub: googleId } = payload;
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = await User.create({
+        email,
+        first_name: given_name,
+        last_name: family_name,
+        googleId,
+      });
+    } else if (!user.googleId) {
+      // Link Google account to existing user
+      user.googleId = googleId;
+      await user.save();
+    }
+
+    generateToken(user._id, res);
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("Error in googleAuth controller", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -4,6 +4,7 @@ import {
   login,
   logout,
   checkAuth,
+  googleAuth,
   refreshToken,
   requestOtpForResetPassword,
   verifyOtpForResetPassword,
@@ -16,6 +17,7 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
+router.post("/google", googleAuth);
 router.post("/request-otp", requestOtpForResetPassword);
 router.post("/verify-otp", verifyOtpForResetPassword);
 router.post("/reset-password", resetPassword);
