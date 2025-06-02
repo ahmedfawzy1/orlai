@@ -99,7 +99,7 @@ export default function ItemCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className='w-full h-full rounded-xl flex flex-col items-center group'>
+    <div className='w-full h-full max-h-[25rem] rounded-xl flex flex-col items-center group'>
       <div className='w-full aspect-[3/4] bg-[#fafafa] relative flex justify-center items-center overflow-hidden'>
         <Link href={`/shop/${product.slug}`} className='w-full h-full'>
           <Image
