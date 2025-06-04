@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useCartStore } from '@/app/store/useCartStore';
+import { useProductStore } from '@/app/store/useProductStore';
 import { MenuItem } from './menuConfig';
 import { Menu, Heart, ShoppingBag, X, Search, Trash2 } from 'lucide-react';
 import { icons } from './icons';
+import { Product } from '@/app/types/product';
 import {
   Accordion,
   AccordionContent,
@@ -42,11 +44,30 @@ interface MobileNavProps {
 
 const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { authUser, logout } = useAuthStore();
   const { items, removeFromCart } = useCartStore();
+  const { products } = useProductStore();
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(filteredProducts);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery, products]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(searchQuery);
+  };
+
+  const handleProductClick = () => {
+    setSearchOpen(false);
+    setSearchQuery('');
   };
 
   const handleNavigation = (e: React.MouseEvent) => {
@@ -71,7 +92,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
           />
         </Link>
         <div className='flex items-center gap-2'>
-          <Sheet>
+          <Sheet open={searchOpen} onOpenChange={setSearchOpen}>
             <SheetTrigger asChild>
               <button aria-label='Search' className='h-fit cursor-pointer'>
                 <Search size={22} strokeWidth={1.5} />
@@ -101,6 +122,39 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                     )}
                   </div>
                 </form>
+                {searchResults.length > 0 && (
+                  <div className='mt-4 max-h-[60vh] overflow-y-auto'>
+                    <div className='grid grid-cols-1 gap-4'>
+                      {searchResults.map(product => (
+                        <Link
+                          key={product._id}
+                          href={`/shop/${product.slug}`}
+                          className='flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md'
+                          onClick={handleProductClick}
+                        >
+                          <Image
+                            src={product.images[0] || '/placeholder.png'}
+                            alt={product.name}
+                            width={50}
+                            height={50}
+                            className='object-cover rounded-md'
+                          />
+                          <div>
+                            <h3 className='font-medium'>{product.name}</h3>
+                            <p className='text-sm text-gray-600'>
+                              ${product.priceRange.minVariantPrice.toFixed(2)}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {searchQuery && searchResults.length === 0 && (
+                  <div className='mt-4 text-center text-gray-500'>
+                    No products found matching "{searchQuery}"
+                  </div>
+                )}
               </SheetHeader>
             </SheetContent>
           </Sheet>

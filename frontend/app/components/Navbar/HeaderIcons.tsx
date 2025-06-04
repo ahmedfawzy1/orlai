@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, Search, ShoppingBag, Trash2, X } from 'lucide-react';
 import { Input } from '../ui/input';
 import {
@@ -20,16 +20,31 @@ import {
 import { toast } from 'react-hot-toast';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useCartStore } from '@/app/store/useCartStore';
+import { useProductStore } from '@/app/store/useProductStore';
+import { Product } from '@/app/types/product';
 
 const HeaderIcons = () => {
   const { items, removeFromCart } = useCartStore();
   const [searchQuery, setSearchQuery] = useState('');
   const { authUser } = useAuthStore();
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const { products } = useProductStore();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(filteredProducts);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery, products]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
   };
 
   const handleNavigation = () => {
@@ -39,9 +54,14 @@ const HeaderIcons = () => {
     }
   };
 
+  const handleProductClick = () => {
+    setSearchOpen(false);
+    setSearchQuery('');
+  };
+
   return (
     <div className='flex items-center gap-3'>
-      <Sheet>
+      <Sheet open={searchOpen} onOpenChange={setSearchOpen}>
         <SheetTrigger asChild>
           <button aria-label='Search' className='h-fit cursor-pointer'>
             <Search size={22} strokeWidth={1.5} />
@@ -71,6 +91,39 @@ const HeaderIcons = () => {
                 )}
               </div>
             </form>
+            {searchResults.length > 0 && (
+              <div className='mt-4 max-h-[60vh] overflow-y-auto'>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                  {searchResults.map(product => (
+                    <Link
+                      key={product._id}
+                      href={`/shop/${product.slug}`}
+                      className='flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md'
+                      onClick={handleProductClick}
+                    >
+                      <Image
+                        src={product.images[0] || '/placeholder.png'}
+                        alt={product.name}
+                        width={50}
+                        height={50}
+                        className='object-cover rounded-md'
+                      />
+                      <div>
+                        <h3 className='font-medium'>{product.name}</h3>
+                        <p className='text-sm text-gray-600'>
+                          ${product.priceRange.minVariantPrice.toFixed(2)}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {searchQuery && searchResults.length === 0 && (
+              <div className='mt-4 text-center text-gray-500'>
+                No products found matching "{searchQuery}"
+              </div>
+            )}
           </SheetHeader>
         </SheetContent>
       </Sheet>
