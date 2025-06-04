@@ -238,14 +238,36 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                 </Accordion>
                 <div className='flex flex-col gap-3'>
                   {authUser ? (
-                    <Button
-                      variant='default'
-                      size='sm'
-                      onClick={() => logout()}
-                      className='py-[18px] cursor-pointer'
-                    >
-                      Logout
-                    </Button>
+                    <>
+                      <Link href='/profile' className='w-full'>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className='w-full py-[18px] cursor-pointer'
+                        >
+                          Profile
+                        </Button>
+                      </Link>
+                      {authUser.role === 'admin' && (
+                        <Link href='/admin' className='w-full'>
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            className='w-full py-[18px] cursor-pointer'
+                          >
+                            Admin
+                          </Button>
+                        </Link>
+                      )}
+                      <Button
+                        variant='default'
+                        size='sm'
+                        onClick={() => logout()}
+                        className='py-[18px] cursor-pointer'
+                      >
+                        Logout
+                      </Button>
+                    </>
                   ) : (
                     <>
                       <Button asChild variant='outline'>

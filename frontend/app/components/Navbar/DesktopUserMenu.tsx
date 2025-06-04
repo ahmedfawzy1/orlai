@@ -33,8 +33,8 @@ const DesktopUserMenu = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href='/settings' className='w-full'>
-            Settings
+          <Link href='/profile' className='w-full'>
+            Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

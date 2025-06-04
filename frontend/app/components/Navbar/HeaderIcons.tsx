@@ -32,8 +32,7 @@ const HeaderIcons = () => {
     console.log('Searching for:', searchQuery);
   };
 
-  const handleNavigation = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleNavigation = () => {
     if (!authUser) {
       toast.error('Please login to access this page');
       return;

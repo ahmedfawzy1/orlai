@@ -2,43 +2,22 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Product } from '@/app/types/product';
 import { Heart, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuthStore } from '@/app/store/useAuthStore';
-import {
-  getWishlistById,
-  addToWishlist,
-  removeFromWishlist,
-} from '@/app/lib/wishlist';
+import { useWishlistStore } from '@/app/store/useWishlistStore';
 import { useCartStore } from '@/app/store/useCartStore';
 
 export default function ItemCard({ product }: { product: Product }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { authUser } = useAuthStore();
+  const { isInWishlist, addToWishlist, removeFromWishlist } =
+    useWishlistStore();
   const userId = authUser?._id;
 
   const { addToCart } = useCartStore();
-
-  useEffect(() => {
-    if (!userId) return;
-    const fetchWishlist = async () => {
-      try {
-        const res = await getWishlistById(userId);
-        setIsWishlisted(res?.products?.some((p: any) => p._id === product._id));
-      } catch (error: any) {
-        setIsWishlisted(false);
-        toast.error('Failed to load wishlist status');
-        console.error(
-          'Error fetching wishlist:',
-          error?.response?.data || error
-        );
-      }
-    };
-    fetchWishlist();
-  }, [userId, product._id]);
 
   const toggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -51,13 +30,11 @@ export default function ItemCard({ product }: { product: Product }) {
 
     setIsLoading(true);
     try {
-      if (isWishlisted) {
+      if (isInWishlist(product._id)) {
         await removeFromWishlist(userId, product._id);
-        setIsWishlisted(false);
         toast.success('Removed from your wishlist');
       } else {
         await addToWishlist(userId, product._id);
-        setIsWishlisted(true);
         toast.success('Added to your wishlist');
       }
     } catch (error: any) {
@@ -119,16 +96,21 @@ export default function ItemCard({ product }: { product: Product }) {
               onClick={toggleWishlist}
               disabled={isLoading}
               className={`bg-white p-3 rounded-full hover:bg-gray-100 transition-all duration-300 cursor-pointer ${
-                isWishlisted ? 'text-red-500' : 'text-gray-500'
+                isInWishlist(product._id) ? 'text-red-500' : 'text-gray-500'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
               aria-label={
-                isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'
+                isInWishlist(product._id)
+                  ? 'Remove from wishlist'
+                  : 'Add to wishlist'
               }
             >
               {isLoading ? (
                 <Loader2 size={20} className='animate-spin' />
               ) : (
-                <Heart size={20} fill={isWishlisted ? 'red' : 'none'} />
+                <Heart
+                  size={20}
+                  fill={isInWishlist(product._id) ? 'red' : 'none'}
+                />
               )}
             </button>
             <Link

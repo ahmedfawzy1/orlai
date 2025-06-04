@@ -12,7 +12,6 @@ import {
   Package,
   Heart,
   MapPin,
-  CreditCard,
   UserRound,
 } from 'lucide-react';
 
@@ -32,11 +31,6 @@ const sidebarLinks = [
     label: 'Manage Addresses',
     icon: <MapPin size={20} />,
     href: '/profile/addresses',
-  },
-  {
-    label: 'Saved Cards',
-    icon: <CreditCard size={20} />,
-    href: '/profile/cards',
   },
 ];
 

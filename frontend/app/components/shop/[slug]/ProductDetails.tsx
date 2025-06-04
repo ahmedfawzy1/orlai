@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { addToWishlist, removeFromWishlist } from '@/app/lib/wishlist';
+import { useWishlistStore } from '@/app/store/useWishlistStore';
 import { Product } from '@/app/types/product';
 import { Heart, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -14,6 +14,8 @@ export default function ProductDetails({
   product: Product;
   userId: string;
 }) {
+  const { isInWishlist, addToWishlist, removeFromWishlist } =
+    useWishlistStore();
   const [selectedColor, setSelectedColor] = useState<any>(
     product.variants.length > 0 ? product.variants[0]?.color.hexCode : null
   );
@@ -21,7 +23,6 @@ export default function ProductDetails({
     product.variants.length > 0 ? product.variants[0]?.size : null
   );
   const [quantity, setQuantity] = useState<number>(1);
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleAddToCart = async () => {
@@ -45,13 +46,11 @@ export default function ProductDetails({
 
     setIsLoading(true);
     try {
-      if (isWishlisted) {
+      if (isInWishlist(product._id)) {
         await removeFromWishlist(userId, product._id);
-        setIsWishlisted(false);
         toast.success('Product removed from wishlist');
       } else {
         await addToWishlist(userId, product._id);
-        setIsWishlisted(true);
         toast.success('Product added to wishlist');
       }
     } catch (error: any) {
@@ -170,7 +169,9 @@ export default function ProductDetails({
         <button
           onClick={e => handleAddToWishlist(e)}
           className={`border-1 border-black rounded-md w-12 h-12 flex items-center justify-center transition-colors duration-150 cursor-pointer ${
-            isWishlisted ? 'bg-gray-900 text-white' : 'bg-transparent'
+            isInWishlist(product._id)
+              ? 'bg-gray-900 text-white'
+              : 'bg-transparent'
           }`}
           aria-label='Add to Wishlist'
         >

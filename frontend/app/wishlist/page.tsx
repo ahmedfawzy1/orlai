@@ -1,13 +1,12 @@
 'use client';
 
-import { useAuthStore } from '@/app/store/useAuthStore';
-import { useWishlistStore } from '@/app/store/useWishlistStore';
-import { Product } from '@/app/types/product';
-import ItemCard from '@/app/components/shop/ItemCard';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useWishlistStore } from '../store/useWishlistStore';
+import { useAuthStore } from '../store/useAuthStore';
+import ItemCard from '../components/shop/ItemCard';
 import { Loader2 } from 'lucide-react';
 
-export default function Wishlists() {
+export default function WishlistPage() {
   const { authUser } = useAuthStore();
   const { products, isLoading, error, fetchWishlist } = useWishlistStore();
 
@@ -42,9 +41,10 @@ export default function Wishlists() {
   }
 
   return (
-    <div className='md:mb-6 flex-1 overflow-y-auto max-w-[100rem] mx-auto scrollbar-hide'>
-      <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 pb-8'>
-        {products.map((product: Product) => (
+    <div className='container mx-auto px-4 py-8'>
+      <h1 className='text-2xl font-bold mb-6'>My Wishlist</h1>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+        {products.map(product => (
           <ItemCard key={product._id} product={product} />
         ))}
       </div>
