@@ -31,7 +31,7 @@ const Navbar = ({
   auth = defaultAuthConfig,
 }: NavbarProps) => {
   return (
-    <header className='p-4'>
+    <header className='px-4 py-3 bg-white shadow-xs sticky top-0 inset-x-0 z-50'>
       <div className='max-w-[1280px] mx-auto'>
         {/* Desktop Menu */}
         <div className='hidden lg:flex justify-between items-center'>
@@ -39,7 +39,7 @@ const Navbar = ({
           <div className='flex items-center gap-6'>
             <DesktopNav menuItems={menu} />
           </div>
-          <div className='flex gap-3'>
+          <div className='flex justify-center gap-2.5'>
             <HeaderIcons />
             <DesktopUserMenu />
           </div>

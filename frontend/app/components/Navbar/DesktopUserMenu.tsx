@@ -16,8 +16,14 @@ const DesktopUserMenu = () => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <User className='size-6 cursor-pointer' />
+      <DropdownMenuTrigger asChild aria-label='User menu'>
+        <button
+          className='h-fit cursor-pointer outline-none'
+          type='button'
+          aria-label='User menu'
+        >
+          <User size={24} />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='min-w-[180px]'>
         {authUser?.role === 'admin' && (

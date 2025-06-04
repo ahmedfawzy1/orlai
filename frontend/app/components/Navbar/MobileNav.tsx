@@ -205,7 +205,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
           <Sheet>
             <SheetTrigger asChild>
               <Button
-                className='w-6'
+                className='w-6 hover:bg-transparent'
                 variant='ghost'
                 size='icon'
                 aria-label='Menu'
