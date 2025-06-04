@@ -8,6 +8,7 @@ interface User {
   first_name: string;
   last_name: string;
   email: string;
+  phone?: string;
   role: string;
   createdAt: string;
   updatedAt: string;
