@@ -22,7 +22,7 @@ export const footerLinks = [
   {
     title: 'Information',
     links: [
-      { href: '/my-account', label: 'My Account' },
+      { href: '/profile', label: 'My Account' },
       { href: '/login', label: 'Login' },
       { href: '/cart', label: 'My Cart' },
       { href: '/wishlist', label: 'My Wishlist' },
@@ -33,7 +33,7 @@ export const footerLinks = [
     title: 'Services',
     links: [
       {
-        href: '/about-us',
+        href: '/our-story',
         label: 'About Us',
         ariaLabel: 'About Us',
       },

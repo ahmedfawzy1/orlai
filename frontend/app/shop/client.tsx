@@ -8,12 +8,13 @@ import { ArrowLeft, ArrowRight, SlidersVertical } from 'lucide-react';
 import { PaginationContent, PaginationItem } from '../components/ui/pagination';
 import { Pagination } from '../components/ui/pagination';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Shop() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const {
     products,
     totalPages,
@@ -43,20 +44,21 @@ export default function Shop() {
   return (
     <section className='px-5 py-2 md:py-10 max-w-[1280px] mx-auto min-h-screen'>
       <div className='flex flex-row justify-between items-start gap-10'>
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         <div className='flex-1'>
           <h1 className='sr-only'>
             Shop The Latest Fashion Products at Lustria
           </h1>
-          <div className='flex md:hidden items-center justify-between'>
-            <h3 className='text-lg font-bold !no-underline pt-0 flex items-center'>
+          <div className='pb-2 flex md:hidden items-center justify-between'>
+            <h3 className='text-xl font-bold !no-underline pt-0 flex items-center'>
               Filter
             </h3>
             <button
               className='p-2 hover:bg-gray-100 rounded-full'
               aria-label='Toggle filters'
+              onClick={() => setIsSidebarOpen(true)}
             >
-              <SlidersVertical className='h-6 w-6' />
+              <SlidersVertical size={20} />
             </button>
           </div>
           {isLoading ? (

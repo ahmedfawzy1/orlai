@@ -10,14 +10,17 @@ import {
 } from '../ui/accordion';
 import { Checkbox } from '../ui/checkbox';
 import { Slider } from '../ui/slider';
-import { Button } from '../ui/button';
-import { SlidersVertical } from 'lucide-react';
 import { useProductStore } from '@/app/store/useProductStore';
 import { useFilterStore } from '@/app/store/useFilterStore';
 import { Skeleton } from '../ui/skeleton';
+import { X } from 'lucide-react';
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+interface SidebarProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([
     0, 250,
   ]);
@@ -226,37 +229,37 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static z-50 w-[300px] h-full rounded-[2px] flex-shrink-0 bg-background transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed top-0 left-0 lg:static z-50 h-full w-[85vw] max-w-xs lg:w-[300px] bg-background transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          shadow-none rounded-none flex-shrink-0 overflow-y-auto`}
       >
+        <div className='flex md:hidden items-center justify-between px-4 pt-3 md:pt-0 pb-2 border-b'>
+          <h3 className='text-lg font-bold !no-underline pt-0 flex items-center'>
+            Filter
+          </h3>
+          <button
+            className='lg:hidden'
+            onClick={() => setIsOpen(false)}
+            aria-label='Close sidebar'
+          >
+            <span className='sr-only'>Close</span>
+            <X size={20} />
+          </button>
+        </div>
         <Accordion
           type='multiple'
           defaultValue={['categories', 'price', 'color', 'size']}
           className='space-y-4 px-4 pt-4 md:pt-0 pb-4'
         >
-          <div className='flex items-center justify-between'>
-            <h3 className='text-lg font-bold !no-underline pt-0 flex items-center'>
-              Filter
-            </h3>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={() => setIsOpen(false)}
-            >
-              <SlidersVertical className='h-6 w-6' />
-            </Button>
-          </div>
-
           <AccordionItem value='categories'>
-            <AccordionTrigger className='text-lg font-bold !no-underline pt-0 flex items-center'>
+            <AccordionTrigger className='pt-0 pb-2 md:py-4 text-lg font-bold !no-underline flex items-center'>
               Product Categories
             </AccordionTrigger>
             <AccordionContent>
               {categories.length === 0 ? (
                 renderCategorySkeletons()
               ) : (
-                <div className='space-y-2'>
+                <div className='space-y-2 md:space-y-3'>
                   {categories.map(category => (
                     <div
                       key={category.name}
@@ -283,7 +286,7 @@ export default function Sidebar() {
           </AccordionItem>
 
           <AccordionItem value='price'>
-            <AccordionTrigger className='text-lg font-bold !no-underline flex items-center'>
+            <AccordionTrigger className='pt-0 pb-0 md:py-4 text-lg font-bold !no-underline flex items-center'>
               Filter by Price
             </AccordionTrigger>
             <AccordionContent>
@@ -309,7 +312,7 @@ export default function Sidebar() {
           </AccordionItem>
 
           <AccordionItem value='color'>
-            <AccordionTrigger className='text-lg font-bold !no-underline flex items-center'>
+            <AccordionTrigger className='pt-0 pb-2 md:py-4 text-lg font-bold !no-underline flex items-center'>
               Filter by Color
             </AccordionTrigger>
             <AccordionContent>
@@ -318,10 +321,7 @@ export default function Sidebar() {
               ) : (
                 <div className='space-y-2'>
                   {colors.map(color => (
-                    <div
-                      key={color.name}
-                      className='flex items-center justify-between'
-                    >
+                    <div key={color.name}>
                       <div className='flex items-center space-x-2'>
                         <Checkbox
                           id={color.name}
@@ -330,7 +330,6 @@ export default function Sidebar() {
                         />
                         <span className='text-sm'>{color.name}</span>
                       </div>
-                      <span className='text-sm text-gray-500'>0</span>
                     </div>
                   ))}
                 </div>
@@ -339,19 +338,16 @@ export default function Sidebar() {
           </AccordionItem>
 
           <AccordionItem value='size'>
-            <AccordionTrigger className='text-lg font-bold !no-underline flex items-center'>
+            <AccordionTrigger className='pt-0 pb-3 md:py-4 text-lg font-bold !no-underline flex items-center'>
               Filter by Size
             </AccordionTrigger>
             <AccordionContent>
               {sizes.length === 0 ? (
                 renderSizeSkeletons()
               ) : (
-                <div className='space-y-2'>
+                <div className='space-y-3'>
                   {sizes.map(size => (
-                    <div
-                      key={size.name}
-                      className='flex items-center justify-between'
-                    >
+                    <div key={size.name}>
                       <div className='flex items-center space-x-2'>
                         <Checkbox
                           id={`size-${size.name}`}
@@ -365,7 +361,6 @@ export default function Sidebar() {
                           {size.name}
                         </label>
                       </div>
-                      <span className='text-sm text-gray-500'>0</span>
                     </div>
                   ))}
                 </div>
