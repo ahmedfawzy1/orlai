@@ -1,30 +1,56 @@
-import axios from 'axios';
-import { Review } from '../types/review';
+import { axiosInstance } from './axios';
+import { Review, ReviewResponse, NewReview } from '../types/review';
 
-export const getReviews = async (productId: string) => {
+export const getProductReviews = async (
+  productId: string,
+  page = 1,
+  limit = 10
+): Promise<ReviewResponse> => {
   try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${productId}/reviews`
-    );
+    const response = await axiosInstance.get(`/reviews/${productId}`, {
+      params: { page, limit },
+    });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return { reviews: [], currentPage: 1, totalPages: 0, totalReviews: 0 };
+    }
     console.error('Error fetching reviews:', error);
-    return { reviews: [] };
+    throw error;
   }
 };
 
-export const addReview = async (
-  productId: string,
-  reviewData: Omit<Review, 'product'>
-) => {
+export const getAllReviews = async (
+  page = 1,
+  limit = 10,
+  sort = '-createdAt'
+): Promise<ReviewResponse> => {
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${productId}/reviews`,
-      reviewData
-    );
+    const response = await axiosInstance.get('/reviews', {
+      params: { page, limit, sort },
+    });
     return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return { reviews: [], currentPage: 1, totalPages: 0, totalReviews: 0 };
+    }
+    console.error('Error fetching all reviews:', error);
+    throw error;
+  }
+};
+
+export const createReview = async (
+  productId: string,
+  reviewData: NewReview
+): Promise<Review> => {
+  try {
+    const response = await axiosInstance.post('/reviews', {
+      ...reviewData,
+      productId,
+    });
+    return response.data.review;
   } catch (error) {
-    console.error('Error adding review:', error);
+    console.error('Error creating review:', error);
     throw error;
   }
 };

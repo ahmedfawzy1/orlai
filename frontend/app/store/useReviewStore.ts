@@ -1,47 +1,95 @@
 import { create } from 'zustand';
-import { Review } from '../types/review';
-import { getReviews, addReview } from '../lib/reviews';
+import { Review, NewReview } from '../types/review';
+import { getProductReviews, getAllReviews, createReview } from '../lib/reviews';
 
 interface ReviewStore {
   reviews: Review[];
+  currentPage: number;
+  totalPages: number;
+  totalReviews: number;
   isLoading: boolean;
+  error: string | null;
   setReviews: (reviews: Review[]) => void;
-  getReviews: (productId: string) => Promise<void>;
-  createReview: (
+  getProductReviews: (
     productId: string,
-    reviewData: Omit<Review, 'product'>
+    page?: number,
+    limit?: number
   ) => Promise<void>;
+  getAllReviews: (
+    page?: number,
+    limit?: number,
+    sort?: string
+  ) => Promise<void>;
+  createReview: (productId: string, reviewData: NewReview) => Promise<void>;
+  clearError: () => void;
 }
 
 export const useReviewStore = create<ReviewStore>(set => ({
   reviews: [],
+  currentPage: 1,
+  totalPages: 0,
+  totalReviews: 0,
   isLoading: false,
+  error: null,
+
   setReviews: (reviews: Review[]) => set({ reviews }),
 
-  getReviews: async (productId: string) => {
-    set({ isLoading: true });
+  getProductReviews: async (productId: string, page = 1, limit = 10) => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await getReviews(productId);
-      set({ reviews: response.reviews });
+      const response = await getProductReviews(productId, page, limit);
+      set({
+        reviews: response.reviews,
+        currentPage: response.currentPage,
+        totalPages: response.totalPages,
+        totalReviews: response.totalReviews,
+      });
     } catch (error) {
+      set({ error: 'Failed to fetch reviews' });
       console.error('Error fetching reviews:', error);
     } finally {
       set({ isLoading: false });
     }
   },
 
-  createReview: async (
-    productId: string,
-    reviewData: Omit<Review, 'product'>
-  ) => {
-    set({ isLoading: true });
+  getAllReviews: async (page = 1, limit = 10, sort = '-createdAt') => {
+    set({ isLoading: true, error: null });
     try {
-      await addReview(productId, reviewData);
-      await useReviewStore.getState().getReviews(productId);
+      const response = await getAllReviews(page, limit, sort);
+      set({
+        reviews: response.reviews,
+        currentPage: response.currentPage,
+        totalPages: response.totalPages,
+        totalReviews: response.totalReviews,
+      });
     } catch (error) {
-      console.error('Error creating review:', error);
+      set({ error: 'Failed to fetch reviews' });
+      console.error('Error fetching all reviews:', error);
     } finally {
       set({ isLoading: false });
     }
   },
+
+  createReview: async (productId: string, reviewData: NewReview) => {
+    set({ isLoading: true, error: null });
+    try {
+      await createReview(productId, reviewData);
+      // Refresh reviews after creating a new one
+      const response = await getProductReviews(productId);
+      set({
+        reviews: response.reviews,
+        currentPage: response.currentPage,
+        totalPages: response.totalPages,
+        totalReviews: response.totalReviews,
+      });
+    } catch (error) {
+      set({ error: 'Failed to create review' });
+      console.error('Error creating review:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  clearError: () => set({ error: null }),
 }));

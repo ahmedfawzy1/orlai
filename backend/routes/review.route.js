@@ -3,8 +3,8 @@ import { createReview, getProductReviews, getAllReviews } from "../controllers/r
 
 const router = express.Router();
 
-router.post("/products/:id/reviews", createReview);
-router.get("/products/:id/reviews", getProductReviews);
-router.get("/reviews", getAllReviews);
+router.post("/", createReview);
+router.get("/:id", getProductReviews);
+router.get("/", getAllReviews);
 
 export default router;

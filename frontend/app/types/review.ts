@@ -8,3 +8,17 @@ export interface Review {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ReviewResponse {
+  reviews: Review[];
+  currentPage: number;
+  totalPages: number;
+  totalReviews: number;
+}
+
+export interface NewReview {
+  name: string;
+  email: string;
+  rating: number;
+  comment: string;
+}
