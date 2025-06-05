@@ -216,7 +216,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                         </div>
                         <button
                           aria-label='Remove item'
-                          className='text-red-500 hover:text-red-700'
+                          className='text-red-500 hover:text-red-700 cursor-pointer'
                           onClick={() => removeFromCart(item._id)}
                         >
                           <Trash2 size={18} strokeWidth={1.5} />

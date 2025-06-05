@@ -190,37 +190,3 @@ export const deleteProduct = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
-export const searchProduct = async (req, res) => {
-  try {
-    const { name, category, color, size, min_price, max_price } = req.query;
-
-    let query = {};
-
-    if (name) query.name = { $regex: name, $options: "i" };
-    if (category) query.category = category;
-    if (min_price && max_price) {
-      query.priceRange = {
-        $elemMatch: {
-          minVariantPrice: { $gte: parseFloat(min_price) },
-          maxVariantPrice: { $lte: parseFloat(max_price) },
-        },
-      };
-    }
-
-    if (color) query["variants.color"] = color;
-    if (size) query["variants.size"] = size;
-
-    const products = await Product.find(query)
-      .populate("category", "name -_id")
-      .populate("variants.color", "name hexCode -_id")
-      .populate("variants.size", "name -_id");
-
-    res.status(200).json({
-      products,
-      total_count: products.length,
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};

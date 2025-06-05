@@ -16,11 +16,11 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProduct(slug);
   const user = await getServerSession();
-  const { products } = await getProducts();
+  const { products } = await getProducts(1, 3, { category: product.category });
 
   return (
-    <section className='px-5 py-8 max-w-[1280px] mx-auto'>
-      <div className='flex flex-col md:flex-row gap-10 mt-10'>
+    <section className='px-4 pb-4 md:py-8 max-w-[1280px] mx-auto'>
+      <div className='flex flex-col md:flex-row gap-10'>
         <ImageGallery ImageUrls={product.images} />
         <ProductDetails product={product} userId={user?._id} />
       </div>

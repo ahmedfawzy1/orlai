@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useWishlistStore } from '@/app/store/useWishlistStore';
 import { Product } from '@/app/types/product';
-import { Heart, Loader2 } from 'lucide-react';
+import { Heart, Loader2, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ReactStars from 'react-rating-star-with-type';
 
@@ -32,6 +32,7 @@ export default function ProductDetails({
     }
     setSelectedColor(null);
     setSelectedSize(null);
+    setQuantity(1);
     toast.success('Product added to cart');
   };
 
@@ -64,7 +65,7 @@ export default function ProductDetails({
   return (
     <div className='flex-1 max-w-xl'>
       <div className='flex justify-between items-center'>
-        <h1 className='text-2xl md:text-3xl font-bold'>{product.name}</h1>
+        <h1 className='text-xl md:text-3xl font-bold'>{product.name}</h1>
         {product.availableForSale && product.inventory > 0 ? (
           <span className='bg-green-100 text-green-800 font-medium text-xs md:mb-2 inline-block rounded px-3 py-1.5'>
             In Stock
@@ -113,14 +114,18 @@ export default function ProductDetails({
             <button
               key={variant.color.hexCode}
               title={variant.color.name}
-              className={`inline-block w-8 h-8 rounded-sm cursor-pointer border-2 ${
+              className={`relative inline-block w-8 h-8 rounded-sm cursor-pointer border-2 ${
                 selectedColor === variant.color.hexCode
-                  ? 'border-black'
+                  ? 'border-black/50'
                   : 'border-transparent'
               }`}
               style={{ background: variant.color.hexCode }}
               onClick={() => setSelectedColor(variant.color.hexCode)}
-            />
+            >
+              {selectedColor === variant.color.hexCode && (
+                <Check className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white w-5 h-5' />
+              )}
+            </button>
           ))}
         </div>
       </div>
@@ -145,21 +150,21 @@ export default function ProductDetails({
       <div className='flex items-center gap-4 mt-6'>
         <div className='flex items-center border border-black rounded-lg'>
           <button
-            className='px-4 py-3 text-xl border-none bg-transparent cursor-pointer'
+            className='px-4 py-2.5 md:py-3 text-xl border-none bg-transparent cursor-pointer'
             onClick={() => setQuantity(quantity - 1)}
           >
             -
           </button>
           <span className='px-4 text-lg'>{quantity}</span>
           <button
-            className='px-4 py-3 text-xl border-none bg-transparent cursor-pointer'
+            className='px-4 py-2.5 md:py-3 text-xl border-none bg-transparent cursor-pointer'
             onClick={() => setQuantity(quantity + 1)}
           >
             +
           </button>
         </div>
         <button
-          className='flex-1 bg-gray-900 text-white font-semibold text-lg py-4 rounded-xl border-none cursor-pointer transition-colors duration-300 hover:bg-gray-800'
+          className='flex-1 bg-gray-900 text-white font-semibold text-lg py-2.5 md:py-3 rounded-lg border-none cursor-pointer transition-colors duration-300 hover:bg-gray-800'
           disabled={!product.availableForSale || product.inventory === 0}
           onClick={() => handleAddToCart()}
           aria-label='Add to Cart'
@@ -168,10 +173,10 @@ export default function ProductDetails({
         </button>
         <button
           onClick={e => handleAddToWishlist(e)}
-          className={`border-1 border-black rounded-md w-12 h-12 flex items-center justify-center transition-colors duration-150 cursor-pointer ${
+          className={`border-1 border-black rounded-md w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-all duration-200 cursor-pointer ${
             isInWishlist(product._id)
-              ? 'bg-gray-900 text-white'
-              : 'bg-transparent'
+              ? 'bg-gray-900 text-white hover:bg-gray-800'
+              : 'bg-transparent hover:bg-gray-100'
           }`}
           aria-label='Add to Wishlist'
         >
