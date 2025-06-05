@@ -8,13 +8,17 @@ const isValidObjectId = (id) => {
 export const getAllWishlists = async (req, res) => {
   try {
     const wishlists = await Wishlist.find()
-      .populate("customer")
+      .populate({
+        path: "customer",
+        select: "first_name last_name email role phone",
+      })
       .populate({
         path: "products",
         populate: {
           path: "variants.color",
         },
-      });
+      })
+      .select("-__v");
 
     if (!wishlists || wishlists.length === 0) {
       return res.status(404).json({ message: "No wishlists found" });
@@ -22,7 +26,8 @@ export const getAllWishlists = async (req, res) => {
 
     res.status(200).json(wishlists);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching wishlists:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
