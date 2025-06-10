@@ -41,8 +41,14 @@ export const createReview = async (req, res) => {
     // Save review
     await newReview.save();
 
-    // Add review to product
+    // Add review to product and update average rating
     product.reviews.push(newReview._id);
+
+    // Calculate new average rating
+    const allReviews = await Review.find({ product: productId });
+    const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
+    product.averageRating = totalRating / allReviews.length;
+
     await product.save();
 
     res.status(201).json({
