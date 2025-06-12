@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useCartStore } from '@/app/store/useCartStore';
 import { useProductStore } from '@/app/store/useProductStore';
@@ -27,7 +28,6 @@ import {
 } from '@/app/components/ui/sheet';
 import { Input } from '../ui/input';
 import toast from 'react-hot-toast';
-
 interface MobileNavProps {
   menuItems: MenuItem[];
   logo: {
@@ -46,8 +46,10 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [cartMenuOpen, setCartMenuOpen] = useState(false);
+  const router = useRouter();
   const { authUser, logout } = useAuthStore();
-  const { items, removeFromCart } = useCartStore();
+  const { items, removeFromCart, getCart } = useCartStore();
   const { products } = useProductStore();
 
   useEffect(() => {
@@ -60,6 +62,12 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
       setSearchResults([]);
     }
   }, [searchQuery, products]);
+
+  useEffect(() => {
+    if (cartMenuOpen && authUser) {
+      getCart();
+    }
+  }, [cartMenuOpen, authUser, getCart]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,7 +173,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
           >
             <Heart size={22} strokeWidth={1.5} />
           </Link>
-          <Sheet>
+          <Sheet open={cartMenuOpen} onOpenChange={setCartMenuOpen}>
             <SheetTrigger asChild>
               <button aria-label='Cart' className='h-fit cursor-pointer'>
                 <ShoppingBag size={22} strokeWidth={1.5} />
@@ -249,7 +257,10 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                       View Cart
                     </Link>
                   </SheetClose>
-                  <button className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'>
+                  <button
+                    onClick={() => router.push('/checkout/address')}
+                    className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'
+                  >
                     Checkout
                   </button>
                 </div>

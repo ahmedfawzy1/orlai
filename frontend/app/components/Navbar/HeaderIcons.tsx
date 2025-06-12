@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Heart, Search, ShoppingBag, Trash2, X } from 'lucide-react';
 import { Input } from '../ui/input';
 import {
@@ -24,8 +25,9 @@ import { useProductStore } from '@/app/store/useProductStore';
 import { Product } from '@/app/types/product';
 
 const HeaderIcons = () => {
-  const { items, removeFromCart } = useCartStore();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const { items, removeFromCart, getCart } = useCartStore();
   const { authUser } = useAuthStore();
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -42,6 +44,12 @@ const HeaderIcons = () => {
       setSearchResults([]);
     }
   }, [searchQuery, products]);
+
+  useEffect(() => {
+    if (cartMenuOpen && authUser) {
+      getCart();
+    }
+  }, [cartMenuOpen, authUser, getCart]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,7 +233,10 @@ const HeaderIcons = () => {
                 >
                   View Cart
                 </Link>
-                <button className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'>
+                <button
+                  onClick={() => router.push('/checkout/address')}
+                  className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'
+                >
                   Checkout
                 </button>
               </div>
