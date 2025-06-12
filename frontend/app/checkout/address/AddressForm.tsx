@@ -179,7 +179,7 @@ export default function AddressForm() {
           <AddressSkeleton />
         ) : addresses.length > 0 ? (
           <>
-            <div className='flex flex-col sm:flex-row gap-4 mb-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4'>
               {addresses.map(addr => (
                 <Card
                   key={addr._id}
