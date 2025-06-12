@@ -1,15 +1,18 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import Image from 'next/image';
 import { Minus, Plus } from 'lucide-react';
-import { useCartStore } from '../store/useCartStore';
 import { Skeleton } from '../components/ui/skeleton';
+import { useCartStore } from '../store/useCartStore';
 
 export default function CartPage() {
+  const router = useRouter();
+
   const {
     items,
     delivery,
@@ -239,7 +242,10 @@ export default function CartPage() {
                 <span>Grand Total</span>
                 <span>${grandTotal.toFixed(2)}</span>
               </div>
-              <Button className='w-full mt-4 sm:mt-6 py-4 sm:py-6 text-base font-normal rounded-lg'>
+              <Button
+                className='w-full mt-4 sm:mt-6 py-4 sm:py-6 text-base font-normal rounded-lg'
+                onClick={() => router.push('/checkout/address')}
+              >
                 Proceed to Checkout
               </Button>
             </CardContent>
