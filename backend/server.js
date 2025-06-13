@@ -20,11 +20,12 @@ import filtersRoutes from "./routes/filters.route.js";
 import wishlistRoutes from "./routes/wishlist.route.js";
 import cartRoutes from "./routes/cart.route.js";
 import addressRoutes from "./routes/address.route.js";
+import orderRoutes from "./routes/order.route.js";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 connectDB();
 
@@ -46,6 +47,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/address", addressRoutes);
+app.use("/api/orders", orderRoutes);
 
 // 404 handler
 app.use((req, res) => {

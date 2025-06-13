@@ -15,15 +15,66 @@ import {
 import { ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/app/store/useCartStore';
 import { useCheckoutStore } from '@/app/store/useCheckoutStore';
+import { axiosInstance } from '@/app/lib/axios';
 
 export default function ReviewOrder() {
-  const { items } = useCartStore();
+  const { items, clearCart } = useCartStore();
   const { selectedAddress, paymentDetails, clearCheckout } = useCheckoutStore();
   const [showDialog, setShowDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handlePlaceOrder = () => {
-    setShowDialog(true);
+  const calculateTotal = () => {
+    return items.reduce((total, item) => {
+      return total + item.product.priceRange.minVariantPrice * item.quantity;
+    }, 0);
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (!selectedAddress || !paymentDetails) {
+        throw new Error('Please complete shipping and payment details');
+      }
+
+      const orderData = {
+        items: items.map(item => ({
+          product: item.product._id,
+          quantity: item.quantity,
+          size: item.size.name,
+          color: item.color.name,
+          price: item.product.priceRange.minVariantPrice,
+        })),
+        shippingAddress: selectedAddress,
+        paymentMethod: paymentDetails.method,
+        paymentDetails:
+          paymentDetails.method === 'card'
+            ? {
+                stripePaymentMethodId: paymentDetails.paymentMethodId,
+                cardType: paymentDetails.cardType,
+                last4: paymentDetails.last4,
+              }
+            : null,
+        totalAmount: calculateTotal(),
+        shippingCost: 5,
+      };
+
+      const response = await axiosInstance.post('/orders', orderData);
+      const data = response.data;
+
+      if (!response.status) {
+        throw new Error(data.error || 'Failed to create order');
+      }
+
+      setShowDialog(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditAddress = () => {
@@ -36,6 +87,11 @@ export default function ReviewOrder() {
 
   return (
     <div>
+      {error && (
+        <div className='mb-4 p-4 bg-red-50 text-red-600 rounded-md'>
+          {error}
+        </div>
+      )}
       <div className='mb-8'>
         <div className='mb-4'>
           <span className='text-lg font-semibold'>
@@ -99,18 +155,10 @@ export default function ReviewOrder() {
             </div>
             {paymentDetails ? (
               <div className='text-sm'>
-                {paymentDetails.method === 'card' &&
-                paymentDetails.cardDetails ? (
+                {paymentDetails.method === 'card' ? (
                   <>
-                    <div className='capitalize'>
-                      {paymentDetails.cardDetails.cardType}
-                    </div>
-                    <div>
-                      Card ending in{' '}
-                      {paymentDetails.cardDetails.number.slice(-4)}
-                    </div>
-                    <div>Expires: {paymentDetails.cardDetails.expiry}</div>
-                    <div>Name: {paymentDetails.cardDetails.name}</div>
+                    <div className='capitalize'>{paymentDetails.cardType}</div>
+                    <div>Card ending in {paymentDetails.last4}</div>
                   </>
                 ) : (
                   <div>Cash on Delivery</div>
@@ -125,9 +173,9 @@ export default function ReviewOrder() {
       <Button
         className='w-full max-w-xs'
         onClick={handlePlaceOrder}
-        disabled={!selectedAddress || !paymentDetails}
+        disabled={!selectedAddress || !paymentDetails || loading}
       >
-        Place Order
+        {loading ? 'Processing...' : 'Place Order'}
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -156,8 +204,9 @@ export default function ReviewOrder() {
               <Button
                 className='w-full bg-black text-white hover:bg-black/90 transition duration-300 text-sm font-normal rounded-lg py-6'
                 onClick={() => {
-                  setShowDialog(false);
+                  clearCart();
                   clearCheckout();
+                  setShowDialog(false);
                   router.push('/profile/orders');
                 }}
               >
@@ -167,8 +216,9 @@ export default function ReviewOrder() {
                 variant='outline'
                 className='w-full border-black text-black text-sm font-normal rounded-lg py-6 bg-white duration-300'
                 onClick={() => {
-                  setShowDialog(false);
+                  clearCart();
                   clearCheckout();
+                  setShowDialog(false);
                   router.push('/');
                 }}
               >

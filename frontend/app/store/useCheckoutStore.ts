@@ -14,6 +14,9 @@ interface Address {
 
 interface PaymentDetails {
   method: 'card' | 'cod';
+  paymentMethodId?: string;
+  cardType?: string;
+  last4?: string;
   cardDetails?: {
     number: string;
     name: string;
