@@ -1,4 +1,12 @@
-import React from 'react';
+import generateSEO from '../lib/seo';
+
+export const generateMetadata = async () => {
+  return generateSEO({
+    title: 'Our Story | Lustria',
+    description:
+      "Learn about Lustria's journey, mission, and commitment to quality, craftsmanship, and community. Discover our story and what sets us apart.",
+  });
+};
 
 export default function OurStory() {
   return (

@@ -10,6 +10,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { LoaderCircle } from 'lucide-react';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+
 export default function Client() {
   const router = useRouter();
   const [formData, setFormData] = useState({

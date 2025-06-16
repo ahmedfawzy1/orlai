@@ -18,9 +18,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'lustria',
+  title: 'Shop Trendy & Elegant Clothing - Lustria',
   description:
-    'Lustria offers a wide variety of stylish and high-quality clothing for every occasion. Discover the latest fashion trends with curated collections for men, women, and kids. Shop now for unique pieces that elevate your wardrobe, delivered right to your doorstep with easy returns and excellent customer service.',
+    'Discover premium fashion at Lustria - your destination for trendy, sustainable clothing. Find your perfect style with our curated collection of quality garments',
+  alternates: {
+    canonical: 'https://lustria.shop',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

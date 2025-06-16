@@ -5,8 +5,32 @@ import ImageGallery from '@/app/components/shop/[slug]/ImageGallery';
 import ProductDetails from '@/app/components/shop/[slug]/ProductDetails';
 import TabMenu from '@/app/components/shop/[slug]/TabMenu';
 import RelatedProducts from '@/app/components/shop/[slug]/RelatedProducts';
+import generateSEO from '@/app/lib/seo';
 
 export const revalidate = 3600;
+
+export const generateMetadata = async (props: {
+  params: Promise<{ slug: string }>;
+}) => {
+  const { slug } = await props.params;
+  const product = await getProduct(slug);
+
+  if (!product) {
+    return generateSEO({
+      title: 'Product Not Found | Lustria',
+      description:
+        'Oops! The product you are looking for is unavailable. Explore our latest collections at Lustria.',
+    });
+  }
+
+  return generateSEO({
+    title: `${product.name} | Buy Online at Lustria`,
+    description:
+      product.description.length > 150
+        ? `${product.description.substring(0, 150)}...`
+        : `${product.description} Shop now for premium quality and exclusive designs.`,
+  });
+};
 
 export default async function ProductPage({
   params,
