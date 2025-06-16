@@ -11,7 +11,6 @@ import {
   Truck,
   Gift,
   User,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -46,11 +45,6 @@ const sidebarLinks = [
     href: '/admin/coupons',
   },
   { label: 'Staff', icon: <User className='w-5 h-5' />, href: '/admin/staff' },
-  {
-    label: 'Settings',
-    icon: <Settings className='w-5 h-5' />,
-    href: '/admin/settings',
-  },
 ];
 
 export default function Sidebar() {

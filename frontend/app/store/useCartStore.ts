@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { CartItem } from '../types/cart';
-import { toast } from 'react-hot-toast';
+import { axiosInstance } from '../lib/axios';
 import {
   addToCart as apiAddToCart,
   clearCart as apiClearCart,
@@ -9,6 +9,7 @@ import {
   removeFromCart as apiRemoveFromCart,
   updateCart as apiUpdateCart,
 } from '../lib/cart';
+import { toast } from 'react-hot-toast';
 
 interface CartState {
   items: CartItem[];
@@ -17,6 +18,8 @@ interface CartState {
   error: string | null;
   discount: string;
   discountApplied: boolean;
+  discountAmount: number;
+  couponInfo: any;
   delivery: number;
   getCart: () => Promise<void>;
   addToCart: (item: CartItem) => Promise<void>;
@@ -24,7 +27,7 @@ interface CartState {
   removeFromCart: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   setDiscount: (code: string) => void;
-  applyDiscount: () => void;
+  applyDiscount: () => Promise<void>;
 }
 
 export const useCartStore = create<CartState>()(
@@ -36,6 +39,8 @@ export const useCartStore = create<CartState>()(
       error: null,
       discount: '',
       discountApplied: false,
+      discountAmount: 0,
+      couponInfo: null,
       delivery: 5,
 
       getCart: async () => {
@@ -109,7 +114,14 @@ export const useCartStore = create<CartState>()(
       },
 
       clearCart: async () => {
-        set({ items: [], total: 0 });
+        set({
+          items: [],
+          total: 0,
+          discount: '',
+          discountApplied: false,
+          discountAmount: 0,
+          couponInfo: null,
+        });
         toast.success('Cart cleared');
 
         apiClearCart().catch(() =>
@@ -119,18 +131,36 @@ export const useCartStore = create<CartState>()(
 
       setDiscount: code => set({ discount: code }),
 
-      applyDiscount: () => {
-        const { discount, discountApplied, total } = get();
+      applyDiscount: async () => {
+        const { discount, discountApplied, items } = get();
         if (discountApplied) return;
-        let discountAmount = 0;
-        if (discount.trim().toUpperCase() === 'FLAT50') {
-          discountAmount = total * 0.5;
+        // Calculate subtotal
+        const subtotal = items.reduce(
+          (sum, item) =>
+            sum +
+            (item.product?.priceRange?.minVariantPrice || 0) * item.quantity,
+          0
+        );
+        try {
+          const response = await axiosInstance.post('/coupons/validate', {
+            code: discount,
+            amount: subtotal,
+          });
+          const data = response.data;
+          if (data.valid) {
+            set({
+              total: Math.max(0, subtotal - data.discountAmount),
+              discountApplied: true,
+              discountAmount: data.discountAmount,
+              couponInfo: data.coupon,
+            });
+            toast.success('Discount applied!');
+          } else {
+            toast.error('Invalid coupon');
+          }
+        } catch (error: any) {
+          toast.error(error.response?.data?.message || 'Invalid coupon');
         }
-        set({
-          total: Math.max(0, total - discountAmount),
-          discountApplied: true,
-        });
-        toast.success('Discount applied!');
       },
     }),
     {
@@ -141,6 +171,8 @@ export const useCartStore = create<CartState>()(
         total: state.total,
         discount: state.discount,
         discountApplied: state.discountApplied,
+        discountAmount: state.discountAmount,
+        couponInfo: state.couponInfo,
       }),
     }
   )

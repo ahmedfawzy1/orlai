@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { CardContent } from '../ui/card';
@@ -12,26 +11,22 @@ interface DiscountSectionProps {
 }
 
 export const DiscountSection: React.FC<DiscountSectionProps> = () => {
-  const [discount, setDiscount] = useState('');
-  const [discountApplied, setDiscountApplied] = useState(false);
-  // const [successMsg, setSuccessMsg] = useState('');
-  const { total: subtotal, delivery } = useCartStore();
+  const {
+    discount,
+    setDiscount,
+    discountApplied,
+    discountAmount,
+    couponInfo,
+    applyDiscount,
+    total: subtotal,
+    delivery,
+  } = useCartStore();
 
-  const handleApplyDiscount = () => {
-    if (discountApplied) return;
-    let discountAmount = 0;
-    if (discount.trim().toUpperCase() === 'FLAT50') {
-      discountAmount = 50;
-    }
-    if (discountAmount > 0) {
-      setDiscountApplied(true);
-      // setSuccessMsg('Discount applied!');
-    } else {
-      // setSuccessMsg('Invalid discount code.');
-    }
+  const handleApplyDiscount = async () => {
+    await applyDiscount();
   };
 
-  const grandTotal = Math.max(0, subtotal + delivery);
+  const grandTotal = Math.max(0, subtotal - discountAmount + delivery);
 
   return (
     <div className='flex flex-col gap-4 sm:gap-6 w-full md:pt-16'>
@@ -47,7 +42,7 @@ export const DiscountSection: React.FC<DiscountSectionProps> = () => {
             </div>
             <div className='flex'>
               <Input
-                placeholder='FLAT50'
+                placeholder='Enter coupon code'
                 value={discount}
                 onChange={e => setDiscount(e.target.value)}
                 disabled={discountApplied}
@@ -61,9 +56,9 @@ export const DiscountSection: React.FC<DiscountSectionProps> = () => {
                 {discountApplied ? 'Applied' : 'Apply'}
               </Button>
             </div>
-            {discountApplied && (
+            {discountApplied && couponInfo && (
               <div className='text-green-600 text-xs mt-1'>
-                Discount applied!
+                Coupon "{couponInfo.code}" applied: -${discountAmount}
               </div>
             )}
           </div>

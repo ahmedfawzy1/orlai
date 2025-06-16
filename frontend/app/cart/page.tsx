@@ -18,6 +18,8 @@ export default function CartPage() {
     delivery,
     discount,
     discountApplied,
+    discountAmount,
+    couponInfo,
     loading,
     error,
     setDiscount,
@@ -44,8 +46,8 @@ export default function CartPage() {
     }
   };
 
-  const handleApplyDiscount = () => {
-    applyDiscount();
+  const handleApplyDiscount = async () => {
+    await applyDiscount();
   };
 
   const subtotal = items.reduce(
@@ -54,14 +56,6 @@ export default function CartPage() {
     0
   );
 
-  let discountAmount = 0;
-  if (discountApplied) {
-    if (discount === 'FLAT50') {
-      discountAmount = 50;
-    }
-  }
-
-  // Calculate grand total
   let grandTotal = subtotal - discountAmount + delivery;
   if (grandTotal < 0) grandTotal = 0;
 
@@ -228,9 +222,9 @@ export default function CartPage() {
                     {discountApplied ? 'Applied' : 'Apply'}
                   </Button>
                 </div>
-                {discountApplied && (
+                {discountApplied && couponInfo && (
                   <div className='text-green-600 text-xs mt-1'>
-                    Discount applied!
+                    Coupon "{couponInfo.code}" applied: -${discountAmount}
                   </div>
                 )}
               </div>
