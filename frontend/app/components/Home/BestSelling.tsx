@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import ItemCard from '../shop/ItemCard';
-import { getBestSellingProducts } from '@/app/lib/products';
+import { getAllBestSellingProducts } from '@/app/lib/products';
 import { Product } from '@/app/types/product';
 
 export default async function BestSelling() {
-  // const bestSellingProducts = await getBestSellingProducts();
-  const bestSellingProducts = [];
+  const bestSellingProducts = await getAllBestSellingProducts();
 
   return (
     <section className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'>
@@ -15,7 +14,7 @@ export default async function BestSelling() {
 
       <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-10 pb-8'>
         {bestSellingProducts?.map((product: Product) => (
-          <ItemCard key={product.id} product={product} />
+          <ItemCard key={product._id} product={product} />
         ))}
       </div>
 

@@ -10,21 +10,25 @@ const categories = [
     id: 1,
     name: 'Casual Wear',
     image: '/images/category/category1.avif',
+    slug: 'Bottomwear',
   },
   {
     id: 2,
     name: 'Western Wear',
     image: '/images/category/category2.avif',
+    slug: 'Outerwear',
   },
   {
     id: 3,
     name: 'Ethnic Wear',
     image: '/images/category/category3.avif',
+    slug: 'Knitwear',
   },
   {
     id: 4,
     name: 'Kids Wear',
     image: '/images/category/category4.avif',
+    slug: 'Footwear',
   },
 ];
 
@@ -124,7 +128,7 @@ export default function Category() {
               priority={true}
             />
             <Link
-              href={`/shop?category=${category.name}`}
+              href={`/shop?category=${category.slug}`}
               className='px-4 py-2 text-black text-lg font-medium text-center w-[calc(100%-2rem)] absolute bottom-5 left-1/2 z-10 -translate-x-1/2 bg-white rounded-lg hover:scale-105 transition-all duration-300'
             >
               {category.name}

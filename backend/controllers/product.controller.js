@@ -2,6 +2,7 @@ import Product from "../models/product.model.js";
 import Category from "../models/category.model.js";
 import Color from "../models/color.model.js";
 import Size from "../models/size.model.js";
+import Order from "../models/order.model.js";
 
 export const createProduct = async (req, res) => {
   try {
@@ -188,5 +189,62 @@ export const deleteProduct = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+export const getBestSellers = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 8;
+
+    const bestSellers = await Order.aggregate([
+      { $unwind: "$items" },
+      { $match: { orderStatus: "delivered" } },
+      {
+        $group: {
+          _id: "$items.product",
+          totalSold: { $sum: "$items.quantity" },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      { $unwind: "$productDetails" },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "productDetails.category",
+          foreignField: "_id",
+          as: "categoryDetails",
+        },
+      },
+      { $unwind: "$categoryDetails" },
+      {
+        $project: {
+          _id: "$productDetails._id",
+          name: "$productDetails.name",
+          description: "$productDetails.description",
+          priceRange: { $arrayElemAt: ["$productDetails.priceRange", 0] },
+          images: "$productDetails.images",
+          category: "$categoryDetails.name",
+          availableForSale: "$productDetails.availableForSale",
+          variants: "$productDetails.variants",
+          averageRating: "$productDetails.averageRating",
+          slug: "$productDetails.slug",
+          totalSold: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json(bestSellers);
+  } catch (error) {
+    console.error("Error getting bestsellers:", error);
+    res.status(500).json({ message: "Error getting bestsellers" });
   }
 };
