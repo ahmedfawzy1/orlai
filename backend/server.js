@@ -21,6 +21,7 @@ import wishlistRoutes from "./routes/wishlist.route.js";
 import cartRoutes from "./routes/cart.route.js";
 import addressRoutes from "./routes/address.route.js";
 import orderRoutes from "./routes/order.route.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/address", addressRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/admins", adminRoutes);
 
 // 404 handler
 app.use((req, res) => {
