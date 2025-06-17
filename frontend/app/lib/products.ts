@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { axiosInstance } from './axios';
 import { Product } from '../types/product';
 
 export async function getProducts(
@@ -16,7 +16,6 @@ export async function getProducts(
   } = {}
 ) {
   try {
-    let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/products`;
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
@@ -34,8 +33,7 @@ export async function getProducts(
       ...(queryParams.search && { search: queryParams.search }),
     });
 
-    url = `${url}?${params.toString()}`;
-    const res = await axios.get(url);
+    const res = await axiosInstance.get(`/products?${params.toString()}`);
     return res.data;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -51,20 +49,8 @@ export async function getProducts(
 
 export async function getAllBestSellingProducts() {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/bestsellers`,
-      {
-        next: {
-          revalidate: 3600,
-        },
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch bestsellers');
-    }
-
-    return res.json();
+    const res = await axiosInstance.get('/products/bestsellers');
+    return res.data;
   } catch (error) {
     console.error('Error fetching bestSelling products:', error);
     return [];
@@ -73,20 +59,8 @@ export async function getAllBestSellingProducts() {
 
 export async function getBestSellingProducts() {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/bestsellers?limit=4`,
-      {
-        next: {
-          revalidate: 3600,
-        },
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch bestsellers');
-    }
-
-    return res.json();
+    const res = await axiosInstance.get('/products/bestsellers?limit=4');
+    return res.data;
   } catch (error) {
     console.error('Error fetching bestSelling products:', error);
     return [];
@@ -95,9 +69,7 @@ export async function getBestSellingProducts() {
 
 export async function getProduct(id: string) {
   try {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${id}`
-    );
+    const res = await axiosInstance.get(`/products/${id}`);
     return res.data;
   } catch (error) {
     console.error('Error fetching product by id:', error);
@@ -107,10 +79,7 @@ export async function getProduct(id: string) {
 
 export async function createProduct(productData: Product) {
   try {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products`,
-      productData
-    );
+    const res = await axiosInstance.post('/products', productData);
     return res.data;
   } catch (error) {
     console.error('Error fetching product by slug:', error);
@@ -120,10 +89,7 @@ export async function createProduct(productData: Product) {
 
 export async function updateProduct(id: string, updateData: Partial<Product>) {
   try {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${id}`,
-      updateData
-    );
+    const res = await axiosInstance.put(`/products/${id}`, updateData);
     return res.data;
   } catch (error) {
     console.error('Error updating product:', error);
@@ -133,9 +99,7 @@ export async function updateProduct(id: string, updateData: Partial<Product>) {
 
 export async function deleteProduct(id: string) {
   try {
-    const res = await axios.delete(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${id}`
-    );
+    const res = await axiosInstance.delete(`/products/${id}`);
     return res.data;
   } catch (error) {
     console.error('Error deleting product:', error);

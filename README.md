@@ -22,28 +22,48 @@ clean folder structure with dedicated route handlers for each feature.
   - Rich product detail pages with images, descriptions, pricing, size/color
     options
   - Inventory tracking
+  - Product categorization and organization
+  - Size and color variants management
+  - Product reviews and ratings system
 - **Filters & Categories**:
   - Category, color, size, and style filtering
+  - Price range filtering
+  - Search functionality
+  - Dynamic category management
 - **Shopping Experience**:
-  - User-friendly cart management (add, update, remove items)
+
+  - User-friendly cart management
   - Secure checkout process with Stripe
   - Order history and tracking
-  - Wishlist functionality for saving favorite items
+  - Wishlist functionality
+  - Coupon system for discounts
+  - Address management for shipping
+
 - **User Authentication & Authorization**:
+
   - Email/password login
   - Google OAuth integration
-  - User roles (e.g., admin, customer) for protected admin routes
+  - User roles (admin, customer)
+  - Password reset functionality
+  - Profile management
+
 - **Reviews & Ratings**:
+
   - Leave ratings and comments on products
-  - Display average ratings on product pages
-- **Brand Management**:
-  - Create and manage brands via the admin dashboard
-  - Associate products with specific brands
-- **Admin Panel**:
-  - Product creation and management
+  - Display average ratings
+  - Review management system
+  - User-specific reviews
+
+- **Admin Dashboard**:
+
+  - Product management
   - Inventory control
   - Brand management
   - Order management (view, update status)
+  - Sales analytics and reporting
+  - Customer management
+  - Coupon management
+
 - **Additional Enhancements**:
   - Stripe Webhook integration for real-time order and payment updates
   - Sitemap generation for improved SEO
@@ -51,32 +71,84 @@ clean folder structure with dedicated route handlers for each feature.
   - Responsive UI built with Tailwind CSS and NextUI components
   - Form validation with React Hook Form and Zod
   - Real-time notifications with React Hot Toast
-- **Blog Management with Sanity**:
-  - Create and manage blog posts through Sanity Studio
-  - Rich text editor for content creation
-  - Image management and optimization
+  - Interactive charts and analytics with Recharts
+  - SEO Optimization:
+    - Dynamic sitemap generation
+    - Robots.txt configuration
+    - Meta tags management
+  - Authentication Features:
+    - Google OAuth integration
+    - Email/password authentication
+    - Password reset functionality
+  - Shop Features:
+    - Product filtering and sorting
+    - Wishlist functionality
+    - Shopping cart management
+    - Checkout process
+    - Order tracking
+    - Product reviews and ratings
+    - Coupon system
+    - Address management
+  - Admin Dashboard:
+    - Product management
+    - Order management
+    - Analytics and reporting
+    - Inventory tracking
+    - Brand management
+    - Customer management
+    - Coupon management
 
 ## Tech Stack
 
 - **Frontend**:
-  - Next.js 15.1.6
+  - Next.js 15.3.1
   - React 19
   - TypeScript 5
-  - Tailwind CSS
+  - Tailwind CSS 4
+  - State Management:
+    - Zustand
+  - Form Handling:
+    - React Hook Form
+    - Zod Validation
+  - Styling:
+    - Tailwind CSS
+  - Authentication:
+    - NextAuth.js
+    - Google OAuth
+  - API Integration:
+    - Axios
+    - RESTful APIs
+  - Development Tools:
+    - ESLint
+    - Prettier
+    - TypeScript
+    - Turbopack
 - **Backend**:
   - Next.js API Routes / Route Handlers
   - Prisma 6.2.1 (ORM)
   - PostgreSQL (database)
   - Sanity.io (Headless CMS for blog)
+- **Payment Processing**:
+  - Stripe (checkout and webhook)
+- **Other Tools**:
+  - React Hot Toast (notifications)
+  - Recharts (data visualization)
 - **Authentication**:
   - NextAuth.js
   - Google OAuth
 - **Payment Processing**:
-  - Stripe (checkout and webhook)
+
+  - Stripe integration
+  - Webhook handling
+  - Payment status tracking
+
 - **Other Tools**:
   - Axios (HTTP client)
   - React Hook Form + Zod (form handling & validation)
   - React Hot Toast (notifications)
+  - Recharts (data visualization)
+  - Zustand (state management)
+  - Lucide React (icons)
 
 ## Live Preview
 
@@ -97,7 +169,7 @@ management, orders, brands, etc.).
 
 Ensure you have the following installed on your local machine:
 
-- **Node.js** (v14 or above)
+- **Node.js** (v18 or above)
 - **npm** or **yarn**
 
 ### Getting Started
@@ -119,7 +191,7 @@ Ensure you have the following installed on your local machine:
    with the following keys (adjust the values as needed):
 
    ```
-   DATABASE_URL="postgresql://username:password@hostname:port/database"
+   DATABASE_URL="mongodb://username:password@hostname:port/database"
    NEXTAUTH_SECRET="your-nextauth-secret"
    NEXTAUTH_URL="http://localhost:3000"
    GOOGLE_CLIENT_ID="your-google-client-id"

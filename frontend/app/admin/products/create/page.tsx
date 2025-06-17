@@ -409,6 +409,7 @@ export default function CreateProduct() {
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none mb-2.5'
                   />
                   <Color
+                    selectedColor={currentVariant.color}
                     onColorChange={color => handleVariantChange('color', color)}
                   />
                 </div>

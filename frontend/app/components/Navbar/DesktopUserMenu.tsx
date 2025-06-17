@@ -34,7 +34,7 @@ const DesktopUserMenu = () => {
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
-          <Link href='/orders' className='w-full'>
+          <Link href='/profile/orders' className='w-full'>
             Orders
           </Link>
         </DropdownMenuItem>

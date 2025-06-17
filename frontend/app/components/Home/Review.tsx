@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 // import { getReviews } from '@/app/lib/review';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import ReactStars from 'react-rating-star-with-type';
-import { reviews as reviewsData } from '@/app/data/review.json';
+import reviewData from '@/app/data/review.json';
 
 interface Review {
   id: number;
@@ -33,7 +33,7 @@ export default function Review() {
       try {
         // const { reviews } = await getReviews();
         // setReviews(reviews);
-        setReviews(reviewsData);
+        setReviews(reviewData.reviews);
       } catch (error) {
         console.error('Error fetching reviews', error);
       }

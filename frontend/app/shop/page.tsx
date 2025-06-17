@@ -1,5 +1,6 @@
 import Shop from './client';
 import generateSEO from '../lib/seo';
+import { Suspense } from 'react';
 
 export const generateMetadata = async () => {
   return generateSEO({
@@ -10,5 +11,9 @@ export const generateMetadata = async () => {
 };
 
 export default async function Page() {
-  return <Shop />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Shop />
+    </Suspense>
+  );
 }
