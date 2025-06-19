@@ -73,10 +73,18 @@ app.use((err, req, res, next) => {
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
 });
+
 mongoose.connection.on("error", (error) => {
   console.error("MongoDB connection error:", error);
 });
+
+if (process.env.NODE_ENV !== "production" || process.env.VERCEL !== "1") {
+  mongoose.connection.once("open", () => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  });
+}
+
+export default app;

@@ -1,11 +1,9 @@
-import axios from 'axios';
 import { Category } from '@/app/types/filter';
+import { axiosInstance } from '../axios';
 
 export async function getCategories(): Promise<Category[]> {
   try {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`
-    );
+    const res = await axiosInstance.get('/categories');
     return res.data;
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -17,10 +15,7 @@ export async function createCategory(
   categoryData: Category
 ): Promise<Category | null> {
   try {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`,
-      categoryData
-    );
+    const res = await axiosInstance.post('/categories', categoryData);
     return res.data;
   } catch (error) {
     console.error('Error creating category:', error);
@@ -33,10 +28,7 @@ export async function updateCategory(
   updateData: Partial<Category>
 ): Promise<Category | null> {
   try {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories/${id}`,
-      updateData
-    );
+    const res = await axiosInstance.put(`/categories/${id}`, updateData);
     return res.data;
   } catch (error) {
     console.error('Error updating category:', error);
@@ -46,9 +38,7 @@ export async function updateCategory(
 
 export async function deleteCategory(id: string): Promise<boolean> {
   try {
-    await axios.delete(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories/${id}`
-    );
+    await axiosInstance.delete(`/categories/${id}`);
     return true;
   } catch (error) {
     console.error('Error deleting category:', error);

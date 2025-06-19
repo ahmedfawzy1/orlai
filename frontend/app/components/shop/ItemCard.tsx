@@ -128,14 +128,10 @@ export default function ItemCard({ product }: { product: Product }) {
           disabled={!product.availableForSale || product.inventory === 0}
           className='px-4 py-2 text-black text-lg font-medium text-center w-[calc(100%-2rem)] absolute bottom-5 left-1/2 z-50 -translate-x-1/2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 bg-white rounded-lg hover:scale-105 hover:bg-gray-100 transition-all duration-300 transform-gpu cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
           aria-label={
-            product.availableForSale && product.inventory > 0
-              ? 'Add to cart'
-              : 'Product unavailable'
+            product.availableForSale ? 'Add to cart' : 'Product unavailable'
           }
         >
-          {product.availableForSale && product.inventory > 0
-            ? 'Add to Cart'
-            : 'Out of Stock'}
+          {product.availableForSale ? 'Add to Cart' : 'Out of Stock'}
         </button>
       </div>
 

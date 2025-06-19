@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { axiosInstance } from '../lib/axios';
 
 declare global {
   interface Window {
@@ -22,32 +23,21 @@ export default function GoogleLoginButton() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   const handleGoogleLogin = async (response: any) => {
-    if (!apiBaseUrl) {
-      console.error('API base URL is not defined');
-      return;
-    }
-
     try {
       setIsLoading(true);
 
-      const res = await fetch(`${apiBaseUrl}/api/auth/google`, {
+      await axiosInstance.post('/auth/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token: response.credential }),
+        data: { token: response.credential },
         credentials: 'include',
       });
 
-      if (!res.ok) {
-        throw new Error('Google authentication failed');
-      }
-
-      await res.json();
       router.push('/');
       window.location.reload();
     } catch (error) {

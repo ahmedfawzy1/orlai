@@ -1,11 +1,9 @@
-import axios from 'axios';
 import { Color } from '@/app/types/filter';
+import { axiosInstance } from '../axios';
 
 export async function getColors(): Promise<Color[]> {
   try {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/colors`
-    );
+    const res = await axiosInstance.get('/colors');
     return res.data;
   } catch (error) {
     console.error('Error fetching colors:', error);
@@ -15,10 +13,7 @@ export async function getColors(): Promise<Color[]> {
 
 export async function createColor(colorData: Color): Promise<Color | null> {
   try {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/colors`,
-      colorData
-    );
+    const res = await axiosInstance.post('/colors', colorData);
     return res.data;
   } catch (error) {
     console.error('Error creating color:', error);
@@ -31,10 +26,7 @@ export async function updateColor(
   updateData: Partial<Color>
 ): Promise<Color | null> {
   try {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/colors/${id}`,
-      updateData
-    );
+    const res = await axiosInstance.put(`/colors/${id}`, updateData);
     return res.data;
   } catch (error) {
     console.error('Error updating color:', error);
@@ -44,7 +36,7 @@ export async function updateColor(
 
 export async function deleteColor(id: string): Promise<boolean> {
   try {
-    await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/api/colors/${id}`);
+    await axiosInstance.delete(`/colors/${id}`);
     return true;
   } catch (error) {
     console.error('Error deleting color:', error);

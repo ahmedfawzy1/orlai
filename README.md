@@ -167,51 +167,44 @@ management, orders, brands, etc.).
 
 ### Prerequisites
 
-Ensure you have the following installed on your local machine:
+- Node.js 18+
+- MongoDB database
+- Stripe account (for payments)
+- Google OAuth credentials (for authentication)
 
-- **Node.js** (v18 or above)
-- **npm** or **yarn**
+### Setup
 
-### Getting Started
-
-1. Clone the repository:
+1. **Clone the repository**
 
    ```bash
    git clone https://github.com/ahmedfawzy1/lustria
+   cd lustria
    ```
 
-2. Install dependencies:
+2. **Install dependencies**
 
    ```bash
-   cd lustria
    npm install
    ```
 
-3. Set up environment variables: Create a `.env` file at the root of the project
-   with the following keys (adjust the values as needed):
+3. **Environment Variables**
 
-   ```
-   DATABASE_URL="mongodb://username:password@hostname:port/database"
-   NEXTAUTH_SECRET="your-nextauth-secret"
-   NEXTAUTH_URL="http://localhost:3000"
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_CLIENT_SECRET="your-google-client-secret"
-   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloudinary-cloud-name"
-   NEXT_PUBLIC_CLOUDINARY_API_KEY="your-cloudinary-api-key"
-   CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
-   NEXT_PUBLIC_STRIPE_PUBLIC_KEY=your-stripe-public-key
-   STRIPE_SECRET_KEY=your-stripe-secret-key
-   WEBHOOK_SIGNIN_SECRET=your-stripe-webhook-secret
+   Create `.env` files in both frontend and backend directories:
+
+   **Backend (.env)**
+
+   ```env
+   MONGODB_URI=your_mongodb_connection_string
    ```
 
-4. Generate the Prisma client and run migrations:
+   **Frontend (.env.local)**
 
-   ```bash
-   npx prisma generate
-   npx prisma migrate dev
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:5001/api
    ```
 
-5. Run the development server:
+4. **Start development servers**
+
    ```bash
    npm run dev
    ```

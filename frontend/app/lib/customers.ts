@@ -12,7 +12,7 @@ export async function getCustomers(
   limit: number = 8
 ): Promise<CustomerResponse> {
   try {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/customers?page=${page}&limit=${limit}`;
+    const url = `/customers?page=${page}&limit=${limit}`;
     const res = await axiosInstance.get(url);
     return res.data;
   } catch (error) {
@@ -23,7 +23,7 @@ export async function getCustomers(
 
 export async function updateCustomer(id: string, customer: any) {
   try {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/customers/${id}`;
+    const url = `/customers/${id}`;
     const res = await axiosInstance.put(url, customer);
     return res.data;
   } catch (error) {
@@ -34,7 +34,7 @@ export async function updateCustomer(id: string, customer: any) {
 
 export async function deleteCustomer(id: string) {
   try {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/customers/${id}`;
+    const url = `/customers/${id}`;
     const res = await axiosInstance.delete(url);
 
     return res.data;
