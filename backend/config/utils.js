@@ -10,6 +10,7 @@ export const generateToken = (userId, res) => {
     secure: true,
     sameSite: "None",
     path: "/",
+    domain: ".levoire.shop",
   });
   return { accessToken, refreshToken };
 };

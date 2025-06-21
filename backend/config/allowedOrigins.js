@@ -5,6 +5,8 @@ const allowedOrigins = [
   "https://lustria2.vercel.app",
   "https://www.lustria.vercel.app",
   "https://lustria-production.up.railway.app",
+  "https://lustria.levoire.shop",
+  "https://www.lustria.levoire.shop",
   process.env.BACKEND_API_URL,
 ].filter(Boolean);
 

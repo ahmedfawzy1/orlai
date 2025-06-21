@@ -37,7 +37,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Routes
-app.use("/api/", rootRoutes);
+app.use("/", rootRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/products", productRoutes);
