@@ -70,8 +70,8 @@ export default function ReviewOrder() {
       }
 
       setShowDialog(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err: any) {
+      setError(err.response.data.error || 'An error occurred');
     } finally {
       setLoading(false);
     }

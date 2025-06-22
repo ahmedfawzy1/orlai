@@ -9,10 +9,12 @@ import { Input } from '../components/ui/input';
 import { Minus, Plus } from 'lucide-react';
 import { Skeleton } from '../components/ui/skeleton';
 import { useCartStore } from '../store/useCartStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { toast } from 'react-hot-toast';
 
 export default function Client() {
   const router = useRouter();
-
+  const { authUser } = useAuthStore();
   const {
     items,
     delivery,
@@ -48,6 +50,14 @@ export default function Client() {
 
   const handleApplyDiscount = async () => {
     await applyDiscount();
+  };
+
+  const handleCheckout = () => {
+    if (!authUser) {
+      toast.error('Please login to proceed to checkout');
+      return;
+    }
+    router.push('/checkout/address');
   };
 
   const subtotal = items.reduce(
@@ -238,7 +248,8 @@ export default function Client() {
               </div>
               <Button
                 className='w-full mt-4 sm:mt-6 py-4 sm:py-6 text-base font-normal rounded-lg'
-                onClick={() => router.push('/checkout/address')}
+                onClick={handleCheckout}
+                disabled={items.length === 0}
               >
                 Proceed to Checkout
               </Button>

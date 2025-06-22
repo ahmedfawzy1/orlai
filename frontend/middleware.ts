@@ -2,16 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get('jwt');
-
   const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith('/admin')) {
+  if (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/wishlist') ||
+    pathname.startsWith('/checkout')
+  ) {
     if (!token) {
-      return NextResponse.redirect(new URL('/404', req.url));
+      return NextResponse.redirect(new URL('/login', req.url));
     }
   }
 
-  if (token && (pathname === '/login' || pathname === '/sign-up')) {
+  if (
+    token &&
+    (pathname === '/login' ||
+      pathname === '/sign-up' ||
+      pathname === '/forget_password')
+  ) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
@@ -20,12 +29,12 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/sign-up',
     '/login',
-    '/admin/:path*',
-    '/cart',
+    '/sign-up',
+    '/forget_password',
+    '/profile/:path*',
     '/wishlist',
-    '/orders/:path*',
     '/checkout/:path*',
+    '/admin/:path*',
   ],
 };

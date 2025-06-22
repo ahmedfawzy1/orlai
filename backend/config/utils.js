@@ -10,7 +10,7 @@ export const generateToken = (userId, res) => {
     secure: true,
     sameSite: "None",
     path: "/",
-    domain: ".levoire.shop",
+    domain: process.env.NODE_ENV === "production" ? ".levoire.shop" : "localhost",
   });
   return { accessToken, refreshToken };
 };

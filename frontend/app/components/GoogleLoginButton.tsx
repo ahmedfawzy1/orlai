@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { axiosInstance } from '../lib/axios';
+import { useCartStore } from '../store/useCartStore';
 
 declare global {
   interface Window {
@@ -37,6 +38,9 @@ export default function GoogleLoginButton() {
         data: { token: response.credential },
         credentials: 'include',
       });
+
+      const cartStore = useCartStore.getState();
+      await cartStore.syncLocalCartToBackend();
 
       router.push('/');
       window.location.reload();

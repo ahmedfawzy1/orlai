@@ -10,6 +10,7 @@ import {
   updateCart as apiUpdateCart,
 } from '../lib/cart';
 import { toast } from 'react-hot-toast';
+import { useAuthStore } from './useAuthStore';
 
 interface CartState {
   items: CartItem[];
@@ -28,6 +29,7 @@ interface CartState {
   clearCart: () => Promise<void>;
   setDiscount: (code: string) => void;
   applyDiscount: () => Promise<void>;
+  syncLocalCartToBackend: () => Promise<void>;
 }
 
 export const useCartStore = create<CartState>()(
@@ -67,14 +69,16 @@ export const useCartStore = create<CartState>()(
         set({ items: updatedItems, total: updatedTotal });
         toast.success('Item added to cart!');
 
-        // Fire and forget
-        apiAddToCart(
-          item.product._id,
-          item.variantId,
-          item.color.name,
-          item.size.name,
-          item.quantity
-        ).catch(() => toast.error('Failed to sync with backend'));
+        const authStore = useAuthStore.getState();
+        if (authStore.authUser) {
+          apiAddToCart(
+            item.product._id,
+            item.variantId,
+            item.color.name,
+            item.size.name,
+            item.quantity
+          ).catch(() => toast.error('Failed to sync with backend'));
+        }
       },
 
       updateCart: async (itemId, quantity) => {
@@ -91,9 +95,12 @@ export const useCartStore = create<CartState>()(
         set({ items: updatedItems, total: updatedTotal });
         toast.success('Quantity updated');
 
-        apiUpdateCart(itemId, quantity).catch(() =>
-          toast.error('Failed to sync quantity')
-        );
+        const authStore = useAuthStore.getState();
+        if (authStore.authUser) {
+          apiUpdateCart(itemId, quantity).catch(() =>
+            toast.error('Failed to sync quantity')
+          );
+        }
       },
 
       removeFromCart: async itemId => {
@@ -108,9 +115,12 @@ export const useCartStore = create<CartState>()(
         set({ items: updatedItems, total: updatedTotal });
         toast.success('Item removed');
 
-        apiRemoveFromCart(itemId).catch(() =>
-          toast.error('Failed to sync removal')
-        );
+        const authStore = useAuthStore.getState();
+        if (authStore.authUser) {
+          apiRemoveFromCart(itemId).catch(() =>
+            toast.error('Failed to sync removal')
+          );
+        }
       },
 
       clearCart: async () => {
@@ -124,9 +134,12 @@ export const useCartStore = create<CartState>()(
         });
         toast.success('Cart cleared');
 
-        apiClearCart().catch(() =>
-          toast.error('Failed to clear cart in backend')
-        );
+        const authStore = useAuthStore.getState();
+        if (authStore.authUser) {
+          apiClearCart().catch(() =>
+            toast.error('Failed to clear cart in backend')
+          );
+        }
       },
 
       setDiscount: code => set({ discount: code }),
@@ -160,6 +173,27 @@ export const useCartStore = create<CartState>()(
           }
         } catch (error: any) {
           toast.error(error.response?.data?.message || 'Invalid coupon');
+        }
+      },
+
+      syncLocalCartToBackend: async () => {
+        const { items } = get();
+        if (items.length === 0) return;
+
+        try {
+          for (const item of items) {
+            await apiAddToCart(
+              item.product._id,
+              item.variantId,
+              item.color.name,
+              item.size.name,
+              item.quantity
+            );
+          }
+          console.log('Local cart synced to backend successfully');
+        } catch (error) {
+          console.error('Failed to sync local cart to backend:', error);
+          toast.error('Failed to sync cart items to backend');
         }
       },
     }),

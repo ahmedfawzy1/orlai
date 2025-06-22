@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { useCartStore } from './useCartStore';
 
 interface User {
   _id: string;
@@ -53,6 +54,8 @@ export const useAuthStore = create<AuthState>(set => ({
     try {
       const res = await axiosInstance.get(`/auth/check`);
       set({ authUser: res.data });
+      const cartStore = useCartStore.getState();
+      await cartStore.syncLocalCartToBackend();
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status !== 401) {
         console.error('Error checking auth:', error.response?.data?.message);
@@ -74,6 +77,9 @@ export const useAuthStore = create<AuthState>(set => ({
       const res = await axiosInstance.post('/auth/signup', data);
       set({ authUser: res.data });
       toast.success('Account created successfully');
+      const cartStore = useCartStore.getState();
+      await cartStore.syncLocalCartToBackend();
+
       return true;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status !== 401) {
@@ -92,6 +98,9 @@ export const useAuthStore = create<AuthState>(set => ({
       const res = await axiosInstance.post('/auth/login', data);
       set({ authUser: res.data });
       toast.success('Logged in successfully');
+      const cartStore = useCartStore.getState();
+      await cartStore.syncLocalCartToBackend();
+
       return true;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status !== 401) {

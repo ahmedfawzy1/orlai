@@ -47,6 +47,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const { authUser, logout } = useAuthStore();
   const { items, removeFromCart, getCart } = useCartStore();
@@ -84,6 +85,18 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
       toast.error('Please login to access this page');
       return;
     }
+  };
+
+  const handleMenuLinkClick = () => {
+    setMenuOpen(false);
+  };
+
+  const handleCheckout = () => {
+    if (!authUser) {
+      toast.error('Please login to proceed to checkout');
+      return;
+    }
+    router.push('/checkout/address');
   };
 
   return (
@@ -258,8 +271,9 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                     </Link>
                   </SheetClose>
                   <button
-                    onClick={() => router.push('/checkout/address')}
+                    onClick={handleCheckout}
                     className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'
+                    disabled={items.length === 0}
                   >
                     Checkout
                   </button>
@@ -267,7 +281,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
               </div>
             </SheetContent>
           </Sheet>
-          <Sheet>
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button
                 className='w-6 hover:bg-transparent'
@@ -281,7 +295,11 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
             <SheetContent className='overflow-y-auto'>
               <SheetHeader>
                 <SheetTitle>
-                  <Link href={logo.url} className='flex items-center gap-2'>
+                  <Link
+                    href={logo.url}
+                    className='flex items-center gap-2'
+                    onClick={handleMenuLinkClick}
+                  >
                     <Image
                       width={logo.width}
                       height={logo.height}
@@ -299,12 +317,18 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                   collapsible
                   className='flex w-full flex-col gap-4'
                 >
-                  {menuItems.map(item => renderMobileMenuItem(item))}
+                  {menuItems.map(item =>
+                    renderMobileMenuItem(item, handleMenuLinkClick)
+                  )}
                 </Accordion>
                 <div className='flex flex-col gap-3'>
                   {authUser ? (
                     <>
-                      <Link href='/profile' className='w-full'>
+                      <Link
+                        href='/profile'
+                        className='w-full'
+                        onClick={handleMenuLinkClick}
+                      >
                         <Button
                           variant='outline'
                           size='sm'
@@ -314,7 +338,11 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                         </Button>
                       </Link>
                       {authUser.role === 'admin' && (
-                        <Link href='/admin' className='w-full'>
+                        <Link
+                          href='/admin'
+                          className='w-full'
+                          onClick={handleMenuLinkClick}
+                        >
                           <Button
                             variant='outline'
                             size='sm'
@@ -327,7 +355,10 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                       <Button
                         variant='default'
                         size='sm'
-                        onClick={() => logout()}
+                        onClick={() => {
+                          logout();
+                          setMenuOpen(false);
+                        }}
                         className='py-[18px] cursor-pointer'
                       >
                         Logout
@@ -336,10 +367,17 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                   ) : (
                     <>
                       <Button asChild variant='outline'>
-                        <Link href={auth.login.url}>{auth.login.title}</Link>
+                        <Link
+                          href={auth.login.url}
+                          onClick={handleMenuLinkClick}
+                        >
+                          {auth.login.title}
+                        </Link>
                       </Button>
                       <Button asChild variant='default'>
-                        <Link href={'/signup'}>Sign up</Link>
+                        <Link href={'/sign-up'} onClick={handleMenuLinkClick}>
+                          Sign up
+                        </Link>
                       </Button>
                     </>
                   )}
@@ -353,7 +391,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   );
 };
 
-const renderMobileMenuItem = (item: MenuItem) => {
+const renderMobileMenuItem = (item: MenuItem, onLinkClick: () => void) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className='border-b-0'>
@@ -362,7 +400,11 @@ const renderMobileMenuItem = (item: MenuItem) => {
         </AccordionTrigger>
         <AccordionContent className='mt-2'>
           {item.items.map(subItem => (
-            <SubMenuLink key={subItem.title} item={subItem} />
+            <SubMenuLink
+              key={subItem.title}
+              item={subItem}
+              onLinkClick={onLinkClick}
+            />
           ))}
         </AccordionContent>
       </AccordionItem>
@@ -370,17 +412,29 @@ const renderMobileMenuItem = (item: MenuItem) => {
   }
 
   return (
-    <Link key={item.title} href={item.url} className='text-md font-semibold'>
+    <Link
+      key={item.title}
+      href={item.url}
+      className='text-md font-semibold'
+      onClick={onLinkClick}
+    >
       {item.title}
     </Link>
   );
 };
 
-const SubMenuLink = ({ item }: { item: MenuItem }) => {
+const SubMenuLink = ({
+  item,
+  onLinkClick,
+}: {
+  item: MenuItem;
+  onLinkClick: () => void;
+}) => {
   return (
     <Link
       className='flex flex-row gap-4 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-muted hover:text-accent-foreground'
       href={item.url}
+      onClick={onLinkClick}
     >
       <div className='text-foreground'>{item.icon && icons[item.icon]}</div>
       <div>

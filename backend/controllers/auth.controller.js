@@ -71,14 +71,7 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.cookie("jwt", "", {
-      maxAge: 0,
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      path: "/",
-      domain: ".levoire.shop",
-    });
+    res.cookie("jwt", "", { maxAge: 0 });
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Error in logout controller", error.message);

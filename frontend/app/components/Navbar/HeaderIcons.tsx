@@ -67,6 +67,14 @@ const HeaderIcons = () => {
     setSearchQuery('');
   };
 
+  const handleCheckout = () => {
+    if (!authUser) {
+      toast.error('Please login to proceed to checkout');
+      return;
+    }
+    router.push('/checkout/address');
+  };
+
   return (
     <div className='flex items-center gap-3'>
       <Sheet open={searchOpen} onOpenChange={setSearchOpen}>
@@ -234,7 +242,7 @@ const HeaderIcons = () => {
                   View Cart
                 </Link>
                 <button
-                  onClick={() => router.push('/checkout/address')}
+                  onClick={handleCheckout}
                   className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'
                 >
                   Checkout
