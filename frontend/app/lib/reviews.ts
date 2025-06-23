@@ -54,3 +54,22 @@ export const createReview = async (
     throw error;
   }
 };
+
+export const checkCanReview = async (
+  productId: string
+): Promise<{
+  canReview: boolean;
+  hasPurchased: boolean;
+  hasReviewed: boolean;
+  message: string;
+}> => {
+  try {
+    const response = await axiosInstance.get(
+      `/reviews/${productId}/can-review`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error checking review status:', error);
+    throw error;
+  }
+};

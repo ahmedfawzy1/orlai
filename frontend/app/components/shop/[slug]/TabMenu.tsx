@@ -17,8 +17,15 @@ import toast from 'react-hot-toast';
 
 export default function TabMenu({ product }: { product: Product }) {
   const [showReviewBox, setShowReviewBox] = useState(false);
-  const { reviews, getProductReviews, createReview, isLoading, error } =
-    useReviewStore();
+  const {
+    reviews,
+    getProductReviews,
+    createReview,
+    checkCanReview,
+    reviewStatus,
+    isLoading,
+    error,
+  } = useReviewStore();
   const { authUser } = useAuthStore();
   const [newReview, setNewReview] = useState<NewReview>({
     name: '',
@@ -32,6 +39,12 @@ export default function TabMenu({ product }: { product: Product }) {
       getProductReviews(product._id);
     }
   }, [product?._id, getProductReviews]);
+
+  useEffect(() => {
+    if (product?._id && authUser) {
+      checkCanReview(product._id);
+    }
+  }, [product?._id, authUser, checkCanReview]);
 
   useEffect(() => {
     if (showReviewBox && authUser) {
@@ -65,10 +78,27 @@ export default function TabMenu({ product }: { product: Product }) {
       });
       setShowReviewBox(false);
       toast.success('Review submitted successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting review:', error);
-      toast.error('Failed to submit review. Please try again.');
+      const errorMessage =
+        error.response?.data?.message ||
+        'Failed to submit review. Please try again.';
+      toast.error(errorMessage);
     }
+  };
+
+  const handleReviewButtonClick = () => {
+    if (!authUser) {
+      toast.error('Please login to write a review');
+      return;
+    }
+
+    if (!reviewStatus?.canReview) {
+      toast.error(reviewStatus?.message || 'You cannot review this product');
+      return;
+    }
+
+    setShowReviewBox(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -146,17 +176,15 @@ export default function TabMenu({ product }: { product: Product }) {
         <div className='w-full flex justify-between items-center'>
           <h3 className='text-lg md:text-xl font-bold'>Customer Reviews</h3>
           <button
-            className='bg-black text-sm text-white px-4 py-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50'
-            onClick={() => {
-              if (!authUser) {
-                toast.error('Please login to write a review');
-                return;
-              }
-              setShowReviewBox(true);
-            }}
-            disabled={showReviewBox}
+            className={`text-sm px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
+              reviewStatus?.canReview
+                ? 'bg-black text-white hover:bg-gray-800 focus:ring-black'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            onClick={handleReviewButtonClick}
+            disabled={showReviewBox || !reviewStatus?.canReview}
           >
-            Write a Review
+            {reviewStatus?.hasReviewed ? 'Already Reviewed' : 'Write a Review'}
           </button>
         </div>
 
@@ -243,12 +271,12 @@ export default function TabMenu({ product }: { product: Product }) {
               </div>
             </form>
           )}
-          {reviews.length === 0 && !showReviewBox ? (
+          {(!reviews || reviews.length === 0) && !showReviewBox ? (
             <p className='text-gray-500'>
               No reviews yet. Be the first to review this product!
             </p>
           ) : (
-            reviews.map(review => (
+            reviews?.map(review => (
               <div
                 key={review._id}
                 className='min-w-[315px] px-5 pt-3 pb-5 border border-gray-200 rounded-lg shadow-sm'

@@ -96,6 +96,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
       toast.error('Please login to proceed to checkout');
       return;
     }
+    setCartMenuOpen(false);
     router.push('/checkout/address');
   };
 
@@ -266,6 +267,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                     <Link
                       href='/cart'
                       className='w-full border border-black rounded-md py-2 mb-2 font-medium hover:bg-gray-100 transition block text-center'
+                      onClick={() => setCartMenuOpen(false)}
                     >
                       View Cart
                     </Link>

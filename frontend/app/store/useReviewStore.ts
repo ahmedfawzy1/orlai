@@ -1,6 +1,18 @@
 import { create } from 'zustand';
 import { Review, NewReview } from '../types/review';
-import { getProductReviews, getAllReviews, createReview } from '../lib/reviews';
+import {
+  getProductReviews,
+  getAllReviews,
+  createReview,
+  checkCanReview,
+} from '../lib/reviews';
+
+interface ReviewStatus {
+  canReview: boolean;
+  hasPurchased: boolean;
+  hasReviewed: boolean;
+  message: string;
+}
 
 interface ReviewStore {
   reviews: Review[];
@@ -9,6 +21,7 @@ interface ReviewStore {
   totalReviews: number;
   isLoading: boolean;
   error: string | null;
+  reviewStatus: ReviewStatus | null;
   setReviews: (reviews: Review[]) => void;
   getProductReviews: (
     productId: string,
@@ -21,16 +34,18 @@ interface ReviewStore {
     sort?: string
   ) => Promise<void>;
   createReview: (productId: string, reviewData: NewReview) => Promise<void>;
+  checkCanReview: (productId: string) => Promise<void>;
   clearError: () => void;
 }
 
-export const useReviewStore = create<ReviewStore>(set => ({
+export const useReviewStore = create<ReviewStore>((set, get) => ({
   reviews: [],
   currentPage: 1,
   totalPages: 0,
   totalReviews: 0,
   isLoading: false,
   error: null,
+  reviewStatus: null,
 
   setReviews: (reviews: Review[]) => set({ reviews }),
 
@@ -82,10 +97,25 @@ export const useReviewStore = create<ReviewStore>(set => ({
         totalPages: response.totalPages,
         totalReviews: response.totalReviews,
       });
+      // Also refresh the review status
+      get().checkCanReview(productId);
     } catch (error) {
       set({ error: 'Failed to create review' });
       console.error('Error creating review:', error);
       throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  checkCanReview: async (productId: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const status = await checkCanReview(productId);
+      set({ reviewStatus: status });
+    } catch (error) {
+      set({ error: 'Failed to check review status' });
+      console.error('Error checking review status:', error);
     } finally {
       set({ isLoading: false });
     }

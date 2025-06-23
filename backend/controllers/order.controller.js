@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import dotenv from "dotenv";
 import Size from "../models/size.model.js";
 import Color from "../models/color.model.js";
+import Review from "../models/review.model.js";
 
 dotenv.config();
 
@@ -108,11 +109,27 @@ export const createOrder = async (req, res) => {
 // Get all orders for a customer
 export const getCustomerOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ customer: req.user._id })
+    const ordersFromDB = await Order.find({ customer: req.user._id })
       .populate("items.product")
       .populate("items.size")
       .populate("items.color")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const orders = await Promise.all(
+      ordersFromDB.map(async (order) => {
+        const itemsWithReviewStatus = await Promise.all(
+          order.items.map(async (item) => {
+            const review = await Review.findOne({
+              product: item.product._id,
+              email: req.user.email,
+            });
+            return { ...item, hasReviewed: !!review };
+          })
+        );
+        return { ...order, items: itemsWithReviewStatus };
+      })
+    );
 
     res.status(200).json({
       success: true,

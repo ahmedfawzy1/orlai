@@ -10,7 +10,8 @@ interface OrderItem {
     images: string[];
     priceRange: {
       minVariantPrice: number;
-    };
+      maxVariantPrice: number;
+    }[];
   };
   quantity: number;
   size: {
@@ -22,6 +23,7 @@ interface OrderItem {
     name: string;
   };
   price: number;
+  hasReviewed?: boolean;
 }
 
 export interface Order {

@@ -72,6 +72,7 @@ const HeaderIcons = () => {
       toast.error('Please login to proceed to checkout');
       return;
     }
+    setCartMenuOpen(false);
     router.push('/checkout/address');
   };
 

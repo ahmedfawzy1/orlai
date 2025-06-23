@@ -157,7 +157,10 @@ export default function OrdersPage() {
                 </div>
               </div>
               <div className='font-bold text-lg mt-2 md:mt-0'>
-                ${order.items[0].product.priceRange.minVariantPrice.toFixed(2)}
+                $
+                {order.items[0].product.priceRange?.[0]?.minVariantPrice?.toFixed(
+                  2
+                ) ?? '0.00'}
               </div>
 
               <div className='flex flex-col gap-2 w-full md:w-auto md:flex-col md:items-end'>
@@ -168,35 +171,32 @@ export default function OrdersPage() {
                 >
                   View Order
                 </Button>
-                <Button
-                  variant={
-                    order.orderStatus === 'delivered'
-                      ? 'default'
-                      : 'destructive'
-                  }
-                  className='w-full mt-1'
-                  disabled={
-                    order.orderStatus === 'delivered'
-                      ? false
-                      : order.orderStatus === 'cancelled' ||
-                        cancellingId === order._id
-                  }
-                  onClick={() => {
-                    if (order.orderStatus === 'delivered') {
-                      router.push(`/shop/${order.items[0].product.slug}`);
-                    } else {
-                      openCancelDialog(order._id);
-                    }
-                  }}
-                >
-                  {order.orderStatus === 'delivered'
-                    ? 'Write A Review'
-                    : order.orderStatus === 'cancelled'
-                    ? 'Cancelled'
-                    : cancellingId === order._id
-                    ? 'Cancelling...'
-                    : 'Cancel Order'}
-                </Button>
+
+                {order.orderStatus === 'delivered' &&
+                  !order.items[0].hasReviewed && (
+                    <Button
+                      className='w-full mt-1'
+                      onClick={() =>
+                        router.push(`/shop/${order.items[0].product.slug}`)
+                      }
+                    >
+                      Write a Review
+                    </Button>
+                  )}
+
+                {order.orderStatus !== 'delivered' &&
+                  order.orderStatus !== 'cancelled' && (
+                    <Button
+                      variant='destructive'
+                      className='w-full mt-1'
+                      disabled={cancellingId === order._id}
+                      onClick={() => openCancelDialog(order._id)}
+                    >
+                      {cancellingId === order._id
+                        ? 'Cancelling...'
+                        : 'Cancel Order'}
+                    </Button>
+                  )}
               </div>
             </div>
           ))}

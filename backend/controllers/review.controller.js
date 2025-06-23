@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Product from "../models/product.model.js";
 import Review from "../models/review.model.js";
+import Order from "../models/order.model.js";
 
 export const createReview = async (req, res) => {
   try {
@@ -27,6 +28,23 @@ export const createReview = async (req, res) => {
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if user has purchased this product
+    const hasPurchased = await hasUserPurchasedProduct(req.user._id, productId);
+    if (!hasPurchased) {
+      return res.status(403).json({
+        message: "You can only review products you have purchased and received",
+      });
+    }
+
+    // Check if user has already reviewed this product
+    const existingReview = await Review.findOne({
+      product: productId,
+      email: email,
+    });
+    if (existingReview) {
+      return res.status(400).json({ message: "You have already reviewed this product" });
     }
 
     // Create new review
@@ -123,5 +141,58 @@ export const getAllReviews = async (req, res) => {
   } catch (error) {
     console.error("Error fetching all reviews:", error);
     res.status(500).json({ message: "Error fetching reviews", error: error.message });
+  }
+};
+
+const hasUserPurchasedProduct = async (userId, productId) => {
+  try {
+    const order = await Order.findOne({
+      customer: userId,
+      "items.product": productId,
+      orderStatus: "delivered",
+    });
+    return !!order;
+  } catch (error) {
+    console.error("Error checking purchase history:", error);
+    return false;
+  }
+};
+
+export const checkCanReview = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+
+    // Check if product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if user has purchased this product
+    const hasPurchased = await hasUserPurchasedProduct(req.user._id, productId);
+
+    // Check if user has already reviewed this product
+    const existingReview = await Review.findOne({
+      product: productId,
+      email: req.user.email,
+    });
+
+    res.status(200).json({
+      canReview: hasPurchased && !existingReview,
+      hasPurchased,
+      hasReviewed: !!existingReview,
+      message: hasPurchased
+        ? existingReview
+          ? "You have already reviewed this product"
+          : "You can review this product"
+        : "You can only review products you have purchased and received",
+    });
+  } catch (error) {
+    console.error("Error checking review status:", error);
+    res.status(500).json({ message: "Error checking review status", error: error.message });
   }
 };
