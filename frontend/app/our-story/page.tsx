@@ -11,22 +11,19 @@ export const generateMetadata = async () => {
 export default function OurStory() {
   return (
     <div className='min-h-screen bg-gradient-to-b from-white to-gray-50'>
-      {/* Hero Section */}
       <div className='relative h-[40vh] w-full bg-gray-900 flex items-center justify-center'>
         <div className='absolute inset-0 bg-gradient-to-r from-black/30 to-blue-600/30' />
         <div className='relative z-10 text-center space-y-4'>
-          <h1 className='text-6xl font-bold text-white tracking-tight'>
+          <h1 className='text-4xl md:text-6xl font-bold text-white tracking-tight'>
             Our Story
           </h1>
           <p className='text-xl text-gray-200 max-w-2xl mx-auto'>
-            Crafting excellence since 2020
+            Crafting excellence since 2025
           </p>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className='max-w-7xl mx-auto px-4 py-20 space-y-20'>
-        {/* History Section */}
         <section className='space-y-8'>
           <div className='text-center space-y-4'>
             <h2 className='text-4xl font-bold text-gray-900'>Our Journey</h2>
@@ -84,7 +81,6 @@ export default function OurStory() {
           </div>
         </section>
 
-        {/* Mission Section */}
         <section className='bg-white p-12 rounded-2xl shadow-xl'>
           <div className='max-w-4xl mx-auto space-y-8'>
             <div className='text-center space-y-4'>

@@ -26,7 +26,7 @@ export const footerLinks = [
       { href: '/login', label: 'Login' },
       { href: '/cart', label: 'My Cart' },
       { href: '/wishlist', label: 'My Wishlist' },
-      { href: '/order', label: 'My Orders' },
+      { href: '/profile/orders', label: 'My Orders' },
     ],
   },
   {
