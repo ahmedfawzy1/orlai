@@ -287,6 +287,12 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     order.orderStatus = status;
+
+    // If order is COD and status is delivered, mark payment as completed
+    if (order.paymentMethod === "cod" && status === "delivered") {
+      order.paymentStatus = "completed";
+    }
+
     await order.save();
 
     res.status(200).json({

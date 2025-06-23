@@ -244,7 +244,7 @@ const HeaderIcons = () => {
                 </Link>
                 <button
                   onClick={handleCheckout}
-                  className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'
+                  className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition cursor-pointer'
                 >
                   Checkout
                 </button>

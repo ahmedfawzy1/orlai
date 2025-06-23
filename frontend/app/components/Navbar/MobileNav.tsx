@@ -274,7 +274,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                   </SheetClose>
                   <button
                     onClick={handleCheckout}
-                    className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition'
+                    className='w-full bg-black text-white rounded-md py-2 font-medium hover:bg-gray-900 transition cursor-pointer'
                     disabled={items.length === 0}
                   >
                     Checkout
