@@ -120,14 +120,27 @@ export const getAllReviews = async (req, res) => {
   try {
     const { page = 1, limit = 10, sort = "-createdAt" } = req.query;
 
-    const reviews = await Review.find()
-      .populate("product", "name price images")
+    const uniqueFiveStarReviewIds = await Review.aggregate([
+      { $match: { rating: 5 } },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: "$email",
+          reviewId: { $first: "$_id" },
+        },
+      },
+    ]);
+
+    const reviewIds = uniqueFiveStarReviewIds.map((item) => item.reviewId);
+
+    const total = reviewIds.length;
+
+    // Fetch the full review documents for the unique IDs
+    const reviews = await Review.find({ _id: { $in: reviewIds } })
+      .populate("product", "name priceRange images")
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
-
-    // Get total count for pagination
-    const total = await Review.countDocuments();
 
     if (!reviews || reviews.length === 0) {
       return res.status(404).json({ message: "No reviews found" });

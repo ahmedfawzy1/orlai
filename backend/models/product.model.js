@@ -162,17 +162,22 @@ const productSchema = new mongoose.Schema(
 
 // Virtual field for inventory
 productSchema.virtual("inventory").get(function () {
+  if (!this.variants || !Array.isArray(this.variants)) {
+    return 0;
+  }
   return this.variants.reduce((sum, variant) => sum + variant.stock, 0);
 });
 
 // Middleware to automatically update 'availableForSale' based on inventory
 productSchema.pre("save", function (next) {
-  const inventory = this.variants.reduce((sum, variant) => sum + variant.stock, 0);
+  if (this.variants && Array.isArray(this.variants)) {
+    const inventory = this.variants.reduce((sum, variant) => sum + variant.stock, 0);
 
-  if (inventory === 0) {
-    this.availableForSale = false;
-  } else if (inventory > 0 && this.availableForSale === false) {
-    this.availableForSale = true;
+    if (inventory === 0) {
+      this.availableForSale = false;
+    } else if (inventory > 0 && this.availableForSale === false) {
+      this.availableForSale = true;
+    }
   }
   next();
 });

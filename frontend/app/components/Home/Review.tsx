@@ -2,10 +2,9 @@
 
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
-// import { getReviews } from '@/app/lib/review';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import ReactStars from 'react-rating-star-with-type';
-import reviewData from '@/app/data/review.json';
+import { useReviewStore } from '@/app/store/useReviewStore';
 
 interface Review {
   id: number;
@@ -23,24 +22,14 @@ interface Review {
 }
 
 export default function Review() {
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [scrollLeft, setScrollLeft] = useState(false);
   const [scrollRight, setScrollRight] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { reviews, getAllReviews } = useReviewStore();
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        // const { reviews } = await getReviews();
-        // setReviews(reviews);
-        setReviews(reviewData.reviews);
-      } catch (error) {
-        console.error('Error fetching reviews', error);
-      }
-    };
-
-    fetchReviews();
-  }, []);
+    getAllReviews();
+  }, [getAllReviews]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -143,9 +132,7 @@ export default function Review() {
                   width={24}
                   height={30}
                 />
-                <p className='text-xl font-bold mb-0.5'>
-                  {review.User.username}.
-                </p>
+                <p className='text-xl font-bold mb-0.5'>{review.name}.</p>
               </div>
             </div>
           ))}
