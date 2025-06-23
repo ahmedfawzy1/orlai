@@ -59,13 +59,14 @@ export const createReview = async (req, res) => {
     // Save review
     await newReview.save();
 
+    // Calculate new average rating incrementally
+    const oldTotalRating = product.averageRating * product.reviews.length;
+    const newTotalRating = oldTotalRating + rating;
+    const newAverageRating = newTotalRating / (product.reviews.length + 1);
+
     // Add review to product and update average rating
     product.reviews.push(newReview._id);
-
-    // Calculate new average rating
-    const allReviews = await Review.find({ product: productId });
-    const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
-    product.averageRating = totalRating / allReviews.length;
+    product.averageRating = newAverageRating;
 
     await product.save();
 
