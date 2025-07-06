@@ -2,4 +2,4 @@ import blog from '../schemas/blog'
 import author from '../schemas/author'
 import category from '../schemas/category'
 
-export const schemaTypes = [blog, author, category]
+export const schema = [blog, author, category]
