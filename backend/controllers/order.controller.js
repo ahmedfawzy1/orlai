@@ -93,6 +93,9 @@ export const createOrder = async (req, res) => {
       shippingCost,
     });
 
+    // Reserve inventory immediately when order is created
+    await reserveInventoryForOrder(order);
+
     res.status(201).json({
       success: true,
       data: order,
@@ -181,7 +184,7 @@ export const cancelOrder = async (req, res) => {
     const order = await Order.findOne({
       _id: req.params.id,
       customer: req.user._id,
-    });
+    }).populate("items.product");
 
     if (!order) {
       return res.status(404).json({
@@ -205,7 +208,12 @@ export const cancelOrder = async (req, res) => {
       });
     }
 
+    const previousStatus = order.orderStatus;
     order.orderStatus = "cancelled";
+
+    // Handle inventory restoration if needed
+    await handleInventoryUpdate(order, previousStatus, "cancelled");
+
     await order.save();
 
     res.status(200).json({
@@ -269,7 +277,7 @@ export const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const order = await Order.findById(id);
+    const order = await Order.findById(id).populate("items.product");
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -286,7 +294,11 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
+    const previousStatus = order.orderStatus;
     order.orderStatus = status;
+
+    // Handle inventory updates based on status changes
+    await handleInventoryUpdate(order, previousStatus, status);
 
     // If order is COD and status is delivered, mark payment as completed
     if (order.paymentMethod === "cod" && status === "delivered") {
@@ -305,5 +317,74 @@ export const updateOrderStatus = async (req, res) => {
       success: false,
       error: error.message || "Error updating order status",
     });
+  }
+};
+
+// Helper function to handle inventory updates based on order status changes
+const handleInventoryUpdate = async (order, previousStatus, newStatus) => {
+  const Product = (await import("../models/product.model.js")).default;
+
+  // Define status transitions that affect inventory
+  const inventoryReducingStatuses = ["processing", "shipped", "delivered"];
+  const inventoryRestoringStatuses = ["cancelled"];
+
+  // Check if we need to reduce inventory (order is being processed/shipped/delivered)
+  if (inventoryReducingStatuses.includes(newStatus) && !inventoryReducingStatuses.includes(previousStatus) && previousStatus !== "cancelled") {
+    // Reduce inventory for each item in the order
+    for (const item of order.items) {
+      const product = await Product.findById(item.product._id);
+      if (!product) continue;
+
+      // Find the specific variant (color + size combination)
+      const variant = product.variants.find((v) => v.color.toString() === item.color.toString() && v.size.toString() === item.size.toString());
+
+      if (variant) {
+        // Ensure we don't go below 0
+        variant.stock = Math.max(0, variant.stock - item.quantity);
+        await product.save();
+      }
+    }
+  }
+
+  // Check if we need to restore inventory (order is being cancelled)
+  if (inventoryRestoringStatuses.includes(newStatus) && inventoryReducingStatuses.includes(previousStatus)) {
+    // Restore inventory for each item in the order
+    for (const item of order.items) {
+      const product = await Product.findById(item.product._id);
+      if (!product) continue;
+
+      // Find the specific variant (color + size combination)
+      const variant = product.variants.find((v) => v.color.toString() === item.color.toString() && v.size.toString() === item.size.toString());
+
+      if (variant) {
+        variant.stock += item.quantity;
+        await product.save();
+      }
+    }
+  }
+};
+
+// Helper function to reserve inventory when order is created
+const reserveInventoryForOrder = async (order) => {
+  const Product = (await import("../models/product.model.js")).default;
+
+  // Reserve inventory for each item in the order
+  for (const item of order.items) {
+    const product = await Product.findById(item.product);
+    if (!product) continue;
+
+    // Find the specific variant (color + size combination)
+    const variant = product.variants.find((v) => v.color.toString() === item.color.toString() && v.size.toString() === item.size.toString());
+
+    if (variant) {
+      // Check if we have enough stock
+      if (variant.stock < item.quantity) {
+        throw new Error(`Insufficient stock for product ${product.name}. Available: ${variant.stock}, Requested: ${item.quantity}`);
+      }
+
+      // Reserve the inventory
+      variant.stock -= item.quantity;
+      await product.save();
+    }
   }
 };
