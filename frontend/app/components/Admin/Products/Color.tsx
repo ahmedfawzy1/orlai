@@ -2,7 +2,7 @@ import { useFilterStore } from '@/app/store/useFilterStore';
 
 interface colorProps {
   selectedColor: string;
-  onColorChange: (color: string) => void;
+  onColorChange: (colorId: string) => void;
 }
 
 export default function Color({ selectedColor, onColorChange }: colorProps) {
@@ -15,9 +15,9 @@ export default function Color({ selectedColor, onColorChange }: colorProps) {
           <button
             key={color._id}
             type='button'
-            onClick={() => onColorChange(color.hexCode)}
+            onClick={() => onColorChange(color._id)}
             className={`w-6 h-6 rounded-full border cursor-pointer hover:scale-110 transition-transform ${
-              selectedColor === color.hexCode ? 'ring-2 ring-black' : ''
+              selectedColor === color._id ? 'ring-2 ring-black' : ''
             }`}
             style={{ backgroundColor: color.hexCode }}
             title={color.name}

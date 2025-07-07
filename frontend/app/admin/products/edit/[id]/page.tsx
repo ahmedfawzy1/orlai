@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -20,8 +20,7 @@ export default function EditProductPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { categories } = useFilterStore();
-  const submitButton = useRef<HTMLButtonElement | null>(null);
+  const { categories, sizes, colors } = useFilterStore();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const defaultImage =
     'https://res.cloudinary.com/dr0gslecu/image/upload/v1730150154/lvfef1ettpmxxvvk6gtz.png';
@@ -69,7 +68,7 @@ export default function EditProductPage({
         color: z.string().min(1, 'Color is required'),
         size: z.string().min(1, 'Size is required'),
         stock: z.number().min(1, 'Stock must be at least 1'),
-      })
+      }),
     ),
     image: z.array(z.string()),
     slug: z
@@ -80,7 +79,6 @@ export default function EditProductPage({
 
   const {
     register,
-    handleSubmit,
     formState: { errors, isSubmitting },
     reset,
     setValue,
@@ -130,7 +128,7 @@ export default function EditProductPage({
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData({
@@ -226,21 +224,75 @@ export default function EditProductPage({
         }));
       }
 
-      await axiosInstance.put(
-        `/products/${id}`,
-        {
-          ...formData,
-          images: formData.image,
-          variants: formData.variants,
-        },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+      const categoryId =
+        categories.find(c => c.name === formData.category)?._id ||
+        formData.category;
+      const { maxVariantPrice, minVariantPrice } = formData.priceRange;
+      const priceRange = [{ maxVariantPrice, minVariantPrice }];
+
+      const images = formData.image;
+
+      console.log(formData);
+
+      const transformedVariants = formData.variants.map(variant => {
+        const transformedVariant: any = {
+          size:
+            sizes.find(s => s.name === variant.size)?._id ||
+            (typeof variant.size === 'object' &&
+            variant.size &&
+            '_id' in variant.size
+              ? (variant.size as any)._id
+              : variant.size),
+          stock: variant.stock,
+        };
+
+        // Only add color if it exists
+        if (variant.color) {
+          transformedVariant.color =
+            colors.find(c => c.name === variant.color)?._id ||
+            (typeof variant.color === 'object' &&
+            variant.color &&
+            '_id' in variant.color
+              ? (variant.color as any)._id
+              : variant.color);
+        }
+
+        return transformedVariant;
+      });
+      console.log(transformedVariants);
+
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        category: categoryId,
+        priceRange,
+        images,
+        variants: transformedVariants,
+        slug: formData.slug,
+      };
+
+      await axiosInstance.put(`/products/${id}`, payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
       toast.success('Product updated successfully');
       router.push('/admin/products');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Failed to update product:', error);
       toast.error(`Failed to update product: ${error}`);
-      console.error(error);
     }
+  };
+
+  //  get names from ObjectIds
+  const getSizeName = (sizeId: string) => {
+    const size = sizes.find(s => s._id === sizeId);
+    return size?.name || sizeId;
+  };
+
+  const getColorHex = (colorId: string) => {
+    if (!colorId) return '';
+    const color = colors.find(c => c._id === colorId);
+    return color?.hexCode || '#000000';
   };
 
   return (
@@ -251,7 +303,10 @@ export default function EditProductPage({
           Edit Product
         </h1>
         <button
-          onClick={() => submitButton.current?.click()}
+          type='button'
+          onClick={() => {
+            onSubmit();
+          }}
           className='px-3 py-2 bg-black text-white text-sm md:text-base rounded-md flex justify-center items-center gap-2'
         >
           {isSubmitting ? (
@@ -262,11 +317,7 @@ export default function EditProductPage({
         </button>
       </div>
       <div className='text-black mt-2'>
-        <form
-          id='product-form'
-          onSubmit={handleSubmit(onSubmit)}
-          className='flex flex-col md:flex-row gap-6'
-        >
+        <form id='product-form' className='flex flex-col md:flex-row gap-6'>
           <div className='flex flex-col basis-3/5'>
             <div className='bg-[#f9f9f9] p-5 pt-0 space-y-5 rounded-2xl'>
               <h2 className='text-xl font-bold mb-4'>General Information</h2>
@@ -424,7 +475,7 @@ export default function EditProductPage({
                   <input
                     id='size'
                     type='text'
-                    value={currentVariant.size}
+                    value={getSizeName(currentVariant.size)}
                     onChange={handleChange}
                     disabled
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none mb-2.5'
@@ -441,7 +492,7 @@ export default function EditProductPage({
                   <input
                     id='color'
                     type='text'
-                    value={currentVariant.color}
+                    value={getColorHex(currentVariant.color)}
                     onChange={handleChange}
                     disabled
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none mb-2.5'
@@ -484,11 +535,17 @@ export default function EditProductPage({
                         className='flex items-center justify-between bg-white p-3 rounded-md shadow-sm'
                       >
                         <div className='flex items-center gap-4'>
-                          <div
-                            className='w-6 h-6 rounded-full border'
-                            style={{ backgroundColor: variant.color }}
-                          />
-                          <span className='font-medium'>{variant.size}</span>
+                          {variant.color && (
+                            <div
+                              className='w-6 h-6 rounded-full border'
+                              style={{
+                                backgroundColor: getColorHex(variant.color),
+                              }}
+                            />
+                          )}
+                          <span className='font-medium'>
+                            {getSizeName(variant.size)}
+                          </span>
                           <span className='text-gray-600'>
                             Stock: {variant.stock}
                           </span>
@@ -515,14 +572,6 @@ export default function EditProductPage({
               setImageUrls={setImageUrls}
               handleImageChange={handleImageChange}
             />
-            <button
-              ref={submitButton}
-              type='submit'
-              className='sr-only'
-              aria-label='submit'
-            >
-              submit
-            </button>
           </div>
         </form>
       </div>

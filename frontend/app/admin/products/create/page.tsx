@@ -15,7 +15,7 @@ import toast from 'react-hot-toast';
 
 export default function CreateProduct() {
   const router = useRouter();
-  const { categories } = useFilterStore();
+  const { categories, colors, sizes } = useFilterStore();
 
   const submitButton = useRef<HTMLButtonElement | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -65,7 +65,7 @@ export default function CreateProduct() {
         color: z.string().min(1, 'Color is required'),
         size: z.string().min(1, 'Size is required'),
         stock: z.number().min(1, 'Stock must be at least 1'),
-      })
+      }),
     ),
     image: z.array(z.string()),
     slug: z
@@ -77,7 +77,7 @@ export default function CreateProduct() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData({
@@ -143,19 +143,14 @@ export default function CreateProduct() {
       toast.error('Please fill all variant fields');
       return;
     }
-
+    const newVariants = [...formData.variants, currentVariant];
     setFormData(prev => ({
       ...prev,
-      variants: [...prev.variants, currentVariant],
+      variants: newVariants,
     }));
-    setValue('variants', [...formData.variants, currentVariant]);
+    setValue('variants', newVariants);
     trigger('variants');
-
-    setCurrentVariant({
-      color: '',
-      size: '',
-      stock: 0,
-    });
+    setCurrentVariant({ color: '', size: '', stock: 0 });
   };
 
   const removeVariant = (index: number) => {
@@ -186,23 +181,38 @@ export default function CreateProduct() {
           image: [defaultImage],
         }));
       }
-
-      await axiosInstance.post(
-        '/products',
-        {
-          ...formData,
-          images: formData.image,
-          variants: formData.variants,
-        },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+      const payload = {
+        ...formData,
+        images: formData.image,
+        variants: formData.variants,
+        priceRange: [
+          {
+            maxVariantPrice: formData.priceRange.maxVariantPrice,
+            minVariantPrice: formData.priceRange.minVariantPrice,
+          },
+        ],
+      };
+      await axiosInstance.post('/products', payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
       toast.success('Product created successfully');
       reset();
       router.push('/admin/products');
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to create product: ${error}`);
       console.error(error);
     }
+  };
+
+  //  get names from ObjectIds
+  const getSizeName = (sizeId: string) => {
+    const size = sizes.find(s => s._id === sizeId);
+    return size?.name || sizeId;
+  };
+
+  const getColorHex = (colorId: string) => {
+    const color = colors.find(c => c._id === colorId);
+    return color?.hexCode || '#000000';
   };
 
   return (
@@ -284,7 +294,7 @@ export default function CreateProduct() {
                     >
                       <option value=''>Select a category</option>
                       {categories.map(category => (
-                        <option key={category._id} value={category.name}>
+                        <option key={category._id} value={category._id}>
                           {category.name}
                         </option>
                       ))}
@@ -386,14 +396,14 @@ export default function CreateProduct() {
                   <input
                     id='size'
                     type='text'
-                    value={currentVariant.size}
+                    value={getSizeName(currentVariant.size)}
                     onChange={handleChange}
                     disabled
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none mb-2.5'
                   />
                   <Size
                     selectedSize={currentVariant.size}
-                    onSizeChange={size => handleVariantChange('size', size)}
+                    onSizeChange={sizeId => handleVariantChange('size', sizeId)}
                   />
                 </div>
                 <div className='w-full'>
@@ -403,14 +413,16 @@ export default function CreateProduct() {
                   <input
                     id='color'
                     type='text'
-                    value={currentVariant.color}
+                    value={getColorHex(currentVariant.color)}
                     onChange={handleChange}
                     disabled
                     className='bg-[#efefef] block w-full px-2.5 py-2.5 rounded-lg focus:outline-none mb-2.5'
                   />
                   <Color
                     selectedColor={currentVariant.color}
-                    onColorChange={color => handleVariantChange('color', color)}
+                    onColorChange={colorId =>
+                      handleVariantChange('color', colorId)
+                    }
                   />
                 </div>
               </div>
@@ -448,9 +460,13 @@ export default function CreateProduct() {
                         <div className='flex items-center gap-4'>
                           <div
                             className='w-6 h-6 rounded-full border'
-                            style={{ backgroundColor: variant.color }}
+                            style={{
+                              backgroundColor: getColorHex(variant.color),
+                            }}
                           />
-                          <span className='font-medium'>{variant.size}</span>
+                          <span className='font-medium'>
+                            {getSizeName(variant.size)}
+                          </span>
                           <span className='text-gray-600'>
                             Stock: {variant.stock}
                           </span>
