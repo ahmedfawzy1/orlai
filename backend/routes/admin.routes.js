@@ -1,12 +1,12 @@
 import express from "express";
 import { getAdmins, addAdmin, addAdminByEmail, removeAdmin } from "../controllers/admin.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { adminProtectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", protectRoute, getAdmins);
-router.post("/", protectRoute, addAdmin);
-router.post("/by-email", protectRoute, addAdminByEmail);
-router.delete("/:id", protectRoute, removeAdmin);
+router.get("/", adminProtectRoute, getAdmins);
+router.post("/", adminProtectRoute, addAdmin);
+router.post("/by-email", adminProtectRoute, addAdminByEmail);
+router.delete("/:id", adminProtectRoute, removeAdmin);
 
 export default router;

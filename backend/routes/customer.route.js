@@ -1,11 +1,11 @@
 import express from "express";
 import { getCustomers, updateCustomer, deleteCustomer } from "../controllers/customer.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { adminProtectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", protectRoute, getCustomers);
-router.put("/:id", protectRoute, updateCustomer);
-router.delete("/:id", protectRoute, deleteCustomer);
+router.get("/", adminProtectRoute, getCustomers);
+router.put("/:id", adminProtectRoute, updateCustomer);
+router.delete("/:id", adminProtectRoute, deleteCustomer);
 
 export default router;
