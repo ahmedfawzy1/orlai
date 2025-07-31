@@ -1,35 +1,35 @@
 import type { Metadata } from 'next';
 
 const defaultSEO: Metadata = {
-  metadataBase: new URL('https://lustria.in'),
-  title: 'Shop Trendy & Elegant Clothing - Lustria',
+  metadataBase: new URL('https://orlai.store'),
+  title: 'Shop Trendy & Elegant Clothing - Orlai',
   description:
-    'Discover premium fashion at Lustria - your destination for trendy, sustainable clothing. From casual essentials to elegant statement pieces, find your perfect style with our curated collection of high-quality garments.',
+    'Discover premium fashion at Orlai - your destination for trendy, sustainable clothing. From casual essentials to elegant statement pieces, find your perfect style with our curated collection of high-quality garments.',
   openGraph: {
     type: 'website',
-    url: 'https://lustria.in',
-    title: 'Shop Trendy & Elegant Clothing - Lustria',
-    siteName: 'Lustria',
+    url: 'https://orlai.store',
+    title: 'Shop Trendy & Elegant Clothing - Orlai',
+    siteName: 'Orlai',
     description:
-      'Discover premium fashion at Lustria - your destination for trendy, sustainable clothing. From casual essentials to elegant statement pieces, find your perfect style with our curated collection of high-quality garments.',
+      'Discover premium fashion at Orlai - your destination for trendy, sustainable clothing. From casual essentials to elegant statement pieces, find your perfect style with our curated collection of high-quality garments.',
     locale: 'en_US',
     images: [
       {
-        url: 'https://lustria.in/images/opengraph.webp',
-        alt: 'Lustria Fashion Store',
+        url: 'https://orlai.store/images/opengraph.webp',
+        alt: 'Orlai Fashion Store',
       },
     ],
   },
   twitter: {
-    creator: '@lustria_fashion',
-    site: 'https://lustria.in',
+    creator: '@orlai_fashion',
+    site: 'https://orlai.store',
     card: 'summary_large_image',
   },
 };
 
 export default function generateSEO(props: Metadata = {}): Metadata {
   const seo: Metadata = { ...defaultSEO, ...props };
-  seo.title += ' | Lustria';
+  seo.title += ' | Orlai';
   seo.openGraph = {
     ...seo.openGraph,
     title: seo.title || undefined,

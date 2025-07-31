@@ -36,7 +36,7 @@ export const defaultLogoConfig = {
   url: '/',
   src: '/images/logo.webp',
   alt: 'logo',
-  title: 'lustria',
-  width: 80,
+  title: 'orlai',
+  width: 70,
   height: 22,
 };

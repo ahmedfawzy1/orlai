@@ -10,7 +10,7 @@ import {
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Privacy Policy | Lustria',
+    title: 'Privacy Policy | Orlai',
     description:
       'Read our Privacy Policy to understand how we collect, use, and protect your personal information. Your privacy is important to us.',
   });
@@ -76,7 +76,7 @@ export default function PrivacyPolicyPage() {
           </h2>
           <div className='w-24 h-1 bg-black mx-auto rounded-full mt-4' />
           <p className='text-lg text-gray-600 mt-6 max-w-3xl mx-auto'>
-            At Lustria, we are dedicated to protecting your personal information
+            At Orlai, we are dedicated to protecting your personal information
             and handling it responsibly. This policy outlines how we collect,
             use, and safeguard your data.
           </p>

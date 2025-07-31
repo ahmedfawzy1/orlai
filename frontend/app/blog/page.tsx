@@ -18,7 +18,7 @@ import { urlFor } from '../lib/sanity';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Lustria Blog | Fashion Trends, Style Tips & Inspiration',
+    title: 'Orlai Blog | Fashion Trends, Style Tips & Inspiration',
     description:
       'Discover the latest fashion trends, style tips, and lifestyle inspiration. Stay updated with our blog featuring the best in fashion, beauty, and lifestyle.',
   });

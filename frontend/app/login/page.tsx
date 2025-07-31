@@ -3,9 +3,9 @@ import generateSEO from '../lib/seo';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Login | Lustria',
+    title: 'Login | Orlai',
     description:
-      'Login to your Lustria account to access your order history, wishlist, and personalized recommendations.',
+      'Login to your Orlai account to access your order history, wishlist, and personalized recommendations.',
   });
 };
 

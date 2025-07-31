@@ -19,14 +19,14 @@ export const generateMetadata = async (props: GenerateMetadataProps) => {
 
   if (!slug) {
     return generateSEO({
-      title: 'Article Not Found | Lustria',
+      title: 'Article Not Found | Orlai',
       description: "The article you're looking for doesn't exist.",
     });
   }
 
   return generateSEO({
-    title: `${data.title} | Lustria Blog`,
-    description: `${data.short_description} and explore in-depth fashion insights, on the Lustria Blog.`,
+    title: `${data.title} | Orlai Blog`,
+    description: `${data.short_description} and explore in-depth fashion insights, on the Orlai Blog.`,
   });
 };
 

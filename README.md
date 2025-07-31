@@ -1,4 +1,4 @@
-# Lustria
+# Orlai
 
 This is a modern full-featured e-commerce platform built using **Next.js**,
 **React** and **Typescript**. It supports both client-side and server-side
@@ -8,7 +8,7 @@ integration, blog system, and an admin dashboard for store management.
 
 ## Overview
 
-Lustria offers a wide variety of stylish and high-quality clothing for every
+Orlai offers a wide variety of stylish and high-quality clothing for every
 occasion. Discover the latest fashion trends with curated collections for men,
 women, and kids. Shop now for unique pieces that elevate your wardrobe,
 delivered right to your doorstep with easy returns and excellent customer
@@ -153,7 +153,7 @@ clean folder structure with dedicated route handlers for each feature.
 ## Live Preview
 
 A live preview of the application is available here:
-[Lustria Demo](https://lustria.shop)
+[Orlai Demo](https://orlai.store)
 
 Admin Test Account
 
@@ -177,8 +177,8 @@ management, orders, brands, etc.).
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/ahmedfawzy1/lustria
-   cd lustria
+   git clone https://github.com/ahmedfawzy1/orlai
+   cd orlai
    ```
 
 2. **Install dependencies**

@@ -2,9 +2,9 @@ import generateSEO from '../lib/seo';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Careers | Lustria',
+    title: 'Careers | Orlai',
     description:
-      'Join the Lustria team and help us shape the future of fashion. Explore our open positions and discover a rewarding career with us.',
+      'Join the Orlai team and help us shape the future of fashion. Explore our open positions and discover a rewarding career with us.',
   });
 };
 
@@ -35,7 +35,7 @@ const jobOpenings = [
     location: 'Remote',
     type: 'Full-time',
     description:
-      'Be the voice of Lustria and provide exceptional support to our valued customers.',
+      'Be the voice of Orlai and provide exceptional support to our valued customers.',
   },
 ];
 
@@ -56,11 +56,11 @@ export default function CareersPage() {
       <div className='max-w-7xl mx-auto px-4 py-20 space-y-20'>
         <section className='space-y-8 text-center'>
           <h2 className='text-4xl font-bold text-gray-900'>
-            Why Work at Lustria?
+            Why Work at Orlai?
           </h2>
           <div className='w-24 h-1 bg-black mx-auto rounded-full' />
           <p className='text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto'>
-            At Lustria, we believe in fostering a creative and collaborative
+            At Orlai, we believe in fostering a creative and collaborative
             environment where every team member can thrive. We are passionate
             about fashion, innovation, and our community. Join us to make an
             impact in a dynamic and growing company.

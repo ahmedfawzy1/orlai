@@ -3,9 +3,9 @@ import generateSEO from '../lib/seo';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Your Wishlist | Lustria',
+    title: 'Your Wishlist | Orlai',
     description:
-      'Save your favorite products to your wishlist. Easily keep track of items you love at Lustria.',
+      'Save your favorite products to your wishlist. Easily keep track of items you love at Orlai.',
   });
 };
 export default function WishlistPage() {

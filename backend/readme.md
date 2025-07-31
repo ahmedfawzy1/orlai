@@ -24,7 +24,7 @@ Before running this project, make sure you have the following installed:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/ahmedfawzy1/lustria.git
+   git clone https://github.com/ahmedfawzy1/orlai.git
    cd product-review-api
    ```
 

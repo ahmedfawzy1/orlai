@@ -35,7 +35,7 @@ export default function Footer() {
           <Image
             src={'/images/logo.webp'}
             alt='logo'
-            width={80}
+            width={70}
             height={22}
             className='invert'
           />
@@ -50,12 +50,12 @@ export default function Footer() {
                 <span>(704) 555-0127</span>
               </Link>
               <Link
-                href='mailto:contact@lustria.shop'
+                href='mailto:contact@orlai.shop'
                 className='flex items-center gap-2 text-white/60 hover:text-white transition'
                 aria-label='Email'
               >
                 <Mail size={20} />
-                <span>contact@lustria.shop</span>
+                <span>contact@orlai.shop</span>
               </Link>
               <Link
                 href='https://maps.app.goo.gl/K2rkuRuV2GHSwQfPA'
@@ -118,7 +118,7 @@ export default function Footer() {
           ))}
         </div>
         <p className='text-white text-sm'>
-          &copy; 2025 Lustria. All rights reserved.
+          &copy; 2025 Orlai. All rights reserved.
         </p>
         <div className='flex items-center gap-4 text-white'>
           {socialHandles.map(({ icon: Icon, url, fill }, index) => (

@@ -17,14 +17,14 @@ export const generateMetadata = async (props: {
 
   if (!product) {
     return generateSEO({
-      title: 'Product Not Found | Lustria',
+      title: 'Product Not Found | Orlai',
       description:
-        'Oops! The product you are looking for is unavailable. Explore our latest collections at Lustria.',
+        'Oops! The product you are looking for is unavailable. Explore our latest collections at Orlai.',
     });
   }
 
   return generateSEO({
-    title: `${product.name} | Buy Online at Lustria`,
+    title: `${product.name} | Buy Online at Orlai`,
     description:
       product.description.length > 150
         ? `${product.description.substring(0, 150)}...`

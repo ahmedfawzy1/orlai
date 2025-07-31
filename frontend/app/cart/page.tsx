@@ -3,9 +3,9 @@ import generateSEO from '../lib/seo';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Your Cart | Lustria',
+    title: 'Your Cart | Orlai',
     description:
-      'View and manage the items in your shopping cart. Secure checkout and fast delivery with Lustria.',
+      'View and manage the items in your shopping cart. Secure checkout and fast delivery with Orlai.',
   });
 };
 

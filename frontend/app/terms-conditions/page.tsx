@@ -15,9 +15,9 @@ import {
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Terms & Conditions | Lustria',
+    title: 'Terms & Conditions | Orlai',
     description:
-      'Please read our Terms & Conditions carefully before using our website. These terms govern your use of the Lustria website and services.',
+      'Please read our Terms & Conditions carefully before using our website. These terms govern your use of the Orlai website and services.',
   });
 };
 
@@ -56,7 +56,7 @@ const termsSections = [
     icon: ShieldAlert,
     title: 'Limitation of Liability',
     content:
-      'In no event shall Lustria, nor its directors or employees, be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of our services.',
+      'In no event shall Orlai, nor its directors or employees, be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of our services.',
   },
   {
     icon: FilePenLine,

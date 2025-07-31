@@ -6,9 +6,9 @@ import generateSEO from '../lib/seo';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Best Sellers | Lustria',
+    title: 'Best Sellers | Orlai',
     description:
-      'Discover our best-selling products at Lustria. Shop the most popular items that have been loved by our customers.',
+      'Discover our best-selling products at Orlai. Shop the most popular items that have been loved by our customers.',
   });
 };
 

@@ -3,7 +3,7 @@ import { Clock, Package, Truck } from 'lucide-react';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Delivery Information | Lustria',
+    title: 'Delivery Information | Orlai',
     description:
       'Find all the details about our shipping options, delivery times, and costs. We ship worldwide to bring fashion to your doorstep.',
   });

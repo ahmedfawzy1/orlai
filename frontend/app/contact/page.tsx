@@ -2,9 +2,9 @@ import generateSEO from '../lib/seo';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Contact Us | Lustria',
+    title: 'Contact Us | Orlai',
     description:
-      'Have a question or want to work together? Contact Lustria for support, collaboration, or general inquiries. We would love to hear from you!',
+      'Have a question or want to work together? Contact Orlai for support, collaboration, or general inquiries. We would love to hear from you!',
   });
 };
 

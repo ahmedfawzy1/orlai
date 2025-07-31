@@ -18,11 +18,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Shop Trendy & Elegant Clothing - Lustria',
+  title: 'Shop Trendy & Elegant Clothing - Orlai',
   description:
-    'Discover premium fashion at Lustria - your destination for trendy, sustainable clothing. Find your perfect style with our curated collection of quality garments',
+    'Discover premium fashion at Orlai - your destination for trendy, sustainable clothing. Find your perfect style with our curated collection of quality garments',
   alternates: {
-    canonical: 'https://lustria.shop',
+    canonical: 'https://orlai.store',
   },
   robots: {
     index: true,

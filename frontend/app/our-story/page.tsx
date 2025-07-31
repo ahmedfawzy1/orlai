@@ -2,9 +2,9 @@ import generateSEO from '../lib/seo';
 
 export const generateMetadata = async () => {
   return generateSEO({
-    title: 'Our Story | Lustria',
+    title: 'Our Story | Orlai',
     description:
-      "Learn about Lustria's journey, mission, and commitment to quality, craftsmanship, and community. Discover our story and what sets us apart.",
+      "Learn about Orlai's journey, mission, and commitment to quality, craftsmanship, and community. Discover our story and what sets us apart.",
   });
 };
 

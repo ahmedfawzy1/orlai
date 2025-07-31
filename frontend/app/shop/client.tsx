@@ -46,9 +46,7 @@ export default function Shop() {
       <div className='flex flex-row justify-between items-start gap-10'>
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         <div className='flex-1'>
-          <h1 className='sr-only'>
-            Shop The Latest Fashion Products at Lustria
-          </h1>
+          <h1 className='sr-only'>Shop The Latest Fashion Products at Orlai</h1>
           <div className='pb-2 flex md:hidden items-center justify-between'>
             <h3 className='text-xl font-bold !no-underline pt-0 flex items-center'>
               Filter
@@ -106,7 +104,7 @@ export default function Shop() {
                       {pageNum}
                     </button>
                   </PaginationItem>
-                )
+                ),
               )}
               <PaginationItem>
                 <button
