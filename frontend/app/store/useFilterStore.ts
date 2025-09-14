@@ -46,5 +46,3 @@ export const useFilterStore = create<FilterStore>(set => ({
     await store.getFilters();
   },
 }));
-
-useFilterStore.getState().getFilters();

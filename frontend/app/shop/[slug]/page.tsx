@@ -32,6 +32,11 @@ export const generateMetadata = async (props: {
   });
 };
 
+export const generateStaticParams = async () => {
+  const response = await getProducts(1, 100);
+  return response.products.map((product: any) => ({ slug: product.slug }));
+};
+
 export default async function ProductPage({
   params,
 }: {
@@ -40,7 +45,10 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProduct(slug);
   const user = await getServerSession();
-  const { products } = await getProducts(1, 3, { category: product.category });
+  const relatedResponse = await getProducts(1, 3, {
+    category: product.category,
+  });
+  const products = relatedResponse.products;
 
   return (
     <section className='px-4 pb-4 md:py-8 max-w-[1280px] mx-auto'>

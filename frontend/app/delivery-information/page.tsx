@@ -1,6 +1,8 @@
 import generateSEO from '../lib/seo';
 import { Clock, Package, Truck } from 'lucide-react';
 
+export const revalidate = 3600;
+
 export const generateMetadata = async () => {
   return generateSEO({
     title: 'Delivery Information | Orlai',

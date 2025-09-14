@@ -1,6 +1,5 @@
 'use client';
 
-import { useProductStore } from '../store/useProductStore';
 import { Product } from '../types/product';
 import ItemCard from '../components/shop/ItemCard';
 import Sidebar from '../components/shop/Sidebar';
@@ -9,28 +8,75 @@ import { PaginationContent, PaginationItem } from '../components/ui/pagination';
 import { Pagination } from '../components/ui/pagination';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getProducts } from '../lib/products';
 
-export default function Shop() {
+interface ShopData {
+  products: Product[];
+  totalPages: number;
+  currentPage: number;
+  totalCount: number;
+}
+
+interface FilterData {
+  categories: any[];
+  colors: any[];
+  sizes: any[];
+}
+
+interface ShopProps {
+  initialData: ShopData;
+  filterData: FilterData;
+}
+
+export default function Shop({ initialData, filterData }: ShopProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const {
-    products,
-    totalPages,
-    isLoading,
-    getProducts,
-    setCurrentPage,
-    currentPage: storeCurrentPage,
-  } = useProductStore();
+  const [isClientLoading, setIsClientLoading] = useState(false);
+  const [hasClientData, setHasClientData] = useState(false);
+  const [displayProducts, setDisplayProducts] = useState(initialData.products);
+  const [displayTotalPages, setDisplayTotalPages] = useState(
+    initialData.totalPages,
+  );
+  const [displayCurrentPage, setDisplayCurrentPage] = useState(
+    initialData.currentPage,
+  );
 
-  // Sync URL with store state
+  // Reset client data flag when page changes (navigation)
   useEffect(() => {
-    if (currentPage !== storeCurrentPage) {
-      setCurrentPage(currentPage);
-      getProducts(currentPage, 12);
+    setHasClientData(false);
+  }, [currentPage]);
+
+  // Update display data when initial data changes, but only if we don't have client data
+  useEffect(() => {
+    if (!hasClientData) {
+      setDisplayProducts(initialData.products);
+      setDisplayTotalPages(initialData.totalPages);
+      setDisplayCurrentPage(initialData.currentPage);
     }
-  }, [currentPage, storeCurrentPage, getProducts, setCurrentPage]);
+  }, [initialData, hasClientData]);
+
+  // Handle client-side data fetching for pagination/filtering
+  const fetchClientData = async (page: number, queryParams: any = {}) => {
+    setIsClientLoading(true);
+    try {
+      const response = await getProducts(page, 12, queryParams);
+      setDisplayProducts(response.products);
+      setDisplayTotalPages(response.total_pages);
+      setDisplayCurrentPage(response.current_page);
+      setHasClientData(true);
+    } catch (error) {
+      console.error('Error fetching client data:', error);
+    } finally {
+      setIsClientLoading(false);
+    }
+  };
+
+  // Handle filtering
+  const handleFilter = (queryParams: any) => {
+    fetchClientData(1, queryParams);
+  };
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -39,12 +85,21 @@ export default function Shop() {
     } else {
       router.push(`/shop?page=${page}`);
     }
+    // Only fetch if it's a different page than current
+    if (page !== displayCurrentPage) {
+      fetchClientData(page);
+    }
   };
 
   return (
     <section className='px-5 py-2 md:py-10 max-w-[1280px] mx-auto min-h-screen'>
       <div className='flex flex-row justify-between items-start gap-10'>
-        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <Sidebar
+          isOpen={isSidebarOpen}
+          setIsOpen={setIsSidebarOpen}
+          filterData={filterData}
+          onFilter={handleFilter}
+        />
         <div className='flex-1'>
           <h1 className='sr-only'>Shop The Latest Fashion Products at Orlai</h1>
           <div className='pb-2 flex md:hidden items-center justify-between'>
@@ -59,7 +114,7 @@ export default function Shop() {
               <SlidersVertical size={20} />
             </button>
           </div>
-          {isLoading ? (
+          {isClientLoading ? (
             <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 pb-8'>
               {Array.from({ length: 8 }).map((_, index) => (
                 <div
@@ -70,7 +125,7 @@ export default function Shop() {
             </div>
           ) : (
             <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 pb-8'>
-              {products?.map((product: Product) => (
+              {displayProducts?.map((product: Product) => (
                 <ItemCard key={product._id} product={product} />
               ))}
             </div>
@@ -90,13 +145,13 @@ export default function Shop() {
                   <ArrowLeft size={22} />
                 </button>
               </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              {Array.from({ length: displayTotalPages }, (_, i) => i + 1).map(
                 pageNum => (
                   <PaginationItem key={pageNum}>
                     <button
                       onClick={() => handlePageChange(pageNum)}
                       className={`flex items-center justify-center h-10 px-4 text-sm font-medium ${
-                        pageNum === currentPage
+                        pageNum === displayCurrentPage
                           ? 'bg-gray-900 text-white'
                           : 'text-black bg-white hover:bg-gray-50'
                       } border border-black rounded-md cursor-pointer`}
@@ -109,13 +164,13 @@ export default function Shop() {
               <PaginationItem>
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage >= totalPages}
+                  disabled={currentPage >= displayTotalPages}
                   className={`${
-                    currentPage >= totalPages
+                    currentPage >= displayTotalPages
                       ? 'pointer-events-none text-gray-400'
                       : ''
                   } cursor-pointer`}
-                  aria-disabled={currentPage >= totalPages}
+                  aria-disabled={currentPage >= displayTotalPages}
                   aria-label='Next'
                 >
                   <ArrowRight size={22} />

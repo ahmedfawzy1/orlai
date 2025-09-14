@@ -1,5 +1,7 @@
 import generateSEO from '../lib/seo';
 
+export const revalidate = 3600;
+
 export const generateMetadata = async () => {
   return generateSEO({
     title: 'Contact Us | Orlai',

@@ -10,24 +10,45 @@ import {
 } from '../ui/accordion';
 import { Checkbox } from '../ui/checkbox';
 import { Slider } from '../ui/slider';
-import { useProductStore } from '@/app/store/useProductStore';
-import { useFilterStore } from '@/app/store/useFilterStore';
 import { Skeleton } from '../ui/skeleton';
 import { X } from 'lucide-react';
+
+interface FilterData {
+  categories: any[];
+  colors: any[];
+  sizes: any[];
+}
 
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  filterData: FilterData;
+  onFilter: (queryParams: any) => void;
 }
 
-export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+export default function Sidebar({
+  isOpen,
+  setIsOpen,
+  filterData,
+  onFilter,
+}: SidebarProps) {
   const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([
     0, 250,
   ]);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { filters, setFilters, getProducts } = useProductStore();
-  const { categories, colors, sizes } = useFilterStore();
+  const [filters, setFilters] = useState({
+    categories: [] as string[],
+    colors: [] as string[],
+    sizes: [] as string[],
+    priceRange: [0, 250] as [number, number],
+    searchQuery: '',
+    sort: 'createdAt',
+    order: 'desc' as 'asc' | 'desc',
+  });
+
+  // Use server-provided filter data instead of store
+  const { categories, colors, sizes } = filterData;
 
   useEffect(() => {
     const category = searchParams.get('category');
@@ -52,7 +73,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     if (search) newFilters.searchQuery = search;
 
     if (Object.keys(newFilters).length > 0) {
-      setFilters(newFilters);
+      setFilters(prev => ({ ...prev, ...newFilters }));
     }
   }, [searchParams, setFilters]);
 
@@ -63,7 +84,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
   // Initialize tempPriceRange when filters change
   useEffect(() => {
-    setTempPriceRange(filters.priceRange);
+    setTempPriceRange([filters.priceRange[0], filters.priceRange[1]]);
   }, [filters.priceRange]);
 
   const defaultFilters = {
@@ -133,39 +154,74 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     }
 
     router.push(`/shop?${params.toString()}`, { scroll: false });
-    getProducts(Number(params.get('page')) || 1, 12);
+
+    // Call the filter handler with the query parameters
+    const queryParams = {
+      page: Number(params.get('page')) || 1,
+      limit: 12,
+      ...(filters.categories.length > 0 && {
+        category: filters.categories.join(','),
+      }),
+      ...(filters.colors.length > 0 && {
+        color: filters.colors.join(','),
+      }),
+      ...(filters.sizes.length > 0 && {
+        size: filters.sizes.join(','),
+      }),
+      ...(filters.priceRange[0] > 0 && {
+        min_price: filters.priceRange[0],
+      }),
+      ...(filters.priceRange[1] < 250 && {
+        max_price: filters.priceRange[1],
+      }),
+      ...(filters.searchQuery && {
+        search: filters.searchQuery,
+      }),
+      ...(filters.sort && {
+        sort: filters.sort,
+        order: filters.order,
+      }),
+    };
+
+    onFilter(queryParams);
   };
 
   const handleCategoryChange = (category: string) => {
-    setFilters({
-      categories: filters.categories.includes(category)
-        ? filters.categories.filter(c => c !== category)
-        : [...filters.categories, category],
-    });
+    setFilters(prev => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter(c => c !== category)
+        : [...prev.categories, category],
+    }));
   };
 
   const handleColorChange = (color: string) => {
-    setFilters({
-      colors: filters.colors.includes(color)
-        ? filters.colors.filter(c => c !== color)
-        : [...filters.colors, color],
-    });
+    setFilters(prev => ({
+      ...prev,
+      colors: prev.colors.includes(color)
+        ? prev.colors.filter(c => c !== color)
+        : [...prev.colors, color],
+    }));
   };
 
   const handleSizeChange = (size: string) => {
-    setFilters({
-      sizes: filters.sizes.includes(size)
-        ? filters.sizes.filter(s => s !== size)
-        : [...filters.sizes, size],
-    });
+    setFilters(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size],
+    }));
   };
 
   const handlePriceChange = (value: number[]) => {
-    setTempPriceRange([value[0], value[1]]);
+    setTempPriceRange([value[0], value[1]] as [number, number]);
   };
 
   const handlePriceCommit = (value: number[]) => {
-    setFilters({ priceRange: [value[0], value[1]] });
+    setFilters(prev => ({
+      ...prev,
+      priceRange: [value[0], value[1]] as [number, number],
+    }));
   };
 
   const renderCategorySkeletons = () => (

@@ -8,13 +8,7 @@ import {
   Mail,
 } from 'lucide-react';
 
-export const generateMetadata = async () => {
-  return generateSEO({
-    title: 'Privacy Policy | Orlai',
-    description:
-      'Read our Privacy Policy to understand how we collect, use, and protect your personal information. Your privacy is important to us.',
-  });
-};
+export const revalidate = 3600;
 
 const policySections = [
   {
@@ -54,6 +48,14 @@ const policySections = [
       'If you have any questions regarding this privacy policy, you may contact us using the information on our contact page. We are here to help with any concerns you may have.',
   },
 ];
+
+export const generateMetadata = async () => {
+  return generateSEO({
+    title: 'Privacy Policy | Orlai',
+    description:
+      'Read our Privacy Policy to understand how we collect, use, and protect your personal information. Your privacy is important to us.',
+  });
+};
 
 export default function PrivacyPolicyPage() {
   return (

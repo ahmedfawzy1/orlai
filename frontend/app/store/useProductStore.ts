@@ -162,7 +162,7 @@ export const useProductStore = create<ProductStore>()(set => ({
       const updatedProduct = await updateProduct(id, updateData);
       set(state => ({
         products: state.products.map(product =>
-          product._id === id ? updatedProduct : product
+          product._id === id ? updatedProduct : product,
         ),
         selectedProduct:
           state.selectedProduct?._id === id
@@ -199,6 +199,3 @@ export const useProductStore = create<ProductStore>()(set => ({
     store.getProducts(1, 12);
   },
 }));
-
-// Initialize the store
-useProductStore.getState().init();
