@@ -4,6 +4,8 @@ import { Product } from '../types/product';
 import ItemCard from '../components/shop/ItemCard';
 import generateSEO from '../lib/seo';
 
+export const revalidate = 3600;
+
 export const generateMetadata = async () => {
   return generateSEO({
     title: 'Best Sellers | Orlai',

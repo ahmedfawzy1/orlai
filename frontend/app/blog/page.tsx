@@ -16,6 +16,8 @@ import { BlogOverview } from '../types/blog';
 import { getAllBlogs } from './action';
 import { urlFor } from '../lib/sanity';
 
+export const revalidate = 3600;
+
 export const generateMetadata = async () => {
   return generateSEO({
     title: 'Orlai Blog | Fashion Trends, Style Tips & Inspiration',

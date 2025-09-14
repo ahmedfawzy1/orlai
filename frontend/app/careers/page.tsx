@@ -1,13 +1,5 @@
 import generateSEO from '../lib/seo';
 
-export const generateMetadata = async () => {
-  return generateSEO({
-    title: 'Careers | Orlai',
-    description:
-      'Join the Orlai team and help us shape the future of fashion. Explore our open positions and discover a rewarding career with us.',
-  });
-};
-
 const jobOpenings = [
   {
     title: 'Fashion Designer',
@@ -38,6 +30,14 @@ const jobOpenings = [
       'Be the voice of Orlai and provide exceptional support to our valued customers.',
   },
 ];
+
+export const generateMetadata = async () => {
+  return generateSEO({
+    title: 'Careers | Orlai',
+    description:
+      'Join the Orlai team and help us shape the future of fashion. Explore our open positions and discover a rewarding career with us.',
+  });
+};
 
 export default function CareersPage() {
   return (
