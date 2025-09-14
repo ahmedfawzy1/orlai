@@ -4,29 +4,17 @@ import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import ReactStars from 'react-rating-star-with-type';
-import { useReviewStore } from '@/app/store/useReviewStore';
 import { motion } from 'framer-motion';
+import { Review as ReviewType } from '@/app/types/review';
 
-interface Review {
-  id: number;
-  rating: number;
-  comment: string;
-  User: {
-    id: number;
-    username: string;
-    email: string;
-  };
-  Product: {
-    id: number;
-    description: string;
-  };
+interface ReviewProps {
+  reviews: ReviewType[];
 }
 
-export default function Review() {
+export default function Review({ reviews }: ReviewProps) {
   const [scrollLeft, setScrollLeft] = useState(false);
   const [scrollRight, setScrollRight] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { reviews, getAllReviews } = useReviewStore();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -72,10 +60,6 @@ export default function Review() {
       },
     },
   } as any;
-
-  useEffect(() => {
-    getAllReviews();
-  }, [getAllReviews]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -167,7 +151,7 @@ export default function Review() {
         {reviews?.length > 0 &&
           reviews.map((review, index) => (
             <motion.div
-              key={index}
+              key={review._id || index}
               className='w-[360px] md:w-96 px-5 md:px-6 py-6 md:py-6 bg-white shadow-sm rounded-lg'
               variants={cardVariants}
               whileHover='hover'
@@ -195,7 +179,9 @@ export default function Review() {
                   width={24}
                   height={30}
                 />
-                <p className='text-xl font-bold mb-0.5'>{review.name}.</p>
+                <p className='text-xl font-bold mb-0.5'>
+                  {review.name || 'Anonymous'}.
+                </p>
               </div>
             </motion.div>
           ))}

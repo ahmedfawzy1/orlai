@@ -1,55 +1,43 @@
-'use client';
-
 import Hero from './components/Home/Hero';
 import Category from './components/Home/Category';
 import BestSelling from './components/Home/BestSelling';
 import DealTimer from './components/Home/DealTimer';
 import Review from './components/Home/Review';
-import { motion } from 'framer-motion';
+import { getAllBestSellingProducts } from './lib/products';
+import { getAllReviews } from './lib/reviews';
 
-export default function Home() {
-  const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.4,
-        delayChildren: 0.2,
-        duration: 0.6,
-        ease: 'easeOut',
-      },
-    },
-  } as any;
+export const revalidate = 3600;
 
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: 'easeOut',
-      },
-    },
-  } as any;
+async function getProductsAndReviewsData() {
+  try {
+    const [bestSellingProducts, reviewsResponse] = await Promise.all([
+      getAllBestSellingProducts(),
+      getAllReviews(1, 10, '-createdAt'),
+    ]);
+
+    return {
+      bestSellingProducts: bestSellingProducts || [],
+      reviews: reviewsResponse?.reviews || [],
+    };
+  } catch (error) {
+    console.error('Error fetching home data:', error);
+    return {
+      bestSellingProducts: [],
+      reviews: [],
+    };
+  }
+}
+
+export default async function Home() {
+  const { bestSellingProducts, reviews } = await getProductsAndReviewsData();
 
   return (
-    <motion.main variants={pageVariants} initial='hidden' animate='visible'>
-      <motion.div variants={sectionVariants}>
-        <Hero />
-      </motion.div>
-      <motion.div variants={sectionVariants}>
-        <Category />
-      </motion.div>
-      <motion.div variants={sectionVariants}>
-        <BestSelling />
-      </motion.div>
-      <motion.div variants={sectionVariants}>
-        <DealTimer />
-      </motion.div>
-      <motion.div variants={sectionVariants}>
-        <Review />
-      </motion.div>
-    </motion.main>
+    <main>
+      <Hero />
+      <Category />
+      <BestSelling products={bestSellingProducts} />
+      <DealTimer />
+      <Review reviews={reviews} />
+    </main>
   );
 }

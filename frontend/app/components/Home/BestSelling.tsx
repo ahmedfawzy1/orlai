@@ -2,30 +2,14 @@
 
 import Link from 'next/link';
 import ItemCard from '../shop/ItemCard';
-import { getAllBestSellingProducts } from '@/app/lib/products';
 import { Product } from '@/app/types/product';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
-export default function BestSelling() {
-  const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface BestSellingProps {
+  products: Product[];
+}
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const products = await getAllBestSellingProducts();
-        setBestSellingProducts(products || []);
-      } catch (error) {
-        console.error('Error fetching best selling products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
+export default function BestSelling({ products }: BestSellingProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -63,16 +47,6 @@ export default function BestSelling() {
     },
   } as any;
 
-  if (loading) {
-    return (
-      <section className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'>
-        <div className='text-center'>
-          <div className='animate-pulse text-3xl md:text-[42px] font-semibold h-12 bg-gray-200 rounded mx-auto w-64'></div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <motion.section
       className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'
@@ -92,7 +66,7 @@ export default function BestSelling() {
         className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-10 pb-8'
         variants={containerVariants}
       >
-        {bestSellingProducts?.map((product: Product, index: number) => (
+        {products?.map((product: Product, index: number) => (
           <motion.div key={product._id} variants={cardVariants} custom={index}>
             <ItemCard product={product} />
           </motion.div>
