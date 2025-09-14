@@ -1,32 +1,118 @@
+'use client';
+
 import Link from 'next/link';
 import ItemCard from '../shop/ItemCard';
 import { getAllBestSellingProducts } from '@/app/lib/products';
 import { Product } from '@/app/types/product';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
-export default async function BestSelling() {
-  const bestSellingProducts = await getAllBestSellingProducts();
+export default function BestSelling() {
+  const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getAllBestSellingProducts();
+        setBestSellingProducts(products || []);
+      } catch (error) {
+        console.error('Error fetching best selling products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+        duration: 0.6,
+        ease: 'easeOut',
+      },
+    },
+  } as any;
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: 'easeOut',
+      },
+    },
+  } as any;
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: 'easeOut',
+      },
+    },
+  } as any;
+
+  if (loading) {
+    return (
+      <section className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'>
+        <div className='text-center'>
+          <div className='animate-pulse text-3xl md:text-[42px] font-semibold h-12 bg-gray-200 rounded mx-auto w-64'></div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'>
-      <h4 className='text-3xl md:text-[42px] font-semibold text-center'>
+    <motion.section
+      className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12'
+      variants={containerVariants}
+      initial='hidden'
+      whileInView='visible'
+      viewport={{ once: true, amount: 0.2 }}
+    >
+      <motion.h4
+        className='text-3xl md:text-[42px] font-semibold text-center'
+        variants={itemVariants}
+      >
         Our BestSeller
-      </h4>
+      </motion.h4>
 
-      <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-10 pb-8'>
-        {bestSellingProducts?.map((product: Product) => (
-          <ItemCard key={product._id} product={product} />
+      <motion.div
+        className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-10 pb-8'
+        variants={containerVariants}
+      >
+        {bestSellingProducts?.map((product: Product, index: number) => (
+          <motion.div key={product._id} variants={cardVariants} custom={index}>
+            <ItemCard product={product} />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      <div className='text-center'>
-        <Link
-          className='inline-block px-6 md:px-10 py-3 rounded-full text-gray-800 bg-white border-2 border-gray-800 shadow-sm hover:bg-gray-800 hover:text-white transform hover:-translate-y-0.5 transition-all duration-300 font-medium'
-          href='/bestseller'
-          prefetch={false}
+      <motion.div className='text-center' variants={itemVariants}>
+        <motion.div
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
         >
-          View All
-        </Link>
-      </div>
-    </section>
+          <Link
+            className='inline-block px-6 md:px-10 py-3 rounded-full text-gray-800 bg-white border-2 border-gray-800 shadow-sm hover:bg-gray-800 hover:text-white transition-all duration-300 font-medium'
+            href='/bestseller'
+            prefetch={false}
+          >
+            View All
+          </Link>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }

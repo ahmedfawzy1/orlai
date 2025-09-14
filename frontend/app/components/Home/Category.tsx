@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const categories = [
   {
@@ -36,6 +37,50 @@ export default function Category() {
   const [scrollLeft, setScrollLeft] = useState(false);
   const [scrollRight, setScrollRight] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.3,
+        duration: 0.6,
+        ease: 'easeOut',
+      },
+    },
+  } as any;
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.7,
+        ease: 'easeOut',
+      },
+    },
+  } as any;
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: 'easeOut',
+      },
+    },
+    hover: {
+      scale: 1.02,
+      transition: {
+        duration: 0.3,
+        ease: 'easeInOut',
+      },
+    },
+  } as any;
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -76,44 +121,61 @@ export default function Category() {
   }, []);
 
   return (
-    <section className='px-5 py-10 max-w-[1280px] mx-auto'>
-      <div className='flex justify-between items-center gap-4'>
+    <motion.section
+      className='px-5 py-10 max-w-[1280px] mx-auto'
+      variants={containerVariants}
+      initial='hidden'
+      whileInView='visible'
+      viewport={{ once: true, amount: 0.3 }}
+    >
+      <motion.div
+        className='flex justify-between items-center gap-4'
+        variants={itemVariants}
+      >
         <h3 className='text-2xl md:text-3xl lg:text-[40px] font-semibold'>
           Shop by Categories
         </h3>
 
         <div className='flex flex-nowrap flex-row gap-4 pt-1'>
-          <button
+          <motion.button
             onClick={() => scroll('left')}
             aria-label='Scroll left'
             disabled={!scrollLeft}
             className={`p-2.5 bg-[#f3f3f3] rounded-[8px] ${
               scrollLeft ? 'bg-black' : ''
             } transition-colors`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <ArrowLeft size={16} color={scrollLeft ? '#fff' : '#ccc'} />
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             onClick={() => scroll('right')}
             aria-label='Scroll right'
             disabled={!scrollRight}
             className={`p-2.5 bg-[#f3f3f3] rounded-[8px] ${
               scrollRight ? 'bg-black' : ''
             } transition-colors`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <ArrowRight size={16} color={scrollRight ? '#fff' : '#ccc'} />
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
         ref={scrollRef}
         className='w-full mt-6 md:mt-7 flex gap-4 md:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory'
+        variants={containerVariants}
       >
-        {categories.map(category => (
-          <div
+        {categories.map((category, index) => (
+          <motion.div
             key={category.id}
             className='bg-[#f3f3f3] w-[280px] md:w-[calc(33.333%-1.5rem)] lg:w-[calc(25%-2rem)] h-[250px] md:h-[300px] relative flex-shrink-0 overflow-hidden'
+            variants={cardVariants}
+            whileHover='hover'
+            custom={index}
           >
             <h3 className='text-6xl font-bold text-[#e8e8e8] absolute top-2 left-6'>
               {category.name.split(' ')[0]}
@@ -133,9 +195,9 @@ export default function Category() {
             >
               {category.name}
             </Link>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

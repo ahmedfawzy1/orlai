@@ -6,12 +6,19 @@ import { Clock, ArrowLeft } from 'lucide-react';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { BlogDetail } from '@/app/types/blog';
-import { getBlogDetail } from '../action';
+import { getAllBlogs, getBlogDetail } from '../action';
 import { urlFor } from '@/app/lib/sanity';
+
+export const revalidate = 3600;
 
 interface GenerateMetadataProps {
   params: Promise<{ slug: string }>;
 }
+
+export const generateStaticParams = async () => {
+  const blogs = await getAllBlogs();
+  return blogs.map((blog: BlogDetail) => ({ slug: blog.slug }));
+};
 
 export const generateMetadata = async (props: GenerateMetadataProps) => {
   const { slug } = await props.params;
