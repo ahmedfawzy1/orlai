@@ -4,8 +4,56 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export default function DealTimer() {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 120,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  useEffect(() => {
+    // Set a target time (e.g., 120 days from now)
+    const targetTime = new Date();
+    targetTime.setDate(targetTime.getDate() + 120);
+    targetTime.setHours(23, 59, 59, 999); // Set to end of day
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      const difference = targetTime.getTime() - now.getTime();
+
+      if (difference > 0) {
+        const hours = Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        );
+        const minutes = Math.floor(
+          (difference % (1000 * 60 * 60)) / (1000 * 60),
+        );
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        setTimeLeft({
+          days: 120, // Keep days static as requested
+          hours,
+          minutes,
+          seconds,
+        });
+      } else {
+        // Timer has ended
+        setTimeLeft({
+          days: 120,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        });
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -92,10 +140,19 @@ export default function DealTimer() {
           variants={containerVariants}
         >
           {[
-            { value: '120', label: 'Days' },
-            { value: '18', label: 'Hours' },
-            { value: '15', label: 'Minutes' },
-            { value: '00', label: 'Seconds' },
+            { value: timeLeft.days.toString().padStart(2, '0'), label: 'Days' },
+            {
+              value: timeLeft.hours.toString().padStart(2, '0'),
+              label: 'Hours',
+            },
+            {
+              value: timeLeft.minutes.toString().padStart(2, '0'),
+              label: 'Minutes',
+            },
+            {
+              value: timeLeft.seconds.toString().padStart(2, '0'),
+              label: 'Seconds',
+            },
           ].map((timer, index) => (
             <motion.div
               key={timer.label}
