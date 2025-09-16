@@ -12,6 +12,9 @@ interface FilterState {
 
 interface FilterStore extends FilterState {
   getFilters: () => Promise<void>;
+  setCategories: (categories: Category[]) => void;
+  setColors: (colors: Color[]) => void;
+  setSizes: (sizes: Size[]) => void;
   init: () => Promise<void>;
 }
 
@@ -40,6 +43,10 @@ export const useFilterStore = create<FilterStore>(set => ({
       });
     }
   },
+
+  setCategories: (categories: Category[]) => set({ categories }),
+  setColors: (colors: Color[]) => set({ colors }),
+  setSizes: (sizes: Size[]) => set({ sizes }),
 
   init: async () => {
     const store = useFilterStore.getState();
