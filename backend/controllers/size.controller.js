@@ -4,20 +4,38 @@ export const createSize = async (req, res) => {
   try {
     const { name } = req.body;
 
-    const existingSize = await Size.findOne({ name });
-    if (existingSize) {
-      return res.status(400).json({ message: "Size already exists" });
+    // Input validation
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required",
+      });
     }
 
-    const newSize = new Size({ name });
+    const trimmedName = name.trim();
+
+    const existingSize = await Size.findOne({ name: trimmedName });
+    if (existingSize) {
+      return res.status(400).json({
+        success: false,
+        message: "Size already exists",
+      });
+    }
+
+    const newSize = new Size({ name: trimmedName });
     const savedSize = await newSize.save();
 
     res.status(201).json({
+      success: true,
       message: "Size created successfully",
-      size: savedSize,
+      data: savedSize,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Create size error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
@@ -29,35 +47,105 @@ export const getSizes = async (req, res) => {
       return res.status(404).json({ message: "No sizes found" });
     }
 
-    res.status(200).json(sizes);
+    res.status(200).json({
+      success: true,
+      message: "Sizes retrieved successfully",
+      data: sizes,
+      count: sizes.length,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Get sizes error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
 export const updateSize = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedData = req.body;
+    const { name } = req.body;
 
-    const updatedSize = await Size.findByIdAndUpdate(id, updatedData, { new: true });
-
-    if (!updatedSize) {
-      return res.status(404).json({ message: "Size not found" });
+    // Input validation
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required",
+      });
     }
 
+    const trimmedName = name.trim();
+
+    // Check if size exists
+    const existingSize = await Size.findById(id);
+    if (!existingSize) {
+      return res.status(404).json({
+        success: false,
+        message: "Size not found",
+      });
+    }
+
+    // Check for duplicate name
+    const duplicateSize = await Size.findOne({
+      name: trimmedName,
+      _id: { $ne: id },
+    });
+    if (duplicateSize) {
+      return res.status(400).json({
+        success: false,
+        message: "Size with this name already exists",
+      });
+    }
+
+    const updatedSize = await Size.findByIdAndUpdate(
+      id,
+      { name: trimmedName },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
     res.status(200).json({
+      success: true,
       message: "Size updated successfully",
-      updatedSize,
+      data: updatedSize,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Update size error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
 export const deleteSize = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Check if size exists
+    const existingSize = await Size.findById(id);
+    if (!existingSize) {
+      return res.status(404).json({
+        success: false,
+        message: "Size not found",
+      });
+    }
+
+    // Check if size is being used in any products
+    const Product = (await import("../models/product.model.js")).default;
+    const productsUsingSize = await Product.findOne({
+      "variants.size": id,
+    });
+
+    if (productsUsingSize) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete size as it is being used in products",
+      });
+    }
 
     const deletedSize = await Size.findByIdAndDelete(id);
 
@@ -66,10 +154,15 @@ export const deleteSize = async (req, res) => {
     }
 
     res.status(200).json({
+      success: true,
       message: "Size deleted successfully",
-      deletedSize,
+      data: deletedSize,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Delete size error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
