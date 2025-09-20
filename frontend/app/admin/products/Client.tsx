@@ -53,6 +53,9 @@ export default function Client({
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) {
+      return [];
+    }
     let result = [...products];
 
     // Apply search filter
@@ -66,14 +69,16 @@ export default function Client({
 
     // Apply category filter
     if (categoryFilter !== 'all') {
-      result = result.filter(product => product.category === categoryFilter);
+      result = result.filter(
+        product => product.category.name === categoryFilter,
+      );
     }
 
     // Apply price sorting
     if (priceSort) {
       result.sort((a, b) => {
-        const priceA = a.priceRange.minVariantPrice;
-        const priceB = b.priceRange.minVariantPrice;
+        const priceA = a.priceRange[0].minVariantPrice;
+        const priceB = b.priceRange[0].minVariantPrice;
         return priceSort === 'asc' ? priceA - priceB : priceB - priceA;
       });
     }
@@ -187,10 +192,19 @@ export default function Client({
                       <span>{product.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>${product.priceRange.minVariantPrice}</TableCell>
-                  <TableCell>${product.priceRange.maxVariantPrice}</TableCell>
-                  <TableCell>{product.inventory}</TableCell>
+                  <TableCell>{product?.category?.name}</TableCell>
+                  <TableCell>
+                    ${product.priceRange[0].minVariantPrice}
+                  </TableCell>
+                  <TableCell>
+                    ${product.priceRange[0].maxVariantPrice}
+                  </TableCell>
+                  <TableCell>
+                    {product.variants.reduce(
+                      (total, variant) => total + variant.stock,
+                      0,
+                    )}
+                  </TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${

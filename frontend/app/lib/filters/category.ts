@@ -1,10 +1,11 @@
-import { Category } from '@/app/types/filter';
+import { Category, CategoriesResponse } from '@/app/types/filter';
 import { axiosInstance } from '../axios';
+import { ApiResponse } from '@/app/types/product';
 
 export async function getCategories(): Promise<Category[]> {
   try {
-    const res = await axiosInstance.get('/categories');
-    return res.data;
+    const res = await axiosInstance.get<CategoriesResponse>('/categories');
+    return res.data.data;
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
@@ -12,34 +13,40 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function createCategory(
-  categoryData: Category
-): Promise<Category | null> {
+  categoryData: Category,
+): Promise<Category> {
   try {
-    const res = await axiosInstance.post('/categories', categoryData);
-    return res.data;
+    const res = await axiosInstance.post<ApiResponse<Category>>(
+      '/categories',
+      categoryData,
+    );
+    return res.data.data;
   } catch (error) {
     console.error('Error creating category:', error);
-    return null;
+    throw error;
   }
 }
 
 export async function updateCategory(
   id: string,
-  updateData: Partial<Category>
-): Promise<Category | null> {
+  updateData: Partial<Category>,
+): Promise<Category> {
   try {
-    const res = await axiosInstance.put(`/categories/${id}`, updateData);
-    return res.data;
+    const res = await axiosInstance.put<ApiResponse<Category>>(
+      `/categories/${id}`,
+      updateData,
+    );
+    return res.data.data;
   } catch (error) {
     console.error('Error updating category:', error);
-    return null;
+    throw error;
   }
 }
 
 export async function deleteCategory(id: string): Promise<boolean> {
   try {
-    await axiosInstance.delete(`/categories/${id}`);
-    return true;
+    const res = await axiosInstance.delete<ApiResponse>(`/categories/${id}`);
+    return res.data.success;
   } catch (error) {
     console.error('Error deleting category:', error);
     return false;

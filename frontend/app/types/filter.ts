@@ -24,3 +24,24 @@ export interface Color {
   hexCode: string;
   __v: number;
 }
+
+export interface ColorsResponse {
+  success: boolean;
+  message: string;
+  data: Color[];
+  count: number;
+}
+
+export interface SizesResponse {
+  success: boolean;
+  message: string;
+  data: Size[];
+  count: number;
+}
+
+export interface CategoriesResponse {
+  success: boolean;
+  message: string;
+  data: Category[];
+  count: number;
+}

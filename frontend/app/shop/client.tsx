@@ -12,9 +12,10 @@ import { getProducts } from '../lib/products';
 
 interface ShopData {
   products: Product[];
-  totalPages: number;
-  currentPage: number;
-  totalCount: number;
+  total_count: number;
+  total_pages: number;
+  current_page: number;
+  per_page: number;
 }
 
 interface FilterData {
@@ -37,10 +38,10 @@ export default function Shop({ initialData, filterData }: ShopProps) {
   const [hasClientData, setHasClientData] = useState(false);
   const [displayProducts, setDisplayProducts] = useState(initialData.products);
   const [displayTotalPages, setDisplayTotalPages] = useState(
-    initialData.totalPages,
+    initialData.total_pages,
   );
   const [displayCurrentPage, setDisplayCurrentPage] = useState(
-    initialData.currentPage,
+    initialData.current_page,
   );
 
   // Reset client data flag when page changes (navigation)
@@ -52,8 +53,8 @@ export default function Shop({ initialData, filterData }: ShopProps) {
   useEffect(() => {
     if (!hasClientData) {
       setDisplayProducts(initialData.products);
-      setDisplayTotalPages(initialData.totalPages);
-      setDisplayCurrentPage(initialData.currentPage);
+      setDisplayTotalPages(initialData.total_pages);
+      setDisplayCurrentPage(initialData.current_page);
     }
   }, [initialData, hasClientData]);
 

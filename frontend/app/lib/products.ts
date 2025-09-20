@@ -1,5 +1,11 @@
 import { axiosInstance } from './axios';
-import { Product } from '../types/product';
+import {
+  Product,
+  ProductsResponse,
+  ProductResponse,
+  BestSellersResponse,
+  ApiResponse,
+} from '../types/product';
 
 export async function getProducts(
   page: number = 1,
@@ -13,7 +19,7 @@ export async function getProducts(
     sort?: string;
     order?: 'asc' | 'desc';
     search?: string;
-  } = {}
+  } = {},
 ) {
   try {
     const params = new URLSearchParams({
@@ -33,8 +39,16 @@ export async function getProducts(
       ...(queryParams.search && { search: queryParams.search }),
     });
 
-    const res = await axiosInstance.get(`/products?${params.toString()}`);
-    return res.data;
+    const res = await axiosInstance.get<ProductsResponse>(
+      `/products?${params.toString()}`,
+    );
+    return {
+      products: res.data.data,
+      total_count: res.data.pagination?.total_count || 0,
+      total_pages: res.data.pagination?.total_pages || 0,
+      current_page: res.data.pagination?.current_page || page,
+      per_page: res.data.pagination?.per_page || limit,
+    };
   } catch (error) {
     console.error('Error fetching products:', error);
     return {
@@ -49,8 +63,10 @@ export async function getProducts(
 
 export async function getAllBestSellingProducts() {
   try {
-    const res = await axiosInstance.get('/products/bestsellers');
-    return res.data;
+    const res = await axiosInstance.get<BestSellersResponse>(
+      '/products/bestsellers',
+    );
+    return res.data.data;
   } catch (error) {
     console.error('Error fetching bestSelling products:', error);
     return [];
@@ -59,8 +75,10 @@ export async function getAllBestSellingProducts() {
 
 export async function getBestSellingProducts() {
   try {
-    const res = await axiosInstance.get('/products/bestsellers?limit=4');
-    return res.data;
+    const res = await axiosInstance.get<BestSellersResponse>(
+      '/products/bestsellers?limit=4',
+    );
+    return res.data.data;
   } catch (error) {
     console.error('Error fetching bestSelling products:', error);
     return [];
@@ -69,8 +87,8 @@ export async function getBestSellingProducts() {
 
 export async function getProduct(id: string) {
   try {
-    const res = await axiosInstance.get(`/products/${id}`);
-    return res.data;
+    const res = await axiosInstance.get<ProductResponse>(`/products/${id}`);
+    return res.data.data;
   } catch (error) {
     console.error('Error fetching product by id:', error);
     return null;
@@ -79,18 +97,24 @@ export async function getProduct(id: string) {
 
 export async function createProduct(productData: Product) {
   try {
-    const res = await axiosInstance.post('/products', productData);
-    return res.data;
+    const res = await axiosInstance.post<ProductResponse>(
+      '/products',
+      productData,
+    );
+    return res.data.data;
   } catch (error) {
-    console.error('Error fetching product by slug:', error);
+    console.error('Error creating product:', error);
     return null;
   }
 }
 
 export async function updateProduct(id: string, updateData: Partial<Product>) {
   try {
-    const res = await axiosInstance.put(`/products/${id}`, updateData);
-    return res.data;
+    const res = await axiosInstance.put<ProductResponse>(
+      `/products/${id}`,
+      updateData,
+    );
+    return res.data.data;
   } catch (error) {
     console.error('Error updating product:', error);
     return null;
@@ -99,8 +123,8 @@ export async function updateProduct(id: string, updateData: Partial<Product>) {
 
 export async function deleteProduct(id: string) {
   try {
-    const res = await axiosInstance.delete(`/products/${id}`);
-    return res.data;
+    const res = await axiosInstance.delete<ApiResponse>(`/products/${id}`);
+    return res.data.data;
   } catch (error) {
     console.error('Error deleting product:', error);
     return null;
