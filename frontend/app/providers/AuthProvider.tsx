@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-// import { Loader } from 'lucide-react';
 
 export default function AuthProvider({
   children,
@@ -10,12 +9,18 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const { checkAuth, isCheckingAuth } = useAuthStore();
-  const hasCheckedAuth = useRef(false);
 
   useEffect(() => {
-    if (!hasCheckedAuth.current && !isCheckingAuth) {
-      hasCheckedAuth.current = true;
-      checkAuth();
+    if (!isCheckingAuth) {
+      // Check if there's a JWT cookie before making the request
+      const hasJwtCookie = document.cookie.includes('jwt=');
+
+      if (hasJwtCookie) {
+        checkAuth();
+      } else {
+        // No JWT cookie, user is definitely not authenticated
+        // console.log('No JWT cookie found, skipping auth check');
+      }
     }
   }, [checkAuth, isCheckingAuth]);
 
