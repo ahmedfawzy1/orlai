@@ -11,7 +11,7 @@ export const addToCart = async (
   variantId: string,
   color: string,
   size: string,
-  quantity: number
+  quantity: number,
 ): Promise<Cart | null> => {
   const response = await axiosInstance.post('/cart', {
     productId,
@@ -25,7 +25,7 @@ export const addToCart = async (
 
 export const updateCart = async (
   itemId: string,
-  quantity: number
+  quantity: number,
 ): Promise<Cart> => {
   const response = await axiosInstance.put(`/cart/${itemId}`, { quantity });
   return response.data;

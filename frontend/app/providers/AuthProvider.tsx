@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 // import { Loader } from 'lucide-react';
 
@@ -9,19 +9,15 @@ export default function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { checkAuth } = useAuthStore();
+  const { checkAuth, isCheckingAuth } = useAuthStore();
+  const hasCheckedAuth = useRef(false);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  // if (isCheckingAuth && !authUser) {
-  //   return (
-  //     <div className='h-screen flex items-center justify-center'>
-  //       <Loader className='w-10 h-10 animate-spin' />
-  //     </div>
-  //   );
-  // }
+    if (!hasCheckedAuth.current && !isCheckingAuth) {
+      hasCheckedAuth.current = true;
+      checkAuth();
+    }
+  }, [checkAuth, isCheckingAuth]);
 
   return <>{children}</>;
 }

@@ -37,7 +37,7 @@ interface AuthState {
   resetPassword: (
     email: string,
     otp: string,
-    newPassword: string
+    newPassword: string,
   ) => Promise<boolean>;
 }
 
@@ -45,20 +45,39 @@ export const useAuthStore = create<AuthState>(set => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,
-  isCheckingAuth: true,
+  isCheckingAuth: false,
   isRequestingOtp: false,
   isVerifyingOtp: false,
   isResettingPassword: false,
 
   checkAuth: async () => {
+    // Prevent multiple simultaneous calls
+    const state = useAuthStore.getState();
+    if (state.isCheckingAuth) {
+      return;
+    }
+
+    set({ isCheckingAuth: true });
+
     try {
       const res = await axiosInstance.get(`/auth/check`);
       set({ authUser: res.data });
-      const cartStore = useCartStore.getState();
-      await cartStore.syncLocalCartToBackend();
+      // Sync cart after user is authenticated
+      setTimeout(async () => {
+        const cartStore = useCartStore.getState();
+        await cartStore.syncLocalCartToBackend();
+      }, 1000);
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status !== 401) {
-        console.error('Error checking auth:', error.response?.data?.message);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 429) {
+          // Rate limited - wait before retrying
+          console.warn('Rate limited, will retry auth check later');
+          setTimeout(() => {
+            useAuthStore.getState().checkAuth();
+          }, 5000); // Retry after 5 seconds
+        } else if (error.response?.status !== 401) {
+          console.error('Error checking auth:', error.response?.data?.message);
+        }
       }
       set({ authUser: null });
     } finally {
@@ -174,11 +193,11 @@ export const useAuthStore = create<AuthState>(set => ({
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(
-          error.response?.data?.message || 'Failed to reset password'
+          error.response?.data?.message || 'Failed to reset password',
         );
         console.error(
           'Error resetting password:',
-          error.response?.data?.message
+          error.response?.data?.message,
         );
       }
       return false;

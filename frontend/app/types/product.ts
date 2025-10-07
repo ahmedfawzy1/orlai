@@ -13,28 +13,25 @@ export interface Product {
   images: string[];
   variants: {
     _id: string;
-    color:
-      | string
-      | {
-          _id: string;
-          name: string;
-          hexCode: string;
-          __v: number;
-        };
-    size:
-      | string
-      | {
-          _id: string;
-          name: string;
-          __v: number;
-        };
+    color: {
+      _id: string;
+      name: string;
+      hexCode: string;
+      __v: number;
+    } | null;
+    size: {
+      _id: string;
+      name: string;
+      __v: number;
+    };
     stock: number;
   }[];
   priceRange: {
     maxVariantPrice: number;
     minVariantPrice: number;
     _id: string;
-  }[];
+  };
+  inventory: number;
   averageRating: number;
   slug: string;
   reviews: string[];

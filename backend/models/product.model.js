@@ -78,9 +78,10 @@ const productSchema = new mongoose.Schema(
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {
-        // Transform category to just the name
-        if (ret.category) {
-          ret.category = ret.category.name || ret.category;
+        // Keep category as full object for consistency
+        if (ret.category && typeof ret.category === "object") {
+          // Keep the full category object
+          ret.category = ret.category;
         }
 
         // Transform variants to handle color/size objects and remove duplicate ids
@@ -89,19 +90,18 @@ const productSchema = new mongoose.Schema(
             // Remove id from variant level
             const { id, ...variantWithoutId } = variant;
 
-            // Handle color object
+            // Handle color object - keep full object or null
             if (variant.color && typeof variant.color === "object") {
               const { id, ...colorWithoutId } = variant.color;
               variantWithoutId.color = colorWithoutId;
+            } else {
+              variantWithoutId.color = null;
             }
 
-            // Handle size - return name directly
-            if (variant.size) {
-              if (typeof variant.size === "object") {
-                variantWithoutId.size = variant.size.name;
-              } else {
-                variantWithoutId.size = variant.size;
-              }
+            // Handle size - keep full object
+            if (variant.size && typeof variant.size === "object") {
+              const { id, ...sizeWithoutId } = variant.size;
+              variantWithoutId.size = sizeWithoutId;
             }
 
             return variantWithoutId;
@@ -119,9 +119,10 @@ const productSchema = new mongoose.Schema(
     toObject: {
       virtuals: true,
       transform: function (doc, ret) {
-        // Transform category to just the name
-        if (ret.category) {
-          ret.category = ret.category.name || ret.category;
+        // Keep category as full object for consistency
+        if (ret.category && typeof ret.category === "object") {
+          // Keep the full category object
+          ret.category = ret.category;
         }
 
         // Transform variants to handle color/size objects and remove duplicate ids
@@ -130,19 +131,18 @@ const productSchema = new mongoose.Schema(
             // Remove id from variant level
             const { id, ...variantWithoutId } = variant;
 
-            // Handle color object
+            // Handle color object - keep full object or null
             if (variant.color && typeof variant.color === "object") {
               const { id, ...colorWithoutId } = variant.color;
               variantWithoutId.color = colorWithoutId;
+            } else {
+              variantWithoutId.color = null;
             }
 
-            // Handle size - return name directly
-            if (variant.size) {
-              if (typeof variant.size === "object") {
-                variantWithoutId.size = variant.size.name;
-              } else {
-                variantWithoutId.size = variant.size;
-              }
+            // Handle size - keep full object
+            if (variant.size && typeof variant.size === "object") {
+              const { id, ...sizeWithoutId } = variant.size;
+              variantWithoutId.size = sizeWithoutId;
             }
 
             return variantWithoutId;

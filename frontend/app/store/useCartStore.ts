@@ -76,7 +76,7 @@ export const useCartStore = create<CartState>()(
             item.variantId,
             item.color.name,
             item.size.name,
-            item.quantity
+            item.quantity,
           ).catch(() => toast.error('Failed to sync with backend'));
         }
       },
@@ -84,12 +84,12 @@ export const useCartStore = create<CartState>()(
       updateCart: async (itemId, quantity) => {
         const { items } = get();
         const updatedItems = items.map(i =>
-          i._id === itemId ? { ...i, quantity } : i
+          i._id === itemId ? { ...i, quantity } : i,
         );
         const updatedTotal = updatedItems.reduce(
           (sum, i) =>
             sum + (i.product?.priceRange?.minVariantPrice || 0) * i.quantity,
-          0
+          0,
         );
 
         set({ items: updatedItems, total: updatedTotal });
@@ -98,7 +98,7 @@ export const useCartStore = create<CartState>()(
         const authStore = useAuthStore.getState();
         if (authStore.authUser) {
           apiUpdateCart(itemId, quantity).catch(() =>
-            toast.error('Failed to sync quantity')
+            toast.error('Failed to sync quantity'),
           );
         }
       },
@@ -109,7 +109,7 @@ export const useCartStore = create<CartState>()(
         const updatedTotal = updatedItems.reduce(
           (sum, i) =>
             sum + (i.product?.priceRange?.minVariantPrice || 0) * i.quantity,
-          0
+          0,
         );
 
         set({ items: updatedItems, total: updatedTotal });
@@ -118,7 +118,7 @@ export const useCartStore = create<CartState>()(
         const authStore = useAuthStore.getState();
         if (authStore.authUser) {
           apiRemoveFromCart(itemId).catch(() =>
-            toast.error('Failed to sync removal')
+            toast.error('Failed to sync removal'),
           );
         }
       },
@@ -137,7 +137,7 @@ export const useCartStore = create<CartState>()(
         const authStore = useAuthStore.getState();
         if (authStore.authUser) {
           apiClearCart().catch(() =>
-            toast.error('Failed to clear cart in backend')
+            toast.error('Failed to clear cart in backend'),
           );
         }
       },
@@ -152,7 +152,7 @@ export const useCartStore = create<CartState>()(
           (sum, item) =>
             sum +
             (item.product?.priceRange?.minVariantPrice || 0) * item.quantity,
-          0
+          0,
         );
         try {
           const response = await axiosInstance.post('/coupons/validate', {
@@ -180,20 +180,42 @@ export const useCartStore = create<CartState>()(
         const { items } = get();
         if (items.length === 0) return;
 
+        // Check if user is authenticated before syncing
+        const authStore = useAuthStore.getState();
+        if (!authStore.authUser) {
+          console.log('User not authenticated, skipping cart sync');
+          return;
+        }
+
         try {
+          console.log('Starting cart sync for', items.length, 'items');
           for (const item of items) {
-            await apiAddToCart(
-              item.product._id,
-              item.variantId,
-              item.color.name,
-              item.size.name,
-              item.quantity
-            );
+            if (
+              item.product?._id &&
+              item.variantId &&
+              item.color?.name &&
+              item.size?.name
+            ) {
+              await apiAddToCart(
+                item.product._id,
+                item.variantId,
+                item.color.name,
+                item.size.name,
+                item.quantity,
+              );
+            } else {
+              console.warn('Skipping invalid cart item:', item);
+            }
           }
           console.log('Local cart synced to backend successfully');
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to sync local cart to backend:', error);
-          toast.error('Failed to sync cart items to backend');
+          if (error.response?.status === 401) {
+            console.log('User not authenticated, clearing auth state');
+            useAuthStore.getState().logout();
+          } else {
+            toast.error('Failed to sync cart items to backend');
+          }
         }
       },
     }),
@@ -208,6 +230,6 @@ export const useCartStore = create<CartState>()(
         discountAmount: state.discountAmount,
         couponInfo: state.couponInfo,
       }),
-    }
-  )
+    },
+  ),
 );

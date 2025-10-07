@@ -77,8 +77,8 @@ export default function Client({
     // Apply price sorting
     if (priceSort) {
       result.sort((a, b) => {
-        const priceA = a.priceRange[0].minVariantPrice;
-        const priceB = b.priceRange[0].minVariantPrice;
+        const priceA = a.priceRange.minVariantPrice;
+        const priceB = b.priceRange.minVariantPrice;
         return priceSort === 'asc' ? priceA - priceB : priceB - priceA;
       });
     }
@@ -193,12 +193,8 @@ export default function Client({
                     </div>
                   </TableCell>
                   <TableCell>{product?.category?.name}</TableCell>
-                  <TableCell>
-                    ${product.priceRange[0].minVariantPrice}
-                  </TableCell>
-                  <TableCell>
-                    ${product.priceRange[0].maxVariantPrice}
-                  </TableCell>
+                  <TableCell>${product.priceRange.minVariantPrice}</TableCell>
+                  <TableCell>${product.priceRange.maxVariantPrice}</TableCell>
                   <TableCell>
                     {product.variants.reduce(
                       (total, variant) => total + variant.stock,

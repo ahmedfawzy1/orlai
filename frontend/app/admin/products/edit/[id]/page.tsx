@@ -98,7 +98,7 @@ export default function EditProductPage({
         setFormData({
           name: product.name,
           description: product.description,
-          category: product.category,
+          category: product.category.name,
           priceRange: product.priceRange,
           image: product.images || [],
           variants: product.variants || [],
@@ -110,7 +110,7 @@ export default function EditProductPage({
         reset({
           name: product.name,
           description: product.description,
-          category: product.category,
+          category: product.category.name,
           priceRange: product.priceRange,
           image: product.images || [],
           variants: product.variants || [],

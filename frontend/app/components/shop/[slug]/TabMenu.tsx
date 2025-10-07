@@ -158,6 +158,7 @@ export default function TabMenu({ product }: { product: Product }) {
             <span className='font-semibold text-base min-w-[80px]'>Color</span>
             <span className='text-gray-700 text-base'>
               {product.variants
+                .filter((variant: any) => variant.color !== null)
                 .map((variant: any) => variant.color.name)
                 .join(', ')}
             </span>
@@ -165,7 +166,9 @@ export default function TabMenu({ product }: { product: Product }) {
           <div className='flex items-start gap-8'>
             <span className='font-semibold text-base min-w-[80px]'>Size</span>
             <span className='text-gray-700 text-base'>
-              {product.variants.map((variant: any) => variant.size).join(', ')}
+              {product.variants
+                .map((variant: any) => variant.size.name)
+                .join(', ')}
             </span>
           </div>
         </div>

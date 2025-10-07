@@ -17,10 +17,12 @@ export default function ProductDetails({
   const { isInWishlist, addToWishlist, removeFromWishlist } =
     useWishlistStore();
   const [selectedColor, setSelectedColor] = useState<any>(
-    product.variants.length > 0 ? product.variants[0]?.color.hexCode : null
+    product.variants.length > 0 && product.variants[0]?.color
+      ? product.variants[0].color.hexCode
+      : null,
   );
   const [selectedSize, setSelectedSize] = useState<string | null>(
-    product.variants.length > 0 ? product.variants[0]?.size : null
+    product.variants.length > 0 ? product.variants[0]?.size.name : null,
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -76,7 +78,7 @@ export default function ProductDetails({
           </span>
         )}
       </div>
-      <div className='text-lg md:text-xl md:my-2'>{product.category}</div>
+      <div className='text-lg md:text-xl md:my-2'>{product.category.name}</div>
       <div className='flex items-center gap-2 mb-2'>
         <span className='text-orange-400 text-xl'>
           <ReactStars
@@ -110,23 +112,25 @@ export default function ProductDetails({
       <div className='mb-4'>
         <div className='text-xl font-bold mb-2'>Color</div>
         <div className='flex gap-3'>
-          {product.variants.map((variant: any) => (
-            <button
-              key={variant.color.hexCode}
-              title={variant.color.name}
-              className={`relative inline-block w-8 h-8 rounded-sm cursor-pointer border-2 ${
-                selectedColor === variant.color.hexCode
-                  ? 'border-black/50'
-                  : 'border-transparent'
-              }`}
-              style={{ background: variant.color.hexCode }}
-              onClick={() => setSelectedColor(variant.color.hexCode)}
-            >
-              {selectedColor === variant.color.hexCode && (
-                <Check className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white w-5 h-5' />
-              )}
-            </button>
-          ))}
+          {product.variants
+            .filter((variant: any) => variant.color !== null)
+            .map((variant: any) => (
+              <button
+                key={variant._id}
+                title={variant.color.name}
+                className={`relative inline-block w-8 h-8 rounded-sm cursor-pointer border-2 ${
+                  selectedColor === variant.color.hexCode
+                    ? 'border-black/50'
+                    : 'border-transparent'
+                }`}
+                style={{ background: variant.color.hexCode }}
+                onClick={() => setSelectedColor(variant.color.hexCode)}
+              >
+                {selectedColor === variant.color.hexCode && (
+                  <Check className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white w-5 h-5' />
+                )}
+              </button>
+            ))}
         </div>
       </div>
       <div className='mb-4'>
@@ -134,15 +138,15 @@ export default function ProductDetails({
         <div className='flex gap-3'>
           {product.variants.map((variant: any) => (
             <button
-              key={variant.size}
+              key={variant._id}
               className={`px-4 py-2 border rounded-sm font-medium cursor-pointer transition-colors duration-150 border-gray-900 ${
-                selectedSize === variant.size
+                selectedSize === variant.size.name
                   ? 'bg-gray-900 text-white'
                   : 'bg-white text-gray-900 hover:bg-gray-100'
               }`}
-              onClick={() => setSelectedSize(variant.size)}
+              onClick={() => setSelectedSize(variant.size.name)}
             >
-              {variant.size}
+              {variant.size.name}
             </button>
           ))}
         </div>

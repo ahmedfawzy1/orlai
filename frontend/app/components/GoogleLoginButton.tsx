@@ -70,7 +70,7 @@ export default function GoogleLoginButton() {
         });
         window.google.accounts.id.renderButton(
           document.getElementById('googleButton') as HTMLElement,
-          { theme: 'outline', size: 'large', width: '100%' }
+          { theme: 'outline', size: 'large', width: '100%' },
         );
       }
     };

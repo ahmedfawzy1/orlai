@@ -44,9 +44,14 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
   const product = await getProduct(slug);
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
+
   const user = await getServerSession();
   const relatedResponse = await getProducts(1, 3, {
-    category: product.category,
+    category: product.category.name,
   });
   const products = relatedResponse.products;
 

@@ -55,19 +55,24 @@ export default function ItemCard({ product }: { product: Product }) {
     }
 
     const variant = product.variants[0];
-
     const item = {
       _id: crypto.randomUUID(), // Local unique ID
       product,
       variantId: variant._id,
-      color: {
-        _id: crypto.randomUUID(),
-        name: variant.color.name,
-        hexCode: variant.color.hexCode,
-      },
+      color: variant.color
+        ? {
+            _id: variant.color._id,
+            name: variant.color.name,
+            hexCode: variant.color.hexCode,
+          }
+        : {
+            _id: crypto.randomUUID(),
+            name: 'Default',
+            hexCode: '#000000',
+          },
       size: {
-        _id: crypto.randomUUID(),
-        name: variant.size,
+        _id: variant.size._id,
+        name: variant.size.name,
       },
       quantity: 1,
     };
@@ -142,16 +147,20 @@ export default function ItemCard({ product }: { product: Product }) {
         >
           <h3 className='text-lg font-bold truncate'>{product.name}</h3>
         </Link>
-        <p className='text-md text-black/70 font-medium'>{product.category}</p>
+        <p className='text-md text-black/70 font-medium'>
+          {product.category.name}
+        </p>
         <div className='flex gap-2 items-center'>
           <p className='text-lg font-bold'>
             ${product.priceRange.maxVariantPrice}
           </p>
-          {product.priceRange.minVariantPrice > 0 && (
-            <p className='text-[#000000a6] text-lg font-bold line-through'>
-              ${product.priceRange.minVariantPrice}
-            </p>
-          )}
+          {product.priceRange.minVariantPrice > 0 &&
+            product.priceRange.minVariantPrice !==
+              product.priceRange.maxVariantPrice && (
+              <p className='text-[#000000a6] text-lg font-bold line-through'>
+                ${product.priceRange.minVariantPrice}
+              </p>
+            )}
           {product.inventory <= 5 && product.inventory > 0 && (
             <span className='text-sm text-red-500 font-medium'>
               Only {product.inventory} left!

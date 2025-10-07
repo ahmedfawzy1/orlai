@@ -52,8 +52,7 @@ cartSchema.pre("save", async function (next) {
   });
   this.total = populatedCart.items.reduce((total, item) => {
     const product = item.product;
-    const variant = product.variants.id(item.variantId);
-    return total + variant.price * item.quantity;
+    return total + product.priceRange.minVariantPrice * item.quantity;
   }, 0);
 
   next();

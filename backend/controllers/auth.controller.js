@@ -4,10 +4,14 @@ import User from "../models/user.model.js";
 import { generateToken } from "../config/utils.js";
 import nodemailer from "nodemailer";
 import { OAuth2Client } from "google-auth-library";
+import { sanitizeHtml } from "../middleware/validation.middleware.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const signup = async (req, res) => {
+  // Sanitize input
+  sanitizeHtml(req, res, () => {});
+
   const { first_name, last_name, email, password } = req.body;
   try {
     if (!first_name || !last_name || !email || !password) {
