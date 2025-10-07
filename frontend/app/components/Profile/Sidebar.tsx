@@ -14,6 +14,7 @@ import {
   MapPin,
   UserRound,
 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 const sidebarLinks = [
   {
@@ -38,7 +39,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useAuthStore();
-
+  const { data: session } = useSession();
+  const user = session?.user;
   return (
     <>
       {/* Mobile menu button */}
@@ -70,7 +72,9 @@ export default function Sidebar() {
               <h3 className='text-sm text-gray-500 flex items-center gap-1'>
                 Hello <span className='text-lg'>👋</span>
               </h3>
-              <p className='font-bold text-lg text-gray-900'>Robert Fox</p>
+              <p className='font-bold text-lg text-gray-900'>
+                {user?.first_name} {user?.last_name}
+              </p>
             </div>
             {/* Close button inside sidebar (mobile only) */}
             <div className='flex lg:hidden justify-end p-4'>
