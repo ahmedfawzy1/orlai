@@ -44,6 +44,7 @@ export default function Client({
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priceSort, setPriceSort] = useState('');
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
   // Initialize store with server data
   useEffect(() => {
@@ -90,6 +91,37 @@ export default function Client({
     setSearchQuery('');
     setCategoryFilter('all');
     setPriceSort('');
+    setSelectedProducts([]);
+  };
+
+  // Bulk delete handler
+  const handleBulkDeleteProducts = async () => {
+    try {
+      await Promise.all(selectedProducts.map(id => deleteProduct(id)));
+      toast.success('Selected products deleted successfully');
+      setSelectedProducts([]);
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting selected products:', error);
+      toast.error('Failed to delete selected products');
+    }
+  };
+
+  // Selection handlers
+  const handleSelectAllProducts = (checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(filteredProducts.map(p => p._id));
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const handleSelectProduct = (productId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(prev => [...prev, productId]);
+    } else {
+      setSelectedProducts(prev => prev.filter(id => id !== productId));
+    }
   };
 
   const handleDeleteProduct = async (productId: string) => {
@@ -105,7 +137,18 @@ export default function Client({
 
   return (
     <div className='px-4 pt-6 space-y-6'>
-      <h1 className='text-2xl font-bold'>Products</h1>
+      <div className='flex justify-between items-center'>
+        <h1 className='text-2xl font-bold'>Products</h1>
+        {selectedProducts.length > 0 && (
+          <Button
+            variant='destructive'
+            onClick={handleBulkDeleteProducts}
+            className='h-8'
+          >
+            Delete Selected ({selectedProducts.length})
+          </Button>
+        )}
+      </div>
       <Card className='py-0'>
         <CardContent className='p-2 md:p-4 flex flex-col md:flex-row gap-2 md:gap-4 items-stretch md:items-center'>
           <Input
@@ -159,7 +202,13 @@ export default function Client({
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <Checkbox />
+                  <Checkbox
+                    checked={
+                      selectedProducts.length === filteredProducts.length &&
+                      filteredProducts.length > 0
+                    }
+                    onCheckedChange={handleSelectAllProducts}
+                  />
                 </TableHead>
                 <TableHead>PRODUCT NAME</TableHead>
                 <TableHead>CATEGORY</TableHead>
@@ -176,7 +225,12 @@ export default function Client({
               {filteredProducts.map(product => (
                 <TableRow key={product._id}>
                   <TableCell>
-                    <Checkbox />
+                    <Checkbox
+                      checked={selectedProducts.includes(product._id)}
+                      onCheckedChange={checked =>
+                        handleSelectProduct(product._id, checked as boolean)
+                      }
+                    />
                   </TableCell>
                   <TableCell>
                     <div className='flex items-center gap-2'>

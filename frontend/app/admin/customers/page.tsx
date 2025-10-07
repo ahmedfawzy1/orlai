@@ -29,7 +29,7 @@ export default function CustomersPage() {
   } = useCustomerStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
   const [editRowId, setEditRowId] = useState<string | null>(null);
   const [editData, setEditData] = useState<any>({});
@@ -49,7 +49,7 @@ export default function CustomersPage() {
           customer._id.toLowerCase().includes(query) ||
           customer.first_name.toLowerCase().includes(query) ||
           customer.last_name.toLowerCase().includes(query) ||
-          customer.email.toLowerCase().includes(query)
+          customer.email.toLowerCase().includes(query),
       );
     }
     return result;
@@ -130,7 +130,7 @@ export default function CustomersPage() {
   };
 
   const handleEditChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
@@ -197,6 +197,7 @@ export default function CustomersPage() {
             variant='destructive'
             onClick={handleBulkDelete}
             disabled={loading}
+            className='h-8'
           >
             Delete Selected ({selectedCustomers.length})
           </Button>
@@ -365,7 +366,7 @@ export default function CustomersPage() {
                 >
                   {page}
                 </Button>
-              )
+              ),
             )}
             <Button
               variant='outline'

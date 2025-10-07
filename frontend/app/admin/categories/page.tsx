@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -30,6 +30,10 @@ import ColorPicker from 'react-pick-color';
 export default function CategoriesPage() {
   const { categories, colors, sizes, getFilters } = useFilterStore();
 
+  useEffect(() => {
+    getFilters();
+  }, [getFilters]);
+
   const [newCategory, setNewCategory] = useState({
     name: '',
     description: '',
@@ -48,7 +52,7 @@ export default function CategoriesPage() {
   const [tempHexCode, setTempHexCode] = useState<string>('');
 
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
-    null
+    null,
   );
   const [editingCategory, setEditingCategory] = useState({
     name: '',
@@ -64,6 +68,11 @@ export default function CategoriesPage() {
   const [tempEditHexCode, setTempEditHexCode] = useState<string>('');
   const [editingSizeId, setEditingSizeId] = useState<string | null>(null);
   const [editingSize, setEditingSize] = useState<Partial<Size>>({ name: '' });
+
+  // Selection state
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
   const handleDeleteCategory = async (categoryId: string) => {
     try {
@@ -95,6 +104,89 @@ export default function CategoriesPage() {
     } catch (error) {
       console.error('Error deleting size:', error);
       toast.error('Failed to delete size');
+    }
+  };
+
+  // Bulk delete handlers
+  const handleBulkDeleteCategories = async () => {
+    try {
+      await Promise.all(selectedCategories.map(id => deleteCategory(id)));
+      toast.success('Selected categories deleted successfully');
+      setSelectedCategories([]);
+    } catch (error) {
+      console.error('Error deleting selected categories:', error);
+      toast.error('Failed to delete selected categories');
+    }
+  };
+
+  const handleBulkDeleteColors = async () => {
+    try {
+      await Promise.all(selectedColors.map(id => deleteColor(id)));
+      toast.success('Selected colors deleted successfully');
+      setSelectedColors([]);
+    } catch (error) {
+      console.error('Error deleting selected colors:', error);
+      toast.error('Failed to delete selected colors');
+    }
+  };
+
+  const handleBulkDeleteSizes = async () => {
+    try {
+      await Promise.all(selectedSizes.map(id => deleteSize(id)));
+      toast.success('Selected sizes deleted successfully');
+      setSelectedSizes([]);
+    } catch (error) {
+      console.error('Error deleting selected sizes:', error);
+      toast.error('Failed to delete selected sizes');
+    }
+  };
+
+  // Selection handlers
+  const handleSelectAllCategories = (checked: boolean) => {
+    if (checked) {
+      setSelectedCategories(categories.map(c => c._id || ''));
+    } else {
+      setSelectedCategories([]);
+    }
+  };
+
+  const handleSelectCategory = (categoryId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCategories(prev => [...prev, categoryId]);
+    } else {
+      setSelectedCategories(prev => prev.filter(id => id !== categoryId));
+    }
+  };
+
+  const handleSelectAllColors = (checked: boolean) => {
+    if (checked) {
+      setSelectedColors(colors.map(c => c._id || ''));
+    } else {
+      setSelectedColors([]);
+    }
+  };
+
+  const handleSelectColor = (colorId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedColors(prev => [...prev, colorId]);
+    } else {
+      setSelectedColors(prev => prev.filter(id => id !== colorId));
+    }
+  };
+
+  const handleSelectAllSizes = (checked: boolean) => {
+    if (checked) {
+      setSelectedSizes(sizes.map(s => s._id || ''));
+    } else {
+      setSelectedSizes([]);
+    }
+  };
+
+  const handleSelectSize = (sizeId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedSizes(prev => [...prev, sizeId]);
+    } else {
+      setSelectedSizes(prev => prev.filter(id => id !== sizeId));
     }
   };
 
@@ -227,12 +319,23 @@ export default function CategoriesPage() {
       <div className=''>
         <div className='flex justify-between items-center pb-4'>
           <h1 className='text-2xl font-bold'>Categories</h1>
-          <Button
-            onClick={() => setShowCategoryInput(!showCategoryInput)}
-            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
-          >
-            {showCategoryInput ? 'Cancel' : 'Add Category'}
-          </Button>
+          <div className='flex gap-2'>
+            {selectedCategories.length > 0 && (
+              <Button
+                variant='destructive'
+                onClick={handleBulkDeleteCategories}
+                className='h-8'
+              >
+                Delete Selected ({selectedCategories.length})
+              </Button>
+            )}
+            <Button
+              onClick={() => setShowCategoryInput(!showCategoryInput)}
+              className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+            >
+              {showCategoryInput ? 'Cancel' : 'Add Category'}
+            </Button>
+          </div>
         </div>
         <Card>
           <CardContent className='p-0'>
@@ -240,7 +343,13 @@ export default function CategoriesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>
-                    <Checkbox />
+                    <Checkbox
+                      checked={
+                        selectedCategories.length === categories.length &&
+                        categories.length > 0
+                      }
+                      onCheckedChange={handleSelectAllCategories}
+                    />
                   </TableHead>
                   <TableHead>NAME</TableHead>
                   <TableHead>DESCRIPTION</TableHead>
@@ -301,7 +410,17 @@ export default function CategoriesPage() {
                 {categories.map(category => (
                   <TableRow key={category._id}>
                     <TableCell>
-                      <Checkbox />
+                      <Checkbox
+                        checked={selectedCategories.includes(
+                          category._id || '',
+                        )}
+                        onCheckedChange={checked =>
+                          handleSelectCategory(
+                            category._id || '',
+                            checked as boolean,
+                          )
+                        }
+                      />
                     </TableCell>
                     {editingCategoryId === category._id ? (
                       <>
@@ -399,12 +518,23 @@ export default function CategoriesPage() {
       <div className=''>
         <div className='flex justify-between items-center pb-4'>
           <h1 className='text-2xl font-bold'>Colors</h1>
-          <Button
-            onClick={() => setShowColorInput(!showColorInput)}
-            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
-          >
-            {showColorInput ? 'Cancel' : 'Add Color'}
-          </Button>
+          <div className='flex gap-2'>
+            {selectedColors.length > 0 && (
+              <Button
+                variant='destructive'
+                onClick={handleBulkDeleteColors}
+                className='h-8'
+              >
+                Delete Selected ({selectedColors.length})
+              </Button>
+            )}
+            <Button
+              onClick={() => setShowColorInput(!showColorInput)}
+              className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+            >
+              {showColorInput ? 'Cancel' : 'Add Color'}
+            </Button>
+          </div>
         </div>
         <Card>
           <CardContent className='p-0'>
@@ -412,7 +542,13 @@ export default function CategoriesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className='w-8'>
-                    <Checkbox />
+                    <Checkbox
+                      checked={
+                        selectedColors.length === colors.length &&
+                        colors.length > 0
+                      }
+                      onCheckedChange={handleSelectAllColors}
+                    />
                   </TableHead>
                   <TableHead>NAME</TableHead>
                   <TableHead className='text-center'>HEX CODE</TableHead>
@@ -504,7 +640,12 @@ export default function CategoriesPage() {
                 {colors.map(color => (
                   <TableRow key={color._id}>
                     <TableCell className='w-8'>
-                      <Checkbox />
+                      <Checkbox
+                        checked={selectedColors.includes(color._id || '')}
+                        onCheckedChange={checked =>
+                          handleSelectColor(color._id || '', checked as boolean)
+                        }
+                      />
                     </TableCell>
                     {editingColorId === color._id ? (
                       <>
@@ -526,11 +667,11 @@ export default function CategoriesPage() {
                                 type='button'
                                 onClick={() => {
                                   setTempEditHexCode(
-                                    editingColor.hexCode || '#ffffff'
+                                    editingColor.hexCode || '#ffffff',
                                   );
                                   setShowColorPickerEdit(true);
                                 }}
-                                className='text-blue-600 hover:underline'
+                                className='text-blue-600 hover:underline text-center w-20 font-mono'
                               >
                                 {editingColor.hexCode}
                               </button>
@@ -539,7 +680,7 @@ export default function CategoriesPage() {
                                 type='button'
                                 onClick={() => {
                                   setTempEditHexCode(
-                                    editingColor.hexCode || '#ffffff'
+                                    editingColor.hexCode || '#ffffff',
                                   );
                                   setShowColorPickerEdit(true);
                                 }}
@@ -621,7 +762,9 @@ export default function CategoriesPage() {
                               className='w-6 h-6 rounded-full border'
                               style={{ backgroundColor: color.hexCode }}
                             />
-                            <span>{color.hexCode}</span>
+                            <span className='text-center w-14 font-mono'>
+                              {color.hexCode}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className='text-center'>
@@ -658,12 +801,23 @@ export default function CategoriesPage() {
       <div className=''>
         <div className='flex justify-between items-center pb-4'>
           <h1 className='text-2xl font-bold'>Sizes</h1>
-          <Button
-            onClick={() => setShowSizeInput(!showSizeInput)}
-            className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
-          >
-            {showSizeInput ? 'Cancel' : 'Add Size'}
-          </Button>
+          <div className='flex gap-2'>
+            {selectedSizes.length > 0 && (
+              <Button
+                variant='destructive'
+                onClick={handleBulkDeleteSizes}
+                className='h-8'
+              >
+                Delete Selected ({selectedSizes.length})
+              </Button>
+            )}
+            <Button
+              onClick={() => setShowSizeInput(!showSizeInput)}
+              className='inline-flex items-center justify-center gap-2 whitespace-nowrap h-9 px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow-xs hover:bg-primary/90'
+            >
+              {showSizeInput ? 'Cancel' : 'Add Size'}
+            </Button>
+          </div>
         </div>
         <Card>
           <CardContent className='p-0'>
@@ -671,7 +825,13 @@ export default function CategoriesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>
-                    <Checkbox />
+                    <Checkbox
+                      checked={
+                        selectedSizes.length === sizes.length &&
+                        sizes.length > 0
+                      }
+                      onCheckedChange={handleSelectAllSizes}
+                    />
                   </TableHead>
                   <TableHead>NAME</TableHead>
                   <TableHead className='text-center'>ACTIONS</TableHead>
@@ -701,7 +861,12 @@ export default function CategoriesPage() {
                 {sizes.map(size => (
                   <TableRow key={size._id}>
                     <TableCell className='w-8'>
-                      <Checkbox />
+                      <Checkbox
+                        checked={selectedSizes.includes(size._id || '')}
+                        onCheckedChange={checked =>
+                          handleSelectSize(size._id || '', checked as boolean)
+                        }
+                      />
                     </TableCell>
                     {editingSizeId === size._id ? (
                       <>
