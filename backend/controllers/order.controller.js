@@ -123,6 +123,12 @@ export const getCustomerOrders = async (req, res) => {
       ordersFromDB.map(async (order) => {
         const itemsWithReviewStatus = await Promise.all(
           order.items.map(async (item) => {
+            // Check if product exists and has _id before trying to access it
+            if (!item.product || !item.product._id) {
+              console.warn(`Order ${order._id} has item with missing product data:`, item);
+              return { ...item, hasReviewed: false };
+            }
+
             const review = await Review.findOne({
               product: item.product._id,
               email: req.user.email,
@@ -134,9 +140,14 @@ export const getCustomerOrders = async (req, res) => {
       })
     );
 
+    // Filter out orders that have no valid items
+    const validOrders = orders.filter(
+      (order) => order.items && order.items.length > 0 && order.items.some((item) => item.product && item.product._id)
+    );
+
     res.status(200).json({
       success: true,
-      data: orders,
+      data: validOrders,
     });
   } catch (error) {
     console.error("Error fetching orders:", error);

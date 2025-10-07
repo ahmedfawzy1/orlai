@@ -79,8 +79,8 @@ export default function OrdersPage() {
         {orders
           .filter(order =>
             order.items.some(item =>
-              item.product.name.toLowerCase().includes(search.toLowerCase())
-            )
+              item.product.name.toLowerCase().includes(search.toLowerCase()),
+            ),
           )
           .map(order => (
             <div
@@ -124,8 +124,8 @@ export default function OrdersPage() {
                       order.orderStatus === 'delivered'
                         ? 'bg-green-100 text-green-700'
                         : order.orderStatus === 'cancelled'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
                     }`}
                   >
                     {order.orderStatus}
@@ -140,8 +140,8 @@ export default function OrdersPage() {
                       order.paymentStatus === 'completed'
                         ? 'bg-green-100 text-green-700'
                         : order.paymentStatus === 'failed'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
                     }`}
                   >
                     Payment: {order.paymentStatus}
@@ -159,7 +159,7 @@ export default function OrdersPage() {
               <div className='font-bold text-lg mt-2 md:mt-0'>
                 $
                 {order.items[0].product.priceRange?.[0]?.minVariantPrice?.toFixed(
-                  2
+                  2,
                 ) ?? '0.00'}
               </div>
 
