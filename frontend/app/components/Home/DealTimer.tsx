@@ -68,12 +68,12 @@ export default function DealTimer() {
   } as any;
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.8,
+        duration: 0.6,
         ease: 'easeOut',
       },
     },
@@ -99,12 +99,12 @@ export default function DealTimer() {
   } as any;
 
   const imageVariants = {
-    hidden: { opacity: 0, x: 50 },
+    hidden: { opacity: 0, x: 30 },
     visible: {
       opacity: 1,
       x: 0,
       transition: {
-        duration: 1,
+        duration: 0.8,
         ease: 'easeOut',
       },
     },
@@ -112,11 +112,11 @@ export default function DealTimer() {
 
   return (
     <motion.section
-      className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 flex flex-col-reverse md:flex-row gap-4 md:gap-8'
+      className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 flex flex-col-reverse md:flex-row gap-4 md:gap-8 overflow-hidden'
       variants={containerVariants}
       initial='hidden'
       whileInView='visible'
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: true, amount: 0.5, margin: '0px 0px -100px 0px' }}
     >
       <motion.div
         className='flex justify-center flex-col basis-1/2'
@@ -136,7 +136,7 @@ export default function DealTimer() {
         </motion.p>
 
         <motion.div
-          className='flex justify-center md:justify-start gap-4 pt-6 md:pt-8 pb-6 md:pb-10'
+          className='flex justify-center md:justify-start gap-4 pt-6 md:pt-8 pb-6 md:pb-10 overflow-hidden'
           variants={containerVariants}
         >
           {[
@@ -182,7 +182,10 @@ export default function DealTimer() {
         </motion.div>
       </motion.div>
 
-      <motion.div className='flex flex-col basis-1/2' variants={imageVariants}>
+      <motion.div
+        className='flex flex-col basis-1/2 overflow-hidden'
+        variants={imageVariants}
+      >
         <Image
           priority
           src='/images/deal/deal.avif'
