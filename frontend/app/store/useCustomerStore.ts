@@ -23,12 +23,18 @@ interface CustomerStore {
   loading: boolean;
   error: string | null;
   pagination: PaginationData;
+  searchQuery: string;
   setCustomers: (customers: Customer[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setPagination: (pagination: PaginationData) => void;
+  setSearchQuery: (query: string) => void;
   addCustomer: (customer: Customer) => void;
-  getCustomers: (page?: number, limit?: number) => Promise<void>;
+  getCustomers: (
+    page?: number,
+    limit?: number,
+    search?: string,
+  ) => Promise<void>;
   updateCustomer: (id: string, customer: Partial<Customer>) => void;
   updateCustomerApi: (id: string, customer: Partial<Customer>) => Promise<void>;
   deleteCustomer: (id: string) => Promise<void>;
@@ -38,6 +44,7 @@ export const useCustomerStore = create<CustomerStore>(set => ({
   customers: [],
   loading: false,
   error: null,
+  searchQuery: '',
   pagination: {
     currentPage: 1,
     totalPages: 1,
@@ -47,19 +54,20 @@ export const useCustomerStore = create<CustomerStore>(set => ({
   setLoading: loading => set({ loading }),
   setError: error => set({ error }),
   setPagination: pagination => set({ pagination }),
+  setSearchQuery: query => set({ searchQuery: query }),
   addCustomer: customer =>
     set(state => ({ customers: [...state.customers, customer] })),
   updateCustomer: (id, updatedCustomer) =>
     set(state => ({
       customers: state.customers.map(customer =>
-        customer._id === id ? { ...customer, ...updatedCustomer } : customer
+        customer._id === id ? { ...customer, ...updatedCustomer } : customer,
       ),
     })),
 
-  getCustomers: async (page = 1, limit = 8) => {
+  getCustomers: async (page = 1, limit = 8, search = '') => {
     try {
-      set({ loading: true, error: null });
-      const response = await getCustomers(page, limit);
+      set({ loading: true, error: null, searchQuery: search });
+      const response = await getCustomers(page, limit, search);
       set({
         customers: response.customers,
         pagination: {
@@ -86,7 +94,7 @@ export const useCustomerStore = create<CustomerStore>(set => ({
 
       set(state => ({
         customers: state.customers.map(customer =>
-          customer._id === id ? { ...customer, ...response } : customer
+          customer._id === id ? { ...customer, ...response } : customer,
         ),
         loading: false,
       }));

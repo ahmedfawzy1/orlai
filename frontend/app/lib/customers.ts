@@ -9,10 +9,11 @@ interface CustomerResponse {
 
 export async function getCustomers(
   page: number = 1,
-  limit: number = 8
+  limit: number = 8,
+  search: string = '',
 ): Promise<CustomerResponse> {
   try {
-    const url = `/customers?page=${page}&limit=${limit}`;
+    const url = `/customers?page=${page}&limit=${limit}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
     const res = await axiosInstance.get(url);
     return res.data;
   } catch (error) {

@@ -1,16 +1,27 @@
 import User from "../models/user.model.js";
 
-// Get all customers with pagination
+// Get all customers with pagination and search
 export const getCustomers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
-    const [customers, total] = await Promise.all([
-      User.find().select("-password -otp -otpExpiration").skip(skip).limit(limit),
-      User.countDocuments(),
-    ]);
+    let searchQuery = {};
+    if (search) {
+      searchQuery = {
+        $or: [
+          { first_name: { $regex: search, $options: "i" } },
+          { last_name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
+    const customers = await User.find(searchQuery).select("-password -otp -otpExpiration").skip(skip).limit(limit);
+
+    const total = await User.countDocuments(searchQuery);
 
     res.json({
       customers,
@@ -19,6 +30,7 @@ export const getCustomers = async (req, res) => {
       totalCustomers: total,
     });
   } catch (error) {
+    console.error("Error in getCustomers:", error);
     res.status(500).json({ message: error.message });
   }
 };

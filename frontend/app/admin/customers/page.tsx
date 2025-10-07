@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -23,11 +23,12 @@ export default function CustomersPage() {
     loading,
     error: storeError,
     pagination = { currentPage: 1, totalPages: 1, totalCustomers: 0 },
+    searchQuery,
     deleteCustomer,
     getCustomers,
     updateCustomerApi,
+    setSearchQuery,
   } = useCustomerStore();
-  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
@@ -35,25 +36,8 @@ export default function CustomersPage() {
   const [editData, setEditData] = useState<any>({});
 
   useEffect(() => {
-    getCustomers(currentPage, itemsPerPage);
-  }, [currentPage, getCustomers]);
-
-  // Filter customers
-  const filteredCustomers = useMemo(() => {
-    if (!customers) return [];
-    let result = [...customers];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        customer =>
-          customer._id.toLowerCase().includes(query) ||
-          customer.first_name.toLowerCase().includes(query) ||
-          customer.last_name.toLowerCase().includes(query) ||
-          customer.email.toLowerCase().includes(query),
-      );
-    }
-    return result;
-  }, [customers, searchQuery]);
+    getCustomers(currentPage, itemsPerPage, searchQuery);
+  }, [currentPage, getCustomers, searchQuery]);
 
   const handleReset = () => {
     setSearchQuery('');
@@ -87,7 +71,7 @@ export default function CustomersPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedCustomers(filteredCustomers.map(c => c._id));
+      setSelectedCustomers(customers.map(c => c._id));
     } else {
       setSelectedCustomers([]);
     }
@@ -103,8 +87,8 @@ export default function CustomersPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    getCustomers(1, itemsPerPage);
     setCurrentPage(1);
+    getCustomers(1, itemsPerPage, searchQuery);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -208,7 +192,7 @@ export default function CustomersPage() {
           <form onSubmit={handleSearch} className='w-full flex gap-2'>
             <Input
               type='text'
-              placeholder='Search by ID, name, or email...'
+              placeholder='Search by name, or email...'
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className='w-full'
@@ -230,8 +214,8 @@ export default function CustomersPage() {
                 <TableHead>
                   <Checkbox
                     checked={
-                      selectedCustomers.length === filteredCustomers.length &&
-                      filteredCustomers.length > 0
+                      selectedCustomers.length === customers.length &&
+                      customers.length > 0
                     }
                     onCheckedChange={handleSelectAll}
                   />
@@ -246,14 +230,14 @@ export default function CustomersPage() {
             <TableBody>
               {loading ? (
                 <TableSkeleton />
-              ) : filteredCustomers.length === 0 ? (
+              ) : customers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className='text-center'>
                     No customers found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredCustomers.map(customer => (
+                customers.map(customer => (
                   <TableRow key={customer._id}>
                     <TableCell>
                       <Checkbox
