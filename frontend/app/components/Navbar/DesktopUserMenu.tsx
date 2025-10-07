@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthStore } from '@/app/store/useAuthStore';
+import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { User } from 'lucide-react';
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/app/components/ui/dropdown-menu';
 
 const DesktopUserMenu = () => {
-  const { authUser, logout } = useAuthStore();
+  const { data: session } = useSession();
 
   return (
     <DropdownMenu>
@@ -26,7 +26,7 @@ const DesktopUserMenu = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='min-w-[180px]'>
-        {authUser?.role === 'admin' && (
+        {session?.user?.role === 'admin' && (
           <DropdownMenuItem asChild>
             <Link href='/admin' className='w-full'>
               Admin
@@ -44,8 +44,11 @@ const DesktopUserMenu = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {authUser ? (
-          <DropdownMenuItem onClick={logout} className='text-destructive'>
+        {session?.user ? (
+          <DropdownMenuItem
+            onClick={() => signOut({ redirect: false })}
+            className='text-destructive'
+          >
             Logout
           </DropdownMenuItem>
         ) : (

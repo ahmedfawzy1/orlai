@@ -6,16 +6,16 @@ import { useState } from 'react';
 import { Product } from '@/app/types/product';
 import { Heart, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useAuthStore } from '@/app/store/useAuthStore';
+import { useSession } from 'next-auth/react';
 import { useWishlistStore } from '@/app/store/useWishlistStore';
 import { useCartStore } from '@/app/store/useCartStore';
 
 export default function ItemCard({ product }: { product: Product }) {
   const [isLoading, setIsLoading] = useState(false);
-  const { authUser } = useAuthStore();
+  const { data: session } = useSession();
   const { isInWishlist, addToWishlist, removeFromWishlist } =
     useWishlistStore();
-  const userId = authUser?._id;
+  const userId = session?.user?.id;
 
   const { addToCart } = useCartStore();
 

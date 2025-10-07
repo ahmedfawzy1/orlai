@@ -3,27 +3,31 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '../components/Admin/Dashboard/Sidebar';
-import { useAuthStore } from '../store/useAuthStore';
+import { useSession } from 'next-auth/react';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    if (status === 'loading') return;
 
-  useEffect(() => {
-    if (!isCheckingAuth && (!authUser || authUser.role !== 'admin')) {
-      router.push('/');
+    if (!session?.user) {
+      router.push('/login');
+      return;
     }
-  }, [authUser, isCheckingAuth, router]);
 
-  if (isCheckingAuth) {
+    if (session.user.role !== 'admin') {
+      router.push('/');
+      return;
+    }
+  }, [session, status, router]);
+
+  if (status === 'loading') {
     return (
       <div className='flex items-center justify-center h-screen'>
         <div className='animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900'></div>
@@ -31,7 +35,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!authUser || authUser.role !== 'admin') {
+  if (!session?.user || session.user.role !== 'admin') {
     return null;
   }
 

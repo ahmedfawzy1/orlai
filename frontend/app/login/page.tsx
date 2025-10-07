@@ -9,6 +9,6 @@ export const generateMetadata = async () => {
   });
 };
 
-export default function page() {
+export default async function page() {
   return <Client />;
 }

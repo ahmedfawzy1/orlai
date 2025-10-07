@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { SquarePen } from 'lucide-react';
-import { useAuthStore } from '@/app/store/useAuthStore';
+import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { axiosInstance } from '@/app/lib/axios';
 
 export default function ProfilePage() {
-  const { authUser: user, checkAuth } = useAuthStore();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const [editMode, setEditMode] = useState(false);
 
@@ -45,7 +46,8 @@ export default function ProfilePage() {
         });
 
         toast.success('Profile updated successfully');
-        await checkAuth(); // refresh auth user data
+        // Refresh the session to get updated data
+        window.location.reload();
         setEditMode(false);
       } catch (error) {
         toast.error('Failed to update profile');

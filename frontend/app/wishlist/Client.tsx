@@ -2,19 +2,19 @@
 
 import React, { useEffect } from 'react';
 import { useWishlistStore } from '../store/useWishlistStore';
-import { useAuthStore } from '../store/useAuthStore';
+import { useSession } from 'next-auth/react';
 import ItemCard from '../components/shop/ItemCard';
 import { Loader2 } from 'lucide-react';
 
 export default function Client() {
-  const { authUser } = useAuthStore();
+  const { data: session } = useSession();
   const { products, isLoading, error, fetchWishlist } = useWishlistStore();
 
   useEffect(() => {
-    if (authUser?._id) {
-      fetchWishlist(authUser._id);
+    if (session?.user?.id) {
+      fetchWishlist(session.user.id);
     }
-  }, [authUser?._id, fetchWishlist]);
+  }, [session?.user?.id, fetchWishlist]);
 
   if (isLoading) {
     return (

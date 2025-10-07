@@ -19,7 +19,7 @@ import {
   DropdownMenuContent,
 } from '../ui/dropdown-menu';
 import { toast } from 'react-hot-toast';
-import { useAuthStore } from '@/app/store/useAuthStore';
+import { useSession } from 'next-auth/react';
 import { useCartStore } from '@/app/store/useCartStore';
 import { useProductStore } from '@/app/store/useProductStore';
 import { Product } from '@/app/types/product';
@@ -28,7 +28,7 @@ const HeaderIcons = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const { items, removeFromCart, getCart } = useCartStore();
-  const { authUser } = useAuthStore();
+  const { data: session } = useSession();
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const { products } = useProductStore();
@@ -37,7 +37,7 @@ const HeaderIcons = () => {
   useEffect(() => {
     if (searchQuery.trim()) {
       const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setSearchResults(filteredProducts);
     } else {
@@ -46,17 +46,17 @@ const HeaderIcons = () => {
   }, [searchQuery, products]);
 
   useEffect(() => {
-    if (cartMenuOpen && authUser) {
+    if (cartMenuOpen && session?.user) {
       getCart();
     }
-  }, [cartMenuOpen, authUser, getCart]);
+  }, [cartMenuOpen, session?.user, getCart]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
   const handleNavigation = () => {
-    if (!authUser) {
+    if (!session?.user) {
       toast.error('Please login to access this page');
       return;
     }
@@ -68,7 +68,7 @@ const HeaderIcons = () => {
   };
 
   const handleCheckout = () => {
-    if (!authUser) {
+    if (!session?.user) {
       toast.error('Please login to proceed to checkout');
       return;
     }
@@ -230,7 +230,7 @@ const HeaderIcons = () => {
                           sum +
                           (item.product?.priceRange?.minVariantPrice || 0) *
                             item.quantity,
-                        0
+                        0,
                       )
                       .toFixed(2)}
                   </span>

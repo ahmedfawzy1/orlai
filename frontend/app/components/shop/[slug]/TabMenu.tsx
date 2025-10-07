@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Product } from '@/app/types/product';
 import { NewReview } from '@/app/types/review';
-import { useAuthStore } from '@/app/store/useAuthStore';
+import { useSession } from 'next-auth/react';
 import { useReviewStore } from '@/app/store/useReviewStore';
 import {
   Tabs,
@@ -26,7 +26,7 @@ export default function TabMenu({ product }: { product: Product }) {
     isLoading,
     error,
   } = useReviewStore();
-  const { authUser } = useAuthStore();
+  const { data: session } = useSession();
   const [newReview, setNewReview] = useState<NewReview>({
     name: '',
     email: '',
@@ -41,26 +41,26 @@ export default function TabMenu({ product }: { product: Product }) {
   }, [product?._id, getProductReviews]);
 
   useEffect(() => {
-    if (product?._id && authUser) {
+    if (product?._id && session?.user) {
       checkCanReview(product._id);
     }
-  }, [product?._id, authUser, checkCanReview]);
+  }, [product?._id, session?.user, checkCanReview]);
 
   useEffect(() => {
-    if (showReviewBox && authUser) {
+    if (showReviewBox && session?.user) {
       setNewReview(prev => ({
         ...prev,
-        name: `${authUser.first_name} ${authUser.last_name}`.trim(),
-        email: authUser.email || '',
+        name: `${session.user.first_name} ${session.user.last_name}`.trim(),
+        email: session.user.email || '',
       }));
     } else if (!showReviewBox) {
       setNewReview({ name: '', email: '', rating: 5, comment: '' });
     }
-  }, [showReviewBox, authUser]);
+  }, [showReviewBox, session?.user]);
 
   const handleSubmitReview = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!authUser) {
+    if (!session?.user) {
       toast.error('Please login to write a review');
       return;
     }
@@ -88,7 +88,7 @@ export default function TabMenu({ product }: { product: Product }) {
   };
 
   const handleReviewButtonClick = () => {
-    if (!authUser) {
+    if (!session?.user) {
       toast.error('Please login to write a review');
       return;
     }
@@ -202,9 +202,9 @@ export default function TabMenu({ product }: { product: Product }) {
               <div className='mb-3 flex items-center gap-2'>
                 <CircleUser size={40} strokeWidth={1.2} />
                 <div className='flex flex-col gap-0.5'>
-                  {authUser ? (
+                  {session?.user ? (
                     <span className='font-semibold text-nowrap'>
-                      {`${authUser.first_name} ${authUser.last_name}`.trim()}
+                      {`${session.user.first_name} ${session.user.last_name}`.trim()}
                     </span>
                   ) : (
                     <input
@@ -264,8 +264,8 @@ export default function TabMenu({ product }: { product: Product }) {
                 <div className='text-xs text-gray-400'>
                   Review by{' '}
                   <span className='text-black font-semibold'>
-                    {authUser
-                      ? `${authUser.first_name} ${authUser.last_name}`.trim()
+                    {session?.user
+                      ? `${session.user.first_name} ${session.user.last_name}`.trim()
                       : newReview.name || 'Your Name'}
                   </span>{' '}
                   | Posted on{' '}

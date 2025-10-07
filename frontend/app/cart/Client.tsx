@@ -9,12 +9,12 @@ import { Input } from '../components/ui/input';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Skeleton } from '../components/ui/skeleton';
 import { useCartStore } from '../store/useCartStore';
-import { useAuthStore } from '../store/useAuthStore';
+import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 
 export default function Client() {
   const router = useRouter();
-  const { authUser } = useAuthStore();
+  const { data: session } = useSession();
   const {
     items,
     delivery,
@@ -53,7 +53,7 @@ export default function Client() {
   };
 
   const handleCheckout = () => {
-    if (!authUser) {
+    if (!session?.user) {
       toast.error('Please login to proceed to checkout');
       return;
     }

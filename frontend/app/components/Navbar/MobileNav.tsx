@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/app/store/useAuthStore';
+import { useSession } from 'next-auth/react';
 import { useCartStore } from '@/app/store/useCartStore';
 import { useProductStore } from '@/app/store/useProductStore';
 import { MenuItem } from './menuConfig';
@@ -49,14 +50,15 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const { authUser, logout } = useAuthStore();
+  const { logout } = useAuthStore();
+  const { data: session } = useSession();
   const { items, removeFromCart, getCart } = useCartStore();
   const { products } = useProductStore();
 
   useEffect(() => {
     if (searchQuery.trim()) {
       const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setSearchResults(filteredProducts);
     } else {
@@ -65,10 +67,10 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   }, [searchQuery, products]);
 
   useEffect(() => {
-    if (cartMenuOpen && authUser) {
+    if (cartMenuOpen && session?.user) {
       getCart();
     }
-  }, [cartMenuOpen, authUser, getCart]);
+  }, [cartMenuOpen, session?.user, getCart]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +83,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
 
   const handleNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!authUser) {
+    if (!session?.user) {
       toast.error('Please login to access this page');
       return;
     }
@@ -92,7 +94,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   };
 
   const handleCheckout = () => {
-    if (!authUser) {
+    if (!session?.user) {
       toast.error('Please login to proceed to checkout');
       return;
     }
@@ -228,7 +230,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                             <span className='font-semibold'>
                               $
                               {item.product.priceRange.minVariantPrice.toFixed(
-                                2
+                                2,
                               )}
                             </span>
                           </div>
@@ -258,7 +260,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                             sum +
                             (item.product?.priceRange?.minVariantPrice || 0) *
                               item.quantity,
-                          0
+                          0,
                         )
                         .toFixed(2)}
                     </span>
@@ -320,11 +322,11 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                   className='flex w-full flex-col gap-4'
                 >
                   {menuItems.map(item =>
-                    renderMobileMenuItem(item, handleMenuLinkClick)
+                    renderMobileMenuItem(item, handleMenuLinkClick),
                   )}
                 </Accordion>
                 <div className='flex flex-col gap-3'>
-                  {authUser ? (
+                  {session?.user ? (
                     <>
                       <Link
                         href='/profile'
@@ -339,7 +341,7 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
                           Profile
                         </Button>
                       </Link>
-                      {authUser.role === 'admin' && (
+                      {session.user.role === 'admin' && (
                         <Link
                           href='/admin'
                           className='w-full'

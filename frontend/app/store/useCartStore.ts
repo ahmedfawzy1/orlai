@@ -10,7 +10,7 @@ import {
   updateCart as apiUpdateCart,
 } from '../lib/cart';
 import { toast } from 'react-hot-toast';
-import { useAuthStore } from './useAuthStore';
+import { getSession } from 'next-auth/react';
 
 interface CartState {
   items: CartItem[];
@@ -101,8 +101,8 @@ export const useCartStore = create<CartState>()(
         set({ items: updatedItems, total: updatedTotal });
         toast.success('Item added to cart!');
 
-        const authStore = useAuthStore.getState();
-        if (authStore.authUser) {
+        const session = await getSession();
+        if (session?.user) {
           apiAddToCart(
             item.product._id,
             item.variantId,
@@ -127,8 +127,8 @@ export const useCartStore = create<CartState>()(
         set({ items: updatedItems, total: updatedTotal });
         toast.success('Quantity updated');
 
-        const authStore = useAuthStore.getState();
-        if (authStore.authUser) {
+        const session = await getSession();
+        if (session?.user) {
           apiUpdateCart(itemId, quantity).catch(() =>
             toast.error('Failed to sync quantity'),
           );
@@ -147,8 +147,8 @@ export const useCartStore = create<CartState>()(
         set({ items: updatedItems, total: updatedTotal });
         toast.success('Item removed');
 
-        const authStore = useAuthStore.getState();
-        if (authStore.authUser) {
+        const session = await getSession();
+        if (session?.user) {
           apiRemoveFromCart(itemId).catch(() =>
             toast.error('Failed to sync removal'),
           );
@@ -166,8 +166,8 @@ export const useCartStore = create<CartState>()(
         });
         toast.success('Cart cleared');
 
-        const authStore = useAuthStore.getState();
-        if (authStore.authUser) {
+        const session = await getSession();
+        if (session?.user) {
           apiClearCart().catch(() =>
             toast.error('Failed to clear cart in backend'),
           );
@@ -213,8 +213,8 @@ export const useCartStore = create<CartState>()(
         if (items.length === 0) return;
 
         // Check if user is authenticated before syncing
-        const authStore = useAuthStore.getState();
-        if (!authStore.authUser) {
+        const session = await getSession();
+        if (!session?.user) {
           console.log('User not authenticated, skipping cart sync');
           return;
         }
@@ -293,8 +293,8 @@ export const useCartStore = create<CartState>()(
         } catch (error: any) {
           console.error('Failed to sync local cart to backend:', error);
           if (error.response?.status === 401) {
-            console.log('User not authenticated, clearing auth state');
-            useAuthStore.getState().logout();
+            console.log('User not authenticated, redirecting to login');
+            window.location.href = '/login';
           } else {
             toast.error('Failed to sync cart items to backend');
           }
