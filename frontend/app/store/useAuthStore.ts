@@ -65,6 +65,7 @@ export const useAuthStore = create<AuthState>(set => ({
       // Sync cart after user is authenticated
       setTimeout(async () => {
         const cartStore = useCartStore.getState();
+        cartStore.clearInvalidItems(); // Clear invalid items first
         await cartStore.syncLocalCartToBackend();
       }, 1000);
     } catch (error) {
@@ -97,6 +98,7 @@ export const useAuthStore = create<AuthState>(set => ({
       set({ authUser: res.data });
       toast.success('Account created successfully');
       const cartStore = useCartStore.getState();
+      cartStore.clearInvalidItems(); // Clear invalid items first
       await cartStore.syncLocalCartToBackend();
 
       return true;
@@ -118,6 +120,7 @@ export const useAuthStore = create<AuthState>(set => ({
       set({ authUser: res.data });
       toast.success('Logged in successfully');
       const cartStore = useCartStore.getState();
+      cartStore.clearInvalidItems(); // Clear invalid items first
       await cartStore.syncLocalCartToBackend();
 
       return true;

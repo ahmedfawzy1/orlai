@@ -78,7 +78,9 @@ export default function ProductDetails({
           </span>
         )}
       </div>
-      <div className='text-lg md:text-xl md:my-2'>{product.category.name}</div>
+      <div className='text-lg md:text-xl md:my-2'>
+        {product.category?.name || 'Uncategorized'}
+      </div>
       <div className='flex items-center gap-2 mb-2'>
         <span className='text-orange-400 text-xl'>
           <ReactStars

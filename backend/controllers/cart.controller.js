@@ -40,7 +40,11 @@ export const addToCart = async (req, res) => {
     const variant = product.variants.id(variantId);
     if (!variant) return res.status(404).json({ message: "Variant not found" });
 
-    if (variant.stock < quantity) return res.status(400).json({ message: "Insufficient stock" });
+    if (variant.stock < quantity) {
+      return res.status(400).json({
+        message: `Insufficient stock. Available: ${variant.stock}, Requested: ${quantity}`,
+      });
+    }
 
     // Find color and size by name
     const colorDoc = await Color.findOne({ name: color });

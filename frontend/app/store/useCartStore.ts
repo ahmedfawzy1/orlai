@@ -30,6 +30,7 @@ interface CartState {
   setDiscount: (code: string) => void;
   applyDiscount: () => Promise<void>;
   syncLocalCartToBackend: () => Promise<void>;
+  clearInvalidItems: () => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -61,10 +62,41 @@ export const useCartStore = create<CartState>()(
 
       addToCart: async item => {
         const { items, total } = get();
-        const updatedItems = [...items, item];
-        const updatedTotal =
-          total +
-          (item.product?.priceRange?.minVariantPrice || 0) * item.quantity;
+
+        // Check if item already exists (same product, variant, color, size)
+        const existingItemIndex = items.findIndex(
+          existingItem =>
+            existingItem.product._id === item.product._id &&
+            existingItem.variantId === item.variantId &&
+            existingItem.color._id === item.color._id &&
+            existingItem.size._id === item.size._id,
+        );
+
+        let updatedItems;
+        let updatedTotal;
+
+        if (existingItemIndex !== -1) {
+          // Update existing item quantity
+          updatedItems = items.map((existingItem, index) =>
+            index === existingItemIndex
+              ? {
+                  ...existingItem,
+                  quantity: existingItem.quantity + item.quantity,
+                }
+              : existingItem,
+          );
+          updatedTotal = updatedItems.reduce(
+            (sum, i) =>
+              sum + (i.product?.priceRange?.minVariantPrice || 0) * i.quantity,
+            0,
+          );
+        } else {
+          // Add new item
+          updatedItems = [...items, item];
+          updatedTotal =
+            total +
+            (item.product?.priceRange?.minVariantPrice || 0) * item.quantity;
+        }
 
         set({ items: updatedItems, total: updatedTotal });
         toast.success('Item added to cart!');
@@ -189,6 +221,10 @@ export const useCartStore = create<CartState>()(
 
         try {
           console.log('Starting cart sync for', items.length, 'items');
+
+          // Group items by product variant to avoid duplicate requests
+          const groupedItems = new Map();
+
           for (const item of items) {
             if (
               item.product?._id &&
@@ -196,17 +232,63 @@ export const useCartStore = create<CartState>()(
               item.color?.name &&
               item.size?.name
             ) {
-              await apiAddToCart(
-                item.product._id,
-                item.variantId,
-                item.color.name,
-                item.size.name,
-                item.quantity,
-              );
+              const key = `${item.product._id}-${item.variantId}-${item.color.name}-${item.size.name}`;
+
+              if (groupedItems.has(key)) {
+                groupedItems.get(key).quantity += item.quantity;
+              } else {
+                groupedItems.set(key, {
+                  productId: item.product._id,
+                  variantId: item.variantId,
+                  color: item.color.name,
+                  size: item.size.name,
+                  quantity: item.quantity,
+                });
+              }
             } else {
               console.warn('Skipping invalid cart item:', item);
             }
           }
+
+          // Sync grouped items to backend
+          for (const [, item] of groupedItems) {
+            try {
+              await apiAddToCart(
+                item.productId,
+                item.variantId,
+                item.color,
+                item.size,
+                item.quantity,
+              );
+            } catch (error: any) {
+              console.error('Failed to sync item:', item, error);
+
+              // If it's a stock issue, remove the item from local cart
+              if (
+                error.response?.status === 400 &&
+                error.response?.data?.message?.includes('Insufficient stock')
+              ) {
+                console.log(
+                  'Removing item with insufficient stock from local cart',
+                );
+                const { items: currentItems } = get();
+                const updatedItems = currentItems.filter(
+                  localItem =>
+                    !(
+                      localItem.product._id === item.productId &&
+                      localItem.variantId === item.variantId &&
+                      localItem.color.name === item.color &&
+                      localItem.size.name === item.size
+                    ),
+                );
+                set({ items: updatedItems });
+                toast.error(
+                  `Item removed from cart: ${error.response.data.message}`,
+                );
+              }
+            }
+          }
+
           console.log('Local cart synced to backend successfully');
         } catch (error: any) {
           console.error('Failed to sync local cart to backend:', error);
@@ -216,6 +298,30 @@ export const useCartStore = create<CartState>()(
           } else {
             toast.error('Failed to sync cart items to backend');
           }
+        }
+      },
+
+      clearInvalidItems: () => {
+        const { items } = get();
+        const validItems = items.filter(
+          item =>
+            item.product?._id &&
+            item.variantId &&
+            item.color?._id &&
+            item.size?._id &&
+            item.quantity > 0,
+        );
+
+        if (validItems.length !== items.length) {
+          const updatedTotal = validItems.reduce(
+            (sum, i) =>
+              sum + (i.product?.priceRange?.minVariantPrice || 0) * i.quantity,
+            0,
+          );
+          set({ items: validItems, total: updatedTotal });
+          console.log(
+            `Cleared ${items.length - validItems.length} invalid cart items`,
+          );
         }
       },
     }),

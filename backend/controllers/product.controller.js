@@ -287,6 +287,11 @@ export const getProduct = async (req, res) => {
       });
     }
 
+    // Debug: Check if category is populated
+    if (!product.category) {
+      console.warn(`Product ${product._id} (${product.name}) has no category field`);
+    }
+
     res.status(200).json({
       success: true,
       message: "Product retrieved successfully",

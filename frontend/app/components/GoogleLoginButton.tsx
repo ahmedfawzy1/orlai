@@ -40,6 +40,7 @@ export default function GoogleLoginButton() {
       });
 
       const cartStore = useCartStore.getState();
+      cartStore.clearInvalidItems(); // Clear invalid items first
       await cartStore.syncLocalCartToBackend();
 
       router.push('/');

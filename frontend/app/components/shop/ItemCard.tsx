@@ -148,7 +148,7 @@ export default function ItemCard({ product }: { product: Product }) {
           <h3 className='text-lg font-bold truncate'>{product.name}</h3>
         </Link>
         <p className='text-md text-black/70 font-medium'>
-          {product.category.name}
+          {product.category?.name || 'Uncategorized'}
         </p>
         <div className='flex gap-2 items-center'>
           <p className='text-lg font-bold'>

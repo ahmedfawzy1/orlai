@@ -51,7 +51,7 @@ export default async function ProductPage({
 
   const user = await getServerSession();
   const relatedResponse = await getProducts(1, 3, {
-    category: product.category.name,
+    category: product.category?.name,
   });
   const products = relatedResponse.products;
 

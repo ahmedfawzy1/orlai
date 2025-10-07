@@ -70,7 +70,7 @@ export default function Client({
     // Apply category filter
     if (categoryFilter !== 'all') {
       result = result.filter(
-        product => product.category.name === categoryFilter,
+        product => product.category?.name === categoryFilter,
       );
     }
 
