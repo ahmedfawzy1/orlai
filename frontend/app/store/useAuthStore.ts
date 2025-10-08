@@ -60,7 +60,13 @@ export const useAuthStore = create<AuthState>(set => ({
       }
       return false;
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Signup failed');
+      // Check if it's a Google user error
+      if (error?.response?.data?.isGoogleUser) {
+        toast.error(error.response.data.message);
+      } else {
+        const errorMessage = error?.response?.data?.message || 'Signup failed';
+        toast.error(errorMessage);
+      }
       return false;
     } finally {
       set({ isSigningUp: false });
@@ -70,19 +76,50 @@ export const useAuthStore = create<AuthState>(set => ({
   login: async data => {
     try {
       set({ isLoggingIn: true });
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
 
-      if (result?.error) {
-        toast.error('Invalid email or password');
-        return false;
+      // First, check if the user is a Google user by making a direct API call
+      try {
+        await axiosInstance.post('/auth/validate', {
+          email: data.email,
+          password: data.password,
+        });
+
+        // If we get here, the user is valid and not a Google user
+        const result = await signIn('credentials', {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          toast.error('Invalid email or password');
+          return false;
+        }
+
+        toast.success('Logged in successfully');
+        return true;
+      } catch (checkError: any) {
+        // Check if it's a Google user error
+        if (checkError?.response?.data?.isGoogleUser) {
+          toast.error(checkError.response.data.message);
+          return false;
+        }
+
+        // For other errors, try the normal NextAuth flow
+        const result = await signIn('credentials', {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          toast.error('Invalid email or password');
+          return false;
+        }
+
+        toast.success('Logged in successfully');
+        return true;
       }
-
-      toast.success('Logged in successfully');
-      return true;
     } catch (error) {
       toast.error('Login failed');
       console.error('Login failed:', error);

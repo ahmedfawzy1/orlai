@@ -3,6 +3,7 @@ import {
   signup,
   validateCredentials,
   googleSync,
+  googleAuth,
   requestOtpForResetPassword,
   verifyOtpForResetPassword,
   resetPassword,
@@ -15,6 +16,7 @@ const router = express.Router();
 
 // NextAuth endpoints
 router.post("/validate", sanitizeHtml, validateCredentials);
+router.post("/google", sanitizeHtml, googleAuth);
 router.post("/google-sync", sanitizeHtml, googleSync);
 
 router.post("/signup", validateUserRegistration, signup);

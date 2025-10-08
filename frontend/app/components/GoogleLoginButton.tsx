@@ -1,92 +1,67 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { axiosInstance } from '../lib/axios';
+import Image from 'next/image';
+import { Button } from './ui/button';
 import { useCartStore } from '../store/useCartStore';
-
-declare global {
-  interface Window {
-    google: {
-      accounts: {
-        id: {
-          initialize: (config: any) => void;
-          renderButton: (element: HTMLElement, config: any) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
+import { signIn } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 export default function GoogleLoginButton() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-  const handleGoogleLogin = async (response: any) => {
+  const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
 
-      await axiosInstance.post('/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: { token: response.credential },
-        credentials: 'include',
+      // Use NextAuth's Google provider
+      const result = await signIn('google', {
+        redirect: false,
       });
 
-      const cartStore = useCartStore.getState();
-      cartStore.clearInvalidItems(); // Clear invalid items first
-      await cartStore.syncLocalCartToBackend();
+      if (result?.error) {
+        toast.error('Google login failed. Please try again.');
+        return;
+      }
 
-      router.push('/');
-      window.location.reload();
-    } catch (error) {
+      if (result?.ok) {
+        // Sync cart after successful login
+        const cartStore = useCartStore.getState();
+        cartStore.clearInvalidItems();
+        await cartStore.syncLocalCartToBackend();
+
+        toast.success('Logged in with Google successfully');
+        window.location.href = '/';
+      }
+    } catch (error: any) {
       console.error('Google login error:', error);
+      toast.error('Google login failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!googleClientId) {
-      console.error('Google Client ID is not defined');
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleLogin,
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('googleButton') as HTMLElement,
-          { theme: 'outline', size: 'large', width: '100%' },
-        );
-      }
-    };
-
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [googleClientId]);
-
   return (
-    <div id='googleButton' className='w-full'>
-      {isLoading && <LoaderCircle className='animate-spin' />}
-    </div>
+    <Button
+      variant='outline'
+      className='py-[20px] w-full transition-all duration-300 cursor-pointer'
+      onClick={handleGoogleLogin}
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <LoaderCircle className='animate-spin' />
+      ) : (
+        <>
+          <Image
+            src='/images/icons/google.svg'
+            alt='google'
+            width={24}
+            height={24}
+          />
+          Login with Google
+        </>
+      )}
+    </Button>
   );
 }

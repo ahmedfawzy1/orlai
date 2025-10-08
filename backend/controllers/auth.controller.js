@@ -20,6 +20,19 @@ export const validateCredentials = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Check if user is Google-only (has googleId but no password)
+    if (user.googleId && !user.password) {
+      return res.status(400).json({
+        message: "This account was created with Google. Please use 'Login with Google' instead.",
+        isGoogleUser: true,
+      });
+    }
+
+    // Check if user has a password
+    if (!user.password) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -88,6 +101,13 @@ export const signup = async (req, res) => {
 
     const userExists = await User.findOne({ email }).exec();
     if (userExists) {
+      // Check if it's a Google user
+      if (userExists.googleId && !userExists.password) {
+        return res.status(400).json({
+          message: "This email is already registered with Google. Please use 'Login with Google' instead.",
+          isGoogleUser: true,
+        });
+      }
       return res.status(400).json({ message: "Email already exists" });
     }
 
