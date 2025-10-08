@@ -18,11 +18,7 @@ export const validateUserRegistration = [
   body("first_name").trim().isLength({ min: 1, max: 50 }).withMessage("First name must be between 1 and 50 characters").escape(),
   body("last_name").trim().isLength({ min: 1, max: 50 }).withMessage("Last name must be between 1 and 50 characters").escape(),
   body("email").isEmail().normalizeEmail().withMessage("Please provide a valid email address"),
-  body("password")
-    .isLength({ min: 6, max: 128 })
-    .withMessage("Password must be between 6 and 128 characters")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage("Password must contain at least one uppercase letter, one lowercase letter, and one number"),
+  body("password").isLength({ min: 6, max: 128 }).withMessage("Password must be between 6 and 128 characters"),
   validateRequest,
 ];
 

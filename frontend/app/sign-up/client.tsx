@@ -27,8 +27,20 @@ export default function Client() {
       toast.error('Please fill all fields');
       return false;
     }
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters long');
+    if (first_name.length < 1 || first_name.length > 50) {
+      toast.error('First name must be between 1 and 50 characters');
+      return false;
+    }
+    if (last_name.length < 1 || last_name.length > 50) {
+      toast.error('Last name must be between 1 and 50 characters');
+      return false;
+    }
+    if (!email.includes('@') || !email.includes('.')) {
+      toast.error('Please provide a valid email address');
+      return false;
+    }
+    if (password.length < 6 || password.length > 128) {
+      toast.error('Password must be between 6 and 128 characters');
       return false;
     }
     return true;
