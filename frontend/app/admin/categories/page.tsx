@@ -79,9 +79,11 @@ export default function CategoriesPage() {
       await deleteCategory(categoryId);
       await getFilters();
       toast.success('Category deleted successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting category:', error);
-      toast.error('Failed to delete category');
+      const errorMessage =
+        error?.response?.data?.message || 'Failed to delete category';
+      toast.error(errorMessage);
     }
   };
 
@@ -90,9 +92,11 @@ export default function CategoriesPage() {
       await deleteColor(colorId);
       await getFilters();
       toast.success('Color deleted successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting color:', error);
-      toast.error('Failed to delete color');
+      const errorMessage =
+        error?.response?.data?.message || 'Failed to delete color';
+      toast.error(errorMessage);
     }
   };
 
@@ -101,43 +105,131 @@ export default function CategoriesPage() {
       await deleteSize(sizeId);
       await getFilters();
       toast.success('Size deleted successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting size:', error);
-      toast.error('Failed to delete size');
+      const errorMessage =
+        error?.response?.data?.message || 'Failed to delete size';
+      toast.error(errorMessage);
     }
   };
 
   // Bulk delete handlers
   const handleBulkDeleteCategories = async () => {
     try {
-      await Promise.all(selectedCategories.map(id => deleteCategory(id)));
-      toast.success('Selected categories deleted successfully');
-      setSelectedCategories([]);
-    } catch (error) {
+      const results = await Promise.allSettled(
+        selectedCategories.map(id => deleteCategory(id)),
+      );
+
+      const successful = results.filter(
+        result => result.status === 'fulfilled',
+      ).length;
+      const failed = results.filter(
+        result => result.status === 'rejected',
+      ).length;
+
+      if (failed === 0) {
+        toast.success('Selected categories deleted successfully');
+        setSelectedCategories([]);
+        await getFilters(); // Refresh the data
+      } else if (successful === 0) {
+        // All failed
+        const firstError = results.find(
+          result => result.status === 'rejected',
+        ) as PromiseRejectedResult;
+        const errorMessage =
+          firstError.reason?.response?.data?.message ||
+          'Failed to delete categories';
+        toast.error(errorMessage);
+      } else {
+        // Some succeeded, some failed
+        toast.error(
+          `${successful} categories deleted, ${failed} failed to delete`,
+        );
+        setSelectedCategories([]);
+        await getFilters(); // Refresh the data
+      }
+    } catch (error: any) {
       console.error('Error deleting selected categories:', error);
-      toast.error('Failed to delete selected categories');
+      const errorMessage =
+        error?.response?.data?.message ||
+        'Failed to delete selected categories';
+      toast.error(errorMessage);
     }
   };
 
   const handleBulkDeleteColors = async () => {
     try {
-      await Promise.all(selectedColors.map(id => deleteColor(id)));
-      toast.success('Selected colors deleted successfully');
-      setSelectedColors([]);
-    } catch (error) {
+      const results = await Promise.allSettled(
+        selectedColors.map(id => deleteColor(id)),
+      );
+
+      const successful = results.filter(
+        result => result.status === 'fulfilled',
+      ).length;
+      const failed = results.filter(
+        result => result.status === 'rejected',
+      ).length;
+
+      if (failed === 0) {
+        toast.success('Selected colors deleted successfully');
+        setSelectedColors([]);
+        await getFilters();
+      } else if (successful === 0) {
+        const firstError = results.find(
+          result => result.status === 'rejected',
+        ) as PromiseRejectedResult;
+        const errorMessage =
+          firstError.reason?.response?.data?.message ||
+          'Failed to delete colors';
+        toast.error(errorMessage);
+      } else {
+        toast.error(`${successful} colors deleted, ${failed} failed to delete`);
+        setSelectedColors([]);
+        await getFilters();
+      }
+    } catch (error: any) {
       console.error('Error deleting selected colors:', error);
-      toast.error('Failed to delete selected colors');
+      const errorMessage =
+        error?.response?.data?.message || 'Failed to delete selected colors';
+      toast.error(errorMessage);
     }
   };
 
   const handleBulkDeleteSizes = async () => {
     try {
-      await Promise.all(selectedSizes.map(id => deleteSize(id)));
-      toast.success('Selected sizes deleted successfully');
-      setSelectedSizes([]);
-    } catch (error) {
+      const results = await Promise.allSettled(
+        selectedSizes.map(id => deleteSize(id)),
+      );
+
+      const successful = results.filter(
+        result => result.status === 'fulfilled',
+      ).length;
+      const failed = results.filter(
+        result => result.status === 'rejected',
+      ).length;
+
+      if (failed === 0) {
+        toast.success('Selected sizes deleted successfully');
+        setSelectedSizes([]);
+        await getFilters();
+      } else if (successful === 0) {
+        const firstError = results.find(
+          result => result.status === 'rejected',
+        ) as PromiseRejectedResult;
+        const errorMessage =
+          firstError.reason?.response?.data?.message ||
+          'Failed to delete sizes';
+        toast.error(errorMessage);
+      } else {
+        toast.error(`${successful} sizes deleted, ${failed} failed to delete`);
+        setSelectedSizes([]);
+        await getFilters();
+      }
+    } catch (error: any) {
       console.error('Error deleting selected sizes:', error);
-      toast.error('Failed to delete selected sizes');
+      const errorMessage =
+        error?.response?.data?.message || 'Failed to delete selected sizes';
+      toast.error(errorMessage);
     }
   };
 

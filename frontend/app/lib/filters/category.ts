@@ -47,8 +47,8 @@ export async function deleteCategory(id: string): Promise<boolean> {
   try {
     const res = await axiosInstance.delete<ApiResponse>(`/categories/${id}`);
     return res.data.success;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting category:', error);
-    return false;
+    throw error;
   }
 }
