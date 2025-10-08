@@ -25,6 +25,7 @@ import addressRoutes from "./routes/address.route.js";
 import orderRoutes from "./routes/order.route.js";
 import couponRoutes from "./routes/coupon.route.js";
 import adminRoutes from "./routes/admin.routes.js";
+import dashboardRoutes from "./routes/dashboard.route.js";
 
 dotenv.config();
 
@@ -109,6 +110,7 @@ app.use("/api/address", addressRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/admins", adminRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // 404 handler
 app.use((req, res) => {

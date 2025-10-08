@@ -1,4 +1,6 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import {
   PieChart,
   Pie,
@@ -16,39 +18,104 @@ import {
   CardHeader,
   CardTitle,
 } from '@/app/components/ui/card';
-
-const weeklySales = [
-  { name: 'May 10', sales: 400 },
-  { name: 'May 9', sales: 300 },
-  { name: 'May 8', sales: 150 },
-  { name: 'May 7', sales: 230 },
-  { name: 'May 6', sales: 200 },
-  { name: 'May 5', sales: 270 },
-  { name: 'May 4', sales: 700 },
-];
-
-const weeklyOrders = [
-  { name: 'May 10', orders: 20 },
-  { name: 'May 9', orders: 18 },
-  { name: 'May 8', orders: 10 },
-  { name: 'May 7', orders: 15 },
-  { name: 'May 6', orders: 12 },
-  { name: 'May 5', orders: 16 },
-  { name: 'May 4', orders: 30 },
-];
-
-const bestSellingProducts = [
-  { name: 'Green Leaf Lettuce', value: 400, color: '#34d399' },
-  { name: 'Rainbow Chard', value: 300, color: '#2563eb' },
-  { name: 'Clementine', value: 350, color: '#fb923c' },
-  { name: 'Mint', value: 250, color: '#1e40af' },
-];
+import { getChartData, type ChartData } from '@/app/lib/dashboard';
 
 export default function DashboardCharts() {
   const [tab, setTab] = useState<'sales' | 'orders'>('sales');
-  const chartData = tab === 'sales' ? weeklySales : weeklyOrders;
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setLoading(true);
+        const data = await getChartData();
+        setChartData(data);
+      } catch (err) {
+        setError('Failed to load chart data');
+        console.error('Error fetching chart data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, []);
+
+  const lineChartData = chartData?.weeklyData || [];
   const dataKey = tab === 'sales' ? 'sales' : 'orders';
   const chartColor = tab === 'sales' ? '#10b981' : '#2563eb';
+  const bestSellingProducts = chartData?.bestSellingProducts || [];
+
+  if (loading) {
+    return (
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6'>
+        <Card className='shadow-sm animate-pulse'>
+          <CardHeader>
+            <div className='w-32 h-6 bg-gray-200 rounded'></div>
+          </CardHeader>
+          <CardContent className='px-4'>
+            <div className='flex gap-6 border-b mb-2'>
+              <div className='w-12 h-8 bg-gray-200 rounded'></div>
+              <div className='w-16 h-8 bg-gray-200 rounded'></div>
+            </div>
+            <div className='bg-gray-50 rounded-lg p-2 h-[220px]'></div>
+          </CardContent>
+        </Card>
+        <Card className='shadow-sm animate-pulse'>
+          <CardHeader>
+            <div className='w-40 h-6 bg-gray-200 rounded'></div>
+          </CardHeader>
+          <CardContent>
+            <div className='h-[220px] bg-gray-50 rounded'></div>
+            <div className='flex flex-wrap gap-3 mt-4'>
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className='w-24 h-4 bg-gray-200 rounded'></div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6'>
+        <Card className='shadow-sm border-red-200 bg-red-50'>
+          <CardHeader>
+            <CardTitle className='text-lg font-bold text-red-600'>
+              Chart Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent className='px-4'>
+            <div className='text-red-600 text-center py-8'>
+              <div className='text-lg font-medium mb-2'>
+                Error Loading Chart Data
+              </div>
+              <div className='text-sm'>{error}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className='shadow-sm border-red-200 bg-red-50'>
+          <CardHeader>
+            <CardTitle className='text-lg font-bold text-red-600'>
+              Products Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-red-600 text-center py-8'>
+              <div className='text-lg font-medium mb-2'>
+                Error Loading Products Data
+              </div>
+              <div className='text-sm'>{error}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6'>
@@ -81,7 +148,7 @@ export default function DashboardCharts() {
           </div>
           <div className='bg-gray-50 rounded-lg p-2'>
             <ResponsiveContainer width='100%' height={220}>
-              <LineChart data={chartData}>
+              <LineChart data={lineChartData}>
                 <XAxis dataKey='name' />
                 <YAxis />
                 <Tooltip />
