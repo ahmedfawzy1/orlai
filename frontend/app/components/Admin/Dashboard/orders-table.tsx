@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/app/components/ui/table';
+import { TableCell } from '@/app/components/ui/table';
 import {
   Card,
   CardContent,

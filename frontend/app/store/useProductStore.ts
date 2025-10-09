@@ -145,9 +145,13 @@ export const useProductStore = create<ProductStore>()(set => ({
     set({ isLoading: true, error: null });
     try {
       const newProduct = await createProduct(productData);
-      set(state => ({
-        products: [newProduct, ...state.products],
-      }));
+      if (newProduct) {
+        set(state => ({
+          products: [newProduct, ...state.products],
+        }));
+      } else {
+        set({ error: 'Failed to create product' });
+      }
     } catch (error) {
       set({ error: 'Failed to create product' });
       console.error('Error creating product:', error);
@@ -160,15 +164,19 @@ export const useProductStore = create<ProductStore>()(set => ({
     set({ isLoading: true, error: null });
     try {
       const updatedProduct = await updateProduct(id, updateData);
-      set(state => ({
-        products: state.products.map(product =>
-          product._id === id ? updatedProduct : product,
-        ),
-        selectedProduct:
-          state.selectedProduct?._id === id
-            ? updatedProduct
-            : state.selectedProduct,
-      }));
+      if (updatedProduct) {
+        set(state => ({
+          products: state.products.map(product =>
+            product._id === id ? updatedProduct : product,
+          ),
+          selectedProduct:
+            state.selectedProduct?._id === id
+              ? updatedProduct
+              : state.selectedProduct,
+        }));
+      } else {
+        set({ error: 'Failed to update product' });
+      }
     } catch (error) {
       set({ error: 'Failed to update product' });
       console.error('Error updating product:', error);
