@@ -31,8 +31,15 @@ const HeaderIcons = () => {
   const { data: session } = useSession();
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const { products } = useProductStore();
+  const { products, init } = useProductStore();
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // Initialize products when component mounts
+  useEffect(() => {
+    if (products.length === 0) {
+      init();
+    }
+  }, [init, products.length]);
 
   useEffect(() => {
     if (searchQuery.trim()) {

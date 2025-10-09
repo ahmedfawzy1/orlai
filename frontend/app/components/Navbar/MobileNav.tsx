@@ -53,7 +53,13 @@ const MobileNav = ({ menuItems, logo, auth }: MobileNavProps) => {
   const { logout } = useAuthStore();
   const { data: session } = useSession();
   const { items, removeFromCart, getCart } = useCartStore();
-  const { products } = useProductStore();
+  const { products, init } = useProductStore();
+
+  useEffect(() => {
+    if (products.length === 0) {
+      init();
+    }
+  }, [init, products.length]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
