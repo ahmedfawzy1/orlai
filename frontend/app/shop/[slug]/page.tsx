@@ -1,5 +1,6 @@
 import { getProduct, getProducts } from '@/app/lib/products';
-import { getServerSession } from '@/app/lib/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import React from 'react';
 import ImageGallery from '@/app/components/shop/[slug]/ImageGallery';
 import ProductDetails from '@/app/components/shop/[slug]/ProductDetails';
@@ -49,7 +50,7 @@ export default async function ProductPage({
     return <div>Product not found</div>;
   }
 
-  const user = await getServerSession();
+  const session = await getServerSession(authOptions);
   const relatedResponse = await getProducts(1, 3, {
     category: product.category?.name,
   });
@@ -59,7 +60,7 @@ export default async function ProductPage({
     <section className='px-4 pb-4 md:py-8 max-w-[1280px] mx-auto'>
       <div className='flex flex-col md:flex-row gap-10'>
         <ImageGallery ImageUrls={product.images} />
-        <ProductDetails product={product} userId={user?._id} />
+        <ProductDetails product={product} userId={session?.user?.id || ''} />
       </div>
       <TabMenu product={product} />
       <RelatedProducts products={products} />

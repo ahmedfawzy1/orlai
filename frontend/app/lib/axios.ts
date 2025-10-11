@@ -14,11 +14,12 @@ axiosInstance.interceptors.request.use(
     const session = await getSession();
     if (session?.user) {
       try {
-        // Get JWT token from our API route
         const response = await fetch('/api/auth/token');
         if (response.ok) {
           const data = await response.json();
-          config.headers.Authorization = `Bearer ${data.token}`;
+          if (data.token) {
+            config.headers.Authorization = `Bearer ${data.token}`;
+          }
         }
       } catch (error) {
         console.error('Error getting auth token:', error);

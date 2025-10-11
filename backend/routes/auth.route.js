@@ -1,13 +1,5 @@
 import express from "express";
-import {
-  signup,
-  validateCredentials,
-  googleSync,
-  googleAuth,
-  requestOtpForResetPassword,
-  verifyOtpForResetPassword,
-  resetPassword,
-} from "../controllers/auth.controller.js";
+import { signup, signin, googleSync, requestOtpForResetPassword, verifyOtpForResetPassword, resetPassword } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import { updateProfile } from "../controllers/profile.controller.js";
 import { validateUserRegistration, sanitizeHtml } from "../middleware/validation.middleware.js";
@@ -15,8 +7,7 @@ import { validateUserRegistration, sanitizeHtml } from "../middleware/validation
 const router = express.Router();
 
 // NextAuth endpoints
-router.post("/validate", sanitizeHtml, validateCredentials);
-router.post("/google", sanitizeHtml, googleAuth);
+router.post("/login", sanitizeHtml, signin);
 router.post("/google-sync", sanitizeHtml, googleSync);
 
 router.post("/signup", validateUserRegistration, signup);

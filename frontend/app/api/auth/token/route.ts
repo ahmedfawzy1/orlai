@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import jwt from 'jsonwebtoken';
 import { authOptions } from '../../../../lib/auth';
+import jwt from 'jsonwebtoken';
 
 export async function GET() {
   try {
@@ -11,19 +11,17 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Create a JWT token for API calls using the user data
-    const tokenData = {
-      id: session.user.id,
-      email: session.user.email,
-      role: (session.user as any).role || 'user',
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
-    };
-
-    // Create JWT token using the same secret as the backend
+    // Create a JWT token for API authentication
     const token = jwt.sign(
-      tokenData,
-      process.env.NEXTAUTH_SECRET || 'fallback-secret',
+      {
+        id: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+        first_name: session.user.first_name,
+        last_name: session.user.last_name,
+      },
+      process.env.NEXTAUTH_SECRET!,
+      { expiresIn: '15m' },
     );
 
     return NextResponse.json({ token });

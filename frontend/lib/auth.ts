@@ -6,6 +6,8 @@ import clientPromise from '../app/lib/mongodb';
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
+  debug: process.env.NODE_ENV === 'development',
+  useSecureCookies: process.env.NODE_ENV === 'production',
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -25,7 +27,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const res = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/validate`,
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/login`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -57,6 +59,13 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     async jwt({ token, user, account, trigger, session }) {
       // Initial sign in
       if (account && user) {

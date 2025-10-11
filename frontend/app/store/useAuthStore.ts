@@ -77,49 +77,19 @@ export const useAuthStore = create<AuthState>(set => ({
     try {
       set({ isLoggingIn: true });
 
-      // First, check if the user is a Google user by making a direct API call
-      try {
-        await axiosInstance.post('/auth/validate', {
-          email: data.email,
-          password: data.password,
-        });
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
 
-        // If we get here, the user is valid and not a Google user
-        const result = await signIn('credentials', {
-          email: data.email,
-          password: data.password,
-          redirect: false,
-        });
-
-        if (result?.error) {
-          toast.error('Invalid email or password');
-          return false;
-        }
-
-        toast.success('Logged in successfully');
-        return true;
-      } catch (checkError: any) {
-        // Check if it's a Google user error
-        if (checkError?.response?.data?.isGoogleUser) {
-          toast.error(checkError.response.data.message);
-          return false;
-        }
-
-        // For other errors, try the normal NextAuth flow
-        const result = await signIn('credentials', {
-          email: data.email,
-          password: data.password,
-          redirect: false,
-        });
-
-        if (result?.error) {
-          toast.error('Invalid email or password');
-          return false;
-        }
-
-        toast.success('Logged in successfully');
-        return true;
+      if (result?.error) {
+        toast.error('Invalid email or password');
+        return false;
       }
+
+      toast.success('Logged in successfully');
+      return true;
     } catch (error) {
       toast.error('Login failed');
       console.error('Login failed:', error);
