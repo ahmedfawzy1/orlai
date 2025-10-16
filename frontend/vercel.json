@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/api/auth/:path*", "destination": "/api/auth/:path*" },
+    {
+      "source": "/api/:path*",
+      "destination": "https://api.orlai.store/api/:path*"
+    }
+  ]
+}

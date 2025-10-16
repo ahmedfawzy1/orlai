@@ -1,0 +1,54 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Environment files (these should be passed at runtime)
+.env
+.env.local
+.env.*.local
+
+# Git files
+.git
+.gitignore
+
+# Documentation
+README.md
+readme.md
+*.md
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+test
+tests
+*.test.js
+*.spec.js
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Vercel
+vercel.json
+.vercel
+
+# Logs
+logs
+*.log
+
